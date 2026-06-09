@@ -1,0 +1,29 @@
+{
+  "name": "codegen-marketplace",
+  "description": "Curated software-engineering plugins for coding agents.",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/appunni-m/codegen-marketplace.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "packageManager": "pnpm@10.30.3",
+  "scripts": {
+    "build": "aipm build",
+    "check": "aipm validate && pnpm lint && pnpm check:skills && pnpm check:docs && pnpm test",
+    "check:docs": "node scripts/validate-markdown.mjs",
+    "check:skills": "node scripts/validate-skills.mjs",
+    "lint": "aipm lint .",
+    "scaffold": "aipm scaffold",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@ai-plugin-marketplace/cli": "^0.5.0",
+    "@ai-plugin-marketplace/core": "^0.8.0",
+    "skills-ref": "0.1.5"
+  }
+}
