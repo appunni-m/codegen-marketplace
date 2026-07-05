@@ -1,0 +1,21 @@
+{
+  "name": "rust-development",
+  "version": "0.2.0",
+  "description": "Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.",
+  "author": {
+    "name": "Appunni M",
+    "url": "https://github.com/appunni-m"
+  },
+  "homepage": "https://github.com/appunni-m/codegen-marketplace",
+  "repository": "https://github.com/appunni-m/codegen-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "rust",
+    "debugging",
+    "documentation",
+    "unsafe",
+    "cargo",
+    "clippy"
+  ],
+  "skills": "./skills/"
+}

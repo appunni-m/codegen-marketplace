@@ -1,0 +1,40 @@
+{
+  "name": "rust-development",
+  "version": "0.2.0",
+  "description": "Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.",
+  "author": {
+    "name": "Appunni M",
+    "url": "https://github.com/appunni-m"
+  },
+  "homepage": "https://github.com/appunni-m/codegen-marketplace",
+  "repository": "https://github.com/appunni-m/codegen-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "rust",
+    "debugging",
+    "documentation",
+    "unsafe",
+    "cargo",
+    "clippy"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Rust Development",
+    "shortDescription": "Build, review, debug, and document Rust code.",
+    "longDescription": "Practical Rust engineering guidance covering idiomatic APIs, ownership, debugging, documentation, crate research, coding standards, and unsafe-code review.",
+    "developerName": "Appunni M",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Rust",
+      "Debugging",
+      "Code Review"
+    ],
+    "websiteURL": "https://github.com/appunni-m/codegen-marketplace",
+    "defaultPrompt": [
+      "Review this Rust change for correctness and API quality.",
+      "Trace the root cause of this Rust failure.",
+      "Audit the unsafe code in this crate."
+    ],
+    "brandColor": "#B7410E"
+  }
+}

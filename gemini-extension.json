@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "0.1.0",
+  "name": "rust-development",
+  "version": "0.2.0",
+  "description": "Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {}
+}

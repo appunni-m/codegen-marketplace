@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "paths": [
+    "GEMINI.md",
+    "POWER.md",
+    "gemini-extension.json",
+    "skills/coding-guidelines/SKILL.md",
+    "skills/crate-info/SKILL.md",
+    "skills/rust-development/SKILL.md",
+    "skills/rust-development/evals/evals.json",
+    "skills/rust-development/references/THIRD_PARTY_NOTICES.md",
+    "skills/rust-documentation/SKILL.md",
+    "skills/rust-features/SKILL.md",
+    "skills/systematic-debugging/SKILL.md",
+    "skills/systematic-debugging/references/hypothesis-driven.md",
+    "skills/systematic-debugging/references/pipeline-tracing.md",
+    "skills/systematic-debugging/references/porting-protocol.md",
+    "skills/systematic-debugging/references/root-cause-analysis.md",
+    "skills/unsafe-review/SKILL.md"
+  ]
+}

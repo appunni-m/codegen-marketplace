@@ -1,0 +1,23 @@
+{
+  "skill_name": "rust-development",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write a Rust function that reads a config file at ~/.config/myapp/config.toml, parses it into a Config struct, and returns an error if the file is missing or malformed. The config has fields: port (u16), host (String), and log_level (String). Use proper error handling — don't use unwrap anywhere.",
+      "expected_output": "A Rust function using Result and the ? operator, serde-compatible TOML parsing, useful path context, and error types that distinguish I/O from parse failures without requiring an unnecessary dependency.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I have this Rust code that takes a Vec<Person> and builds a HashMap<String, Vec<Person>> grouped by department. Can you review it and make it more idiomatic? Also, I'm seeing a lot of .clone() calls — is there a way to avoid them?\n\n```rust\nfn group_by_department(people: &Vec<Person>) -> HashMap<String, Vec<Person>> {\n    let mut map: HashMap<String, Vec<Person>> = HashMap::new();\n    for i in 0..people.len() {\n        let person = people[i].clone();\n        let dept = person.department.clone();\n        if map.contains_key(&dept) {\n            let mut list = map.get(&dept).unwrap().clone();\n            list.push(person.clone());\n            map.insert(dept.clone(), list);\n        } else {\n            map.insert(dept.clone(), vec![person.clone()]);\n        }\n    }\n    return map;\n}\n```",
+      "expected_output": "Idiomatic rewrite using iterators, entry API, removing unnecessary clones by taking ownership or using references. No unwrap calls. Using &[Person] instead of &Vec<Person> in the parameter.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I'm building a library crate for a TCP connection manager. The connection can be in three states: Disconnected, Connecting, and Connected. Only Connected connections can send data. Only Disconnected connections can start connecting. I want to make invalid states unrepresentable at compile time. How should I design this? Write the full implementation.",
+      "expected_output": "Type state pattern implementation using PhantomData, with proper state transitions (Disconnected::connect -> Connecting, Connecting::on_established -> Connected), and send() only available on Connection<Connected>. Each state transition consumes self and returns the new state.",
+      "files": []
+    }
+  ]
+}
