@@ -1,0 +1,14 @@
+{
+  "coverageMcp": {
+    "healthUrl": "http://127.0.0.1:59471/health",
+    "connector": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/appunni-m/coverage-mcp.git@main",
+        "coverage-mcp",
+        "connect"
+      ]
+    }
+  }
+}

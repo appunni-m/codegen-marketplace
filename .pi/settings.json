@@ -1,0 +1,6 @@
+{
+  "packages": [
+    "../plugins/rust-development",
+    "../plugins/testing"
+  ]
+}

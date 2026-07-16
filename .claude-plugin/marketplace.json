@@ -1,0 +1,36 @@
+{
+  "name": "codegen-marketplace",
+  "owner": {
+    "name": "Appunni M"
+  },
+  "metadata": {
+    "description": "Curated plugins for Rust development, test execution, and coverage analysis"
+  },
+  "plugins": [
+    {
+      "name": "rust-development",
+      "source": "./plugins/rust-development",
+      "description": "Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.",
+      "tags": [
+        "rust",
+        "debugging",
+        "documentation",
+        "unsafe",
+        "cargo",
+        "clippy"
+      ]
+    },
+    {
+      "name": "testing",
+      "source": "./plugins/testing",
+      "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
+      "tags": [
+        "testing",
+        "coverage",
+        "mcp",
+        "worktrees",
+        "quality"
+      ]
+    }
+  ]
+}

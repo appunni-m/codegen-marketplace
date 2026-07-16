@@ -1,0 +1,31 @@
+{
+  "name": "testing",
+  "version": "0.3.0",
+  "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
+  "author": {
+    "name": "Appunni M",
+    "url": "https://github.com/appunni-m"
+  },
+  "homepage": "https://github.com/appunni-m/coverage-mcp",
+  "repository": "https://github.com/appunni-m/codegen-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "testing",
+    "coverage",
+    "mcp",
+    "worktrees",
+    "quality"
+  ],
+  "skills": "./skills/",
+  "mcpServers": {
+    "coverage-mcp": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/appunni-m/coverage-mcp.git@main",
+        "coverage-mcp",
+        "connect"
+      ]
+    }
+  }
+}
