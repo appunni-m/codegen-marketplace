@@ -95,6 +95,14 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   const manifest = await json(path.join(pluginRoot, '.codex-plugin', 'plugin.json'));
   assert.deepEqual(manifest.mcpServers['coverage-mcp'], compatibility.coverageMcp.connector);
 
+  const geminiManifest = await json(
+    path.join(pluginsRoot, 'rust-development', 'gemini-extension.json'),
+  );
+  assert.deepEqual(
+    geminiManifest.mcpServers['coverage-mcp'],
+    compatibility.coverageMcp.connector,
+  );
+
   for (const documentationPath of [
     'README.md',
     path.join(pluginRoot, 'README.md'),
@@ -105,6 +113,14 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     assert.doesNotMatch(documentation, />=0\.6\.0,<0\.7\.0/, documentationPath);
     assert.match(documentation, /common_db_path/, documentationPath);
   }
+
+  const geminiContext = await fs.readFile(
+    path.join(pluginsRoot, 'rust-development', 'GEMINI.md'),
+    'utf8',
+  );
+  assert.match(geminiContext, /Coverage MCP/);
+  assert.match(geminiContext, /human approval/);
+  assert.match(geminiContext, /project_context\(detailed=false\)/);
 
   const skill = await fs.readFile(
     path.join(pluginRoot, 'skills', 'use-coverage-mcp', 'SKILL.md'),

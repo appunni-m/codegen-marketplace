@@ -23,3 +23,17 @@ narrower match.
 - **crate-info** - Selected and available crate versions, features, and dependency context
 - **rust-features** - Stable release, edition, and feature research
 - **unsafe-review** - Unsafe Rust, FFI, layout, aliasing, and soundness review
+
+## Coverage MCP
+
+This Gemini extension also exposes Coverage MCP for approved test execution,
+coverage history, exact missing lines, and worktree baseline comparisons.
+
+- Require human approval of the exact command, working directory, and artifact
+  paths before registering or running a test command.
+- Start with `project_context(detailed=false)` before rerunning an approved
+  suite.
+- Use one stable `idempotency_key` for retries of the same intended run.
+- Treat a missing worktree snapshot as not measured, not unchanged.
+- Open <http://localhost:59471/> only after a test or coverage task completes;
+  do not open the browser automatically.

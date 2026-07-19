@@ -12,6 +12,7 @@ test('release metadata uses stable plugin versions and tracks Coverage MCP main'
   for (const manifestPath of [
     'plugins/testing/.claude-plugin/plugin.json',
     'plugins/testing/.codex-plugin/plugin.json',
+    'plugins/rust-development/gemini-extension.json',
   ]) {
     const manifest = JSON.parse(await read(manifestPath));
     assert.equal(manifest.version, '0.3.0', manifestPath);

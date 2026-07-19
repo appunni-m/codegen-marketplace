@@ -13,7 +13,7 @@ toolkit from the
 | Plugin | Purpose | Targets |
 | --- | --- | --- |
 | `rust-development` | Rust implementation, debugging, documentation, crate research, coding standards, and unsafe review | Claude Code, Codex, Cursor, Gemini CLI, Kiro, Vercel Skills CLI, Pi |
-| `testing` | Human-approved test runs, bounded summaries, coverage history, exact missing lines, and worktree baseline comparisons | Claude Code, Codex, Pi |
+| `testing` | Human-approved test runs, bounded summaries, coverage history, exact missing lines, and worktree baseline comparisons | Claude Code, Codex, Gemini CLI (combined extension), Pi |
 
 ## Install
 
@@ -56,6 +56,9 @@ gemini extensions install https://github.com/appunni-m/codegen-marketplace
 ```
 
 Gemini has one repository-level extension slot, owned by `rust-development`.
+The combined extension also configures Coverage MCP through `uvx`, so installing
+the repository provides both Rust guidance and testing/coverage tools. Restart
+Gemini CLI after installation or update.
 
 ### Kiro
 
@@ -83,7 +86,8 @@ pi install ./codegen-marketplace/plugins/rust-development
 pi install ./codegen-marketplace/plugins/testing
 ```
 
-The testing plugin also needs Pi's MCP adapter:
+The testing plugin also needs Pi's MCP adapter because Pi does not expose MCP as
+a native marketplace target:
 
 ```bash
 pi install npm:pi-mcp-adapter

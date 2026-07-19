@@ -20,6 +20,19 @@ The testing plugin installs the `use-coverage-mcp` skill and configures the
 stdio connector. `uvx` manages its isolated Python environment; the connector
 starts the HTTP daemon on demand. The plugin does not copy any DuckDB.
 
+## Gemini CLI
+
+Gemini accepts one repository-level extension artifact, so this marketplace
+declares Coverage MCP in its combined `rust-development` Gemini extension.
+Install or update the repository extension, then restart Gemini CLI:
+
+```bash
+gemini extensions install https://github.com/appunni-m/codegen-marketplace
+```
+
+The extension launches the same `uvx` connector and exposes its tools alongside
+the Rust development context.
+
 Update the plugin with:
 
 ```bash

@@ -2,7 +2,7 @@
 schemaVersion: 0.1.0
 name: rust-development
 description: Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.
-version: 0.2.0
+version: 0.3.0
 ---
 
 # Rust Development
