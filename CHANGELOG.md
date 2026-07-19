@@ -4,6 +4,24 @@ All notable changes to this marketplace are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and plugin versions
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-07-19
+
+### Added
+
+- Expose Coverage MCP to Gemini CLI through the repository's combined Gemini
+  extension, using the same `uvx` connector as Codex and Claude Code.
+- Preserve Leonardo Maldonado's MIT notice beside the adapted Rust coding
+  guidelines and in every generated standalone bundle.
+- Include the marketplace MIT license in the independently distributed testing
+  plugin.
+
+### Changed
+
+- Release `rust-development` as `0.3.0` and add Gemini-specific test approval,
+  idempotency, worktree-measurement, and dashboard guidance.
+- Clarify that Pi uses `pi-mcp-adapter` because the marketplace build toolkit
+  does not expose Pi as a native target.
+
 ## [0.3.0] - 2026-07-18
 
 ### Changed
@@ -42,5 +60,6 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Restrict the CI workflow token to read-only repository contents.
 
+[0.4.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.4.0
 [0.3.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.3.0
 [0.2.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.2.0
