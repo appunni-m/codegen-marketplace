@@ -9,6 +9,11 @@ metadata:
 
 # Rust Coding Standards
 
+This skill adapts selected guidance from Leonardo Maldonado's MIT-licensed
+[`rust-skills`](https://github.com/leonardomso/rust-skills) project. Preserve
+the bundled [`references/THIRD_PARTY_NOTICES.md`](references/THIRD_PARTY_NOTICES.md)
+when redistributing this skill.
+
 Apply standards in this order:
 
 1. Read repository instructions, `rustfmt.toml`, `clippy.toml`, workspace lints,

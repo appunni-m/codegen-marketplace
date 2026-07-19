@@ -5,6 +5,7 @@
     "POWER.md",
     "gemini-extension.json",
     "skills/coding-guidelines/SKILL.md",
+    "skills/coding-guidelines/references/THIRD_PARTY_NOTICES.md",
     "skills/crate-info/SKILL.md",
     "skills/rust-development/SKILL.md",
     "skills/rust-development/evals/evals.json",

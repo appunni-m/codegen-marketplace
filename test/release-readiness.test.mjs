@@ -51,9 +51,26 @@ test('third-party notices preserve upstream copyright statements', async () => {
   const skillNotice = await read(
     'plugins/rust-development/skills/rust-development/references/THIRD_PARTY_NOTICES.md',
   );
+  const codingGuidelinesNotice = await read(
+    'plugins/rust-development/skills/coding-guidelines/references/THIRD_PARTY_NOTICES.md',
+  );
 
   assert.match(repositoryNotice, /Copyright \(c\) 2026 Mike North/);
   assert.match(repositoryNotice, /Copyright \(c\) 2024 Apollo Graph, Inc\./);
+  assert.match(repositoryNotice, /Copyright \(c\) 2025 Leonardo Maldonado/);
   assert.match(pluginNotice, /Copyright \(c\) 2024 Apollo Graph, Inc\./);
+  assert.match(pluginNotice, /Copyright \(c\) 2025 Leonardo Maldonado/);
   assert.match(skillNotice, /Copyright \(c\) 2024 Apollo Graph, Inc\./);
+  assert.match(codingGuidelinesNotice, /Copyright \(c\) 2025 Leonardo Maldonado/);
+});
+
+test('distributed plugins preserve the repository MIT copyright notice', async () => {
+  for (const pathname of [
+    'LICENSE',
+    'plugins/testing/LICENSE',
+  ]) {
+    const license = await read(pathname);
+    assert.match(license, /^MIT License$/m, pathname);
+    assert.match(license, /^Copyright \(c\) 2026 Appunni M$/m, pathname);
+  }
 });

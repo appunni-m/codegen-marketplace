@@ -354,6 +354,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the authoring and release checks.
   [Mike North's AI Plugin Marketplace Template](https://github.com/mike-north/ai-plugin-marketplace-template).
 - The core Rust development guidance is adapted from
   [Apollo GraphQL's agent skills](https://github.com/apollographql/skills).
+- The Rust coding-guidelines skill adapts selected guidance from
+  [Leonardo Maldonado's rust-skills](https://github.com/leonardomso/rust-skills).
 - Complete copyright and license texts are preserved in
   [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
