@@ -75,8 +75,9 @@ raw logs and reports.
 
 Coverage MCP `tools/list` describes concrete input and output fields,
 nullability, bounds, and status enums for every tool. Agents can discover the
-wire contract without source-code context; the skill supplies the policy and
-multi-tool workflow around that contract.
+wire contract without source-code context. The server instructions plus
+`tools/list` are intended to be sufficient to use the MCP effectively; the
+skill supplies the policy and multi-tool workflow around that contract.
 
 Agents start with `project_context(detailed=false)` before rerunning an approved
 suite. Run and snapshot responses include timestamps and freshness fields such
