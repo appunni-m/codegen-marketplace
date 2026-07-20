@@ -178,6 +178,28 @@ export default defineConfig({
 The scaffold output is authoritative — `aipm scaffold` emits the full set of
 targets the toolkit supports. Trust it over this table if they disagree.
 
+### Coverage MCP sync
+
+When Coverage MCP changes MCP tool behavior, input/output schema, tool
+descriptions, server instructions, connector guidance, or the agent workflow,
+update the marketplace in the same change window so installed agents do not
+learn stale behavior.
+
+Authoritative source files for the `testing` plugin are:
+
+- `plugins/testing/README.md` for marketplace/user-facing connector guidance.
+- `plugins/testing/skills/use-coverage-mcp/SKILL.md` for the agent workflow.
+- `plugins/testing/compatibility.json` and
+  `plugins/testing/scripts/install-pi-mcp.mjs` when connector invocation or
+  source URL changes.
+- Root `README.md` when examples or installation guidance change.
+
+Do not edit generated root artifacts to patch Coverage MCP guidance. Edit the
+plugin source files above, then run the required marketplace build/check
+workflow if generated outputs are affected. After publishing or pushing, refresh
+the local Codex install with `codex plugin add testing@codegen-marketplace` and
+verify the cached plugin under `~/.codex/plugins/cache/codegen-marketplace/testing/`.
+
 ### Constraints
 
 - **Single-artifact hosts** - Gemini and Kiro each have one repository-level
