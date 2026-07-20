@@ -238,14 +238,15 @@ Search retained logs only when needed:
 ```text
 search_test_logs(
   run_id="returned-run-id",
-  query="FAILED",
+  query=["FAILED", "timeout"],
   context_lines=5,
   max_words=400
 )
 ```
 
-`max_words` is the response budget; `context_lines` only controls which nearby
-lines are considered relevant.
+`query` may be one literal string or a list of literal strings. `max_words` is
+the response budget; `context_lines` only controls which nearby lines are
+considered relevant.
 
 Inspect one file without loading every coverage record:
 

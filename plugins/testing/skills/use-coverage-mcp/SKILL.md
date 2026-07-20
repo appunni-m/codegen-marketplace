@@ -33,8 +33,8 @@ trust boundaries, and token-conscious defaults.
 - `max_words` is the primary response budget. Choose the smallest useful
   budget and continue collections with the opaque `next_cursor` as `cursor`.
 - Never request generic log limits or full stdout/stderr. Use
-  `search_test_logs` with a literal query, the smallest useful
-  `context_lines`, and a bounded `max_words`.
+  `search_test_logs` with one literal query string or a list of literal query
+  strings, the smallest useful `context_lines`, and a bounded `max_words`.
 - Treat unknown parent IDs as errors. Never reinterpret an empty collection as
   proof that an unknown run, snapshot, worktree, or file exists.
 
@@ -77,9 +77,9 @@ Call `run_test` with the registration ID or name, `wait=false`, and one stable
 - Read queue position and ETA from compact run state or `project_context`.
 - Cancel only when the user no longer wants the run, using
   `test_run(action="cancel", detailed=false)`.
-- On failure, use `search_test_logs` for a specific error, failure name, or
-  summary marker. Retrieve another window only when the first evidence points
-  to a different literal.
+- On failure, use `search_test_logs` for a specific error, failure name,
+  summary marker, or small list of related literals. Retrieve another window
+  only when the first evidence points to a different literal.
 - On terminal state, inspect `coverage_ingest` and declared artifact outcomes
   before making a coverage claim.
 

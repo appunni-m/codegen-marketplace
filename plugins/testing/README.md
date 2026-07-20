@@ -87,9 +87,10 @@ MCP call open. Agents poll `test_run(action="status", detailed=false)` at
 `poll_after_ms` and reuse one stable `idempotency_key` for all retries of the
 same intended run. `test_run(action="cancel")` stops obsolete work and its
 process group. Full logs remain on disk; `search_test_logs` returns only literal
-matches and bounded surrounding lines. `max_words` is the primary response
-budget, cursor pagination continues collections, and `detailed=false` remains
-the default everywhere.
+matches for one query string or a list of query strings, plus bounded
+surrounding lines. `max_words` is the primary response budget, cursor
+pagination continues collections, and `detailed=false` remains the default
+everywhere.
 
 `coverage_query(view="file")` returns compact metrics and grouped coverage gaps.
 Request bounded `line_ranges` only when exact covered line records are needed;
