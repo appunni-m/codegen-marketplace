@@ -84,14 +84,16 @@ suite. Run and snapshot responses include timestamps and freshness fields such
 as `age_seconds` and `age`.
 
 `run_test` queues long suites and returns a durable run id without holding the
-MCP call open. Agents poll `test_run(action="status", detailed=false)` at
-the ETA-aware `poll_after_ms` and reuse one stable `idempotency_key` for all
-retries of the same intended run. `test_run(action="cancel")` stops obsolete
-work and its process group. Full logs remain on disk; `search_test_logs` returns only literal
-matches for one query string or a list of query strings, plus bounded
-surrounding lines. `max_words` is the primary response budget, cursor
-pagination continues collections, and `detailed=false` remains the default
-everywhere.
+MCP call open. Agents fetch current run state with
+`get_run_data(detailed=false)`, wait at least the returned
+ETA-aware `poll_after_ms` after each non-terminal response, and reuse one stable
+`idempotency_key` for all retries of the same intended run. `get_run_data` is
+read-only and only fetches durable run data; `cancel_run` is the separate
+mutating tool that stops obsolete work and its process group. Full logs remain
+on disk; `search_test_logs` returns only literal matches for one query string or
+a list of query strings, plus bounded surrounding lines. `max_words` is the
+primary response budget, cursor pagination continues collections, and
+`detailed=false` remains the default everywhere.
 
 `coverage_query(view="file")` returns compact metrics and grouped coverage gaps.
 Request bounded `line_ranges` only when exact covered line records are needed;
@@ -107,8 +109,9 @@ After a command has natural completion history, polls include a median ETA,
 p90 reference, sample count, and estimated timestamps. Queue ETA schedules known
 FIFO work across the server's worker lanes. Missing history is explicit, and an
 overrun is reported separately so agents do not mistake a median estimate for a
-timeout. `poll_after_ms` follows those estimates so agents avoid one-second
-heartbeat polling for long queued or running jobs.
+timeout. `poll_after_ms` follows those estimates so agents avoid immediate
+repeat polling for long queued or running jobs. Missing-history jobs use a
+conservative backoff rather than a one-second heartbeat.
 
 The server runs four approved commands concurrently by default. Set
 `COVERAGE_MCP_RUN_CONCURRENCY` to 1-32 before startup; use `1` when suites share

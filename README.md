@@ -216,16 +216,18 @@ run_test(
 )
 ```
 
-The call returns a durable run id immediately. Poll it no faster than the
-returned `poll_after_ms`. Retries for the same intended run must reuse the same
-idempotency key:
+The call returns a durable run id immediately. Fetch it with `get_run_data` no
+faster than the returned `poll_after_ms`; wait that long after each
+non-terminal response before fetching again. Retries for the same intended run
+must reuse the same idempotency key:
 
 ```text
-test_run(run_id="returned-run-id", action="status", detailed=false, max_words=500)
+get_run_data(run_id="returned-run-id", detailed=false, max_words=500)
 ```
 
-Once the approved command has completion history, polling reports a median ETA,
-p90 duration, sample count, estimated start/completion times, and queue wait.
+Once the approved command has completion history, run data responses report a
+median ETA, p90 duration, sample count, estimated start/completion times, and
+queue wait.
 Queue wait models the server's worker lanes. If a required duration has no
 usable history, the server returns a null ETA with an explicit reason instead
 of guessing.
@@ -264,8 +266,9 @@ returns compact exact covered/uncovered records from up to 10 windows and 200
 unique lines. Duplicate, nested, overlapping, adjacent, and unordered windows
 are normalized before the budget is applied.
 
-Use `test_run(run_id, action="cancel", detailed=false)` to cancel obsolete queued or running work. Running
-cancellation and timeouts terminate the command's complete process group.
+Use `cancel_run(run_id, detailed=false)` to cancel obsolete queued or running
+work. Running cancellation and timeouts terminate the command's complete
+process group.
 
 Run retention is count-based per approved command: the newest 100 terminal runs
 are kept by default. Configure the server with `COVERAGE_MCP_RUN_RETENTION` to
@@ -297,7 +300,8 @@ Projects can add this to `AGENTS.md`:
 - Run tests only through a registered, human-approved command. Ask for explicit
   approval of the full command, cwd, and artifact paths before registration.
 - Give each intended run a stable idempotency key. Keep the returned run id,
-  poll `test_run(action="status", detailed=false)` at `poll_after_ms`, and reuse the key for every retry.
+  fetch `get_run_data(detailed=false)` no sooner than `poll_after_ms`, and
+  reuse the key for every retry.
 - Register each linked worktree once before its first coverage run and retain
   its `worktree_id`.
 - Declare managed reports with `coverage_format` and a stable suite. Use the

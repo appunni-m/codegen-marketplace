@@ -28,7 +28,7 @@ trust boundaries, and token-conscious defaults.
 ## Response Policy
 
 - Keep `detailed=false` everywhere by default. Only `project_context`,
-  `test_run`, `coverage_query`, and `coverage_compare` expose it; set it true
+  `get_run_data`, `coverage_query`, and `coverage_compare` expose it; set it true
   once only when their descriptions identify required audit or provenance data.
 - `max_words` is the primary response budget. Choose the smallest useful
   budget and continue collections with the opaque `next_cursor` as `cursor`.
@@ -72,11 +72,13 @@ Call `run_test` with the registration ID or name, `wait=false`, and one stable
 
 - Save the returned run ID.
 - Reuse the same idempotency key for every retry of that intended run.
-- Poll `test_run(action="status", detailed=false)` no faster than the
-  ETA-aware `poll_after_ms` until `terminal` is true.
+- Fetch current run state with `get_run_data(detailed=false)`;
+  this is read-only and only returns durable run data. When `terminal` is false,
+  wait at least the returned ETA-aware `poll_after_ms` before the next status
+  fetch. Do not poll immediately.
 - Read queue position and ETA from compact run state or `project_context`.
 - Cancel only when the user no longer wants the run, using
-  `test_run(action="cancel", detailed=false)`.
+  `cancel_run(detailed=false)`.
 - On failure, use `search_test_logs` for a specific error, failure name,
   summary marker, or small list of related literals. Retrieve another window
   only when the first evidence points to a different literal.
