@@ -1,6 +1,6 @@
 {
   "name": "testing",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
   "author": {
     "name": "Appunni M",

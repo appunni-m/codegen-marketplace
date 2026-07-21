@@ -9,13 +9,15 @@ async function read(pathname) {
 }
 
 test('release metadata uses stable plugin versions and tracks Coverage MCP main', async () => {
-  for (const manifestPath of [
-    'plugins/testing/.claude-plugin/plugin.json',
-    'plugins/testing/.codex-plugin/plugin.json',
-    'plugins/rust-development/gemini-extension.json',
-  ]) {
+  const expectedVersions = new Map([
+    ['plugins/testing/.claude-plugin/plugin.json', '0.3.1'],
+    ['plugins/testing/.codex-plugin/plugin.json', '0.3.1'],
+    ['plugins/rust-development/gemini-extension.json', '0.3.0'],
+  ]);
+
+  for (const [manifestPath, expectedVersion] of expectedVersions) {
     const manifest = JSON.parse(await read(manifestPath));
-    assert.equal(manifest.version, '0.3.0', manifestPath);
+    assert.equal(manifest.version, expectedVersion, manifestPath);
     assert.equal(manifest.mcpServers['coverage-mcp'].args[1], coverageSource, manifestPath);
     assert.doesNotMatch(manifest.version, /\+codex\./, manifestPath);
   }

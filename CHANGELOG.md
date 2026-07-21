@@ -4,6 +4,14 @@ All notable changes to this marketplace are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and plugin versions
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-07-21
+
+### Changed
+
+- Release the testing plugin as `0.3.1`.
+- Update Coverage MCP workflow guidance for `get_run_data`, `cancel_run`, and
+  ETA-aware `poll_after_ms` status fetches.
+
 ## [0.4.0] - 2026-07-19
 
 ### Added
@@ -60,6 +68,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Restrict the CI workflow token to read-only repository contents.
 
+[0.4.1]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.4.1
 [0.4.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.4.0
 [0.3.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.3.0
 [0.2.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.2.0
