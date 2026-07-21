@@ -72,8 +72,8 @@ Call `run_test` with the registration ID or name, `wait=false`, and one stable
 
 - Save the returned run ID.
 - Reuse the same idempotency key for every retry of that intended run.
-- Poll `test_run(action="status", detailed=false)` no faster than
-  `poll_after_ms` until `terminal` is true.
+- Poll `test_run(action="status", detailed=false)` no faster than the
+  ETA-aware `poll_after_ms` until `terminal` is true.
 - Read queue position and ETA from compact run state or `project_context`.
 - Cancel only when the user no longer wants the run, using
   `test_run(action="cancel", detailed=false)`.
