@@ -5,6 +5,18 @@
   },
   "plugins": [
     {
+      "name": "opensource",
+      "source": {
+        "source": "local",
+        "path": "./plugins/opensource"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
       "name": "rust-development",
       "source": {
         "source": "local",

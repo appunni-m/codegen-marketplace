@@ -4,6 +4,16 @@ All notable changes to this marketplace are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and plugin versions
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- Add the `opensource` plugin with the `opensource-documentation` skill for
+  audience-first README flows, source API contracts, community and security
+  documentation, release artifacts, and evidence-backed validation.
+- Add a deterministic documentation inventory script and cross-project skill
+  evaluation cases.
+
 ## [0.4.1] - 2026-07-21
 
 ### Changed

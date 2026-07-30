@@ -1,0 +1,4 @@
+interface:
+  display_name: "Open-Source Documentation"
+  short_description: "Create verified, audience-first project docs"
+  default_prompt: "Use $opensource-documentation to create and verify this project’s open-source documentation."

@@ -1,0 +1,39 @@
+{
+  "name": "opensource",
+  "version": "0.1.0",
+  "description": "Evidence-first documentation guidance for audience journeys, public APIs, open-source trust, and release artifacts.",
+  "author": {
+    "name": "Appunni M",
+    "url": "https://github.com/appunni-m"
+  },
+  "homepage": "https://github.com/appunni-m/codegen-marketplace",
+  "repository": "https://github.com/appunni-m/codegen-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "readme",
+    "open-source",
+    "api",
+    "quality"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Open Source",
+    "shortDescription": "Create verified, audience-first project documentation.",
+    "longDescription": "Creates and audits README flows, source API documentation, contributor and security material, examples, and packaged documentation using evidence-backed quality gates.",
+    "developerName": "Appunni M",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Documentation",
+      "Open Source",
+      "Quality"
+    ],
+    "websiteURL": "https://github.com/appunni-m/codegen-marketplace",
+    "defaultPrompt": [
+      "Create and verify documentation for this project.",
+      "Audit this README and public API documentation.",
+      "Prepare this project’s docs for an open-source release."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "opensource",
+  "version": "0.1.0",
+  "description": "Evidence-first documentation guidance for audience journeys, public APIs, open-source trust, and release artifacts.",
+  "author": {
+    "name": "Appunni M",
+    "url": "https://github.com/appunni-m"
+  },
+  "homepage": "https://github.com/appunni-m/codegen-marketplace",
+  "repository": "https://github.com/appunni-m/codegen-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "readme",
+    "open-source",
+    "api",
+    "quality"
+  ],
+  "skills": "./skills/"
+}

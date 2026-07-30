@@ -4,9 +4,21 @@
     "name": "Appunni M"
   },
   "metadata": {
-    "description": "Curated plugins for Rust development, test execution, and coverage analysis"
+    "description": "Curated plugins for Rust development, open-source documentation, test execution, and coverage analysis"
   },
   "plugins": [
+    {
+      "name": "opensource",
+      "source": "./plugins/opensource",
+      "description": "Evidence-first documentation guidance for audience journeys, public APIs, open-source trust, and release artifacts.",
+      "tags": [
+        "documentation",
+        "readme",
+        "open-source",
+        "api",
+        "quality"
+      ]
+    },
     {
       "name": "rust-development",
       "source": "./plugins/rust-development",

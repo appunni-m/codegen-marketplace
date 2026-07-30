@@ -1,0 +1,47 @@
+{
+  "skill_name": "opensource-documentation",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Open-source this Python CLI. Rewrite its sparse README, document the public Python API, and make sure a new user can install it and complete one useful command. The current README says it works on all platforms, but only Linux runs in CI.",
+      "expected_output": "Inspects pyproject metadata, CLI help, exports, CI, packaging rules, and current docs before writing. Uses a CLI-focused README flow, narrows or marks the platform claim, adds useful module/function docstrings, executes examples, checks exit/output behavior, inspects the built wheel or source distribution, and reports residual uncertainty.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Make the documentation for this Rust library release-ready. It has feature-gated APIs, unsafe constructors, several allow(missing_docs) attributes, and examples that have not been compiled recently.",
+      "expected_output": "Inventories exports across supported features, treats missing-doc suppressions as findings, adds crate/module and public-item contracts including Errors, Panics, and Safety where applicable, verifies intra-doc links and doctests, generates and inspects rustdoc, checks the crate package contents, and avoids equating clean rustdoc with security or completeness.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Create the complete documentation set for a self-hosted service that stores customer data in PostgreSQL and is deployed with Docker Compose. Include what operators and contributors need.",
+      "expected_output": "Creates an audience map and service-focused front door plus deployment, configuration/secrets, migration, observability, backup/restore, upgrade/rollback, security, troubleshooting, contributor, support, and licensing routes. Separates a local demo from production guidance and verifies the Compose config, packaged files, commands, recovery claims, and data-handling statements.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Audit and improve the docs for this HTTP API and TypeScript SDK. Focus on whether integrators can safely retry requests and understand pagination, rate limits, and runtime validation.",
+      "expected_output": "Reconciles implementation, OpenAPI, package exports, declaration files, examples, and generated TypeDoc. Documents auth, schemas, error retryability, idempotency, timeouts, pagination ordering/consistency, rate limits, promise rejection/cancellation, and the boundary between TypeScript types and untrusted runtime input. Runs appropriate schema, type, example, link, and artifact checks.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "This project is written in a niche language that is not in your normal documentation checklist. It has a native doc generator and package registry. Produce high-quality open-source documentation without guessing the annotation syntax.",
+      "expected_output": "Uses the universal language fallback: finds current authoritative language, export, registry, generator, and example-test conventions; derives public API from native tooling; applies the generic contract facets; generates and inspects reference output; validates registry artifacts; and records source versions instead of borrowing syntax from a superficially similar language.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Review this repository's documentation and tell me what is wrong. Do not edit anything. The maintainers believe it is fully documented because the linter passes.",
+      "expected_output": "Performs a read-only evidence audit, distinguishes proved, declared, planned, and unknown claims, checks whether suppressions or exclusions hide public APIs, inspects generated central pages and package artifacts, tests for circular inventories and false completion, and reports prioritized findings without making unauthorized changes.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Evaluate only the documentation in this Rust repository and tell me what documentation could be improved. While checking the public API, you notice raw-pointer functions, exposed internal modules, mutable public fields, and setters that discard errors. Keep the report within the requested documentation scope.",
+      "expected_output": "Prioritizes and scores only documentation findings such as reader flow, missing or generic public contracts, broken examples, feature and failure documentation, package-doc self-containment, and support routes. It does not turn the response into an API-design, unsafe-code, architecture, or maintainability review and does not recommend implementation changes. If direct evidence makes a truthful documented contract impossible, it records only the minimal contradiction in a separate unranked 'Implementation blockers exposed by documentation validation' appendix; otherwise it omits implementation findings.",
+      "files": []
+    }
+  ]
+}

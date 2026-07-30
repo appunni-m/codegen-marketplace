@@ -14,6 +14,7 @@ toolkit from the
 | --- | --- | --- |
 | `rust-development` | Rust implementation, debugging, documentation, crate research, coding standards, and unsafe review | Claude Code, Codex, Cursor, Gemini CLI, Kiro, Vercel Skills CLI, Pi |
 | `testing` | Human-approved test runs, bounded summaries, coverage history, exact missing lines, and worktree baseline comparisons | Claude Code, Codex, Gemini CLI (combined extension), Pi |
+| `opensource` | Evidence-first README, source API, contributor, security, release, and packaged-documentation guidance | Claude Code, Codex, Cursor, Vercel Skills CLI, Pi |
 
 ## Install
 
@@ -25,6 +26,7 @@ Install only the plugins needed for a given agent.
 codex plugin marketplace add appunni-m/codegen-marketplace
 codex plugin add rust-development@codegen-marketplace
 codex plugin add testing@codegen-marketplace
+codex plugin add opensource@codegen-marketplace
 ```
 
 Start a new Codex thread after installation.
@@ -35,6 +37,7 @@ Start a new Codex thread after installation.
 claude plugin marketplace add appunni-m/codegen-marketplace
 claude plugin install rust-development@codegen-marketplace
 claude plugin install testing@codegen-marketplace
+claude plugin install opensource@codegen-marketplace
 ```
 
 Start a new Claude Code session after installation.
@@ -47,7 +50,7 @@ Import the marketplace repository in **Settings > Plugins**:
 https://github.com/appunni-m/codegen-marketplace
 ```
 
-The Cursor target currently contains `rust-development`.
+The Cursor target currently contains `rust-development` and `opensource`.
 
 ### Gemini CLI
 
@@ -84,6 +87,7 @@ Pi installs local plugin directories. Clone the marketplace once:
 git clone https://github.com/appunni-m/codegen-marketplace.git
 pi install ./codegen-marketplace/plugins/rust-development
 pi install ./codegen-marketplace/plugins/testing
+pi install ./codegen-marketplace/plugins/opensource
 ```
 
 The testing plugin also needs Pi's MCP adapter because Pi does not expose MCP as

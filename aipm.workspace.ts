@@ -8,6 +8,7 @@ export default defineWorkspace({
   marketplace: {
     name: 'codegen-marketplace',
     owner: { name: 'Appunni M' },
-    description: 'Curated plugins for Rust development, test execution, and coverage analysis',
+    description:
+      'Curated plugins for Rust development, open-source documentation, test execution, and coverage analysis',
   },
 });
