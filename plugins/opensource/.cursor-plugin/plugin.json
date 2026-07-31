@@ -1,7 +1,7 @@
 {
   "name": "opensource",
   "version": "0.1.0",
-  "description": "Evidence-first open-source guidance for documentation quality and safe, standardized Makefile command interfaces.",
+  "description": "Evidence-first open-source guidance for documentation, Makefile interfaces, and live-oracle migration parity tests.",
   "author": {
     "name": "Appunni M",
     "url": "https://github.com/appunni-m"
@@ -12,9 +12,9 @@
   "keywords": [
     "documentation",
     "makefile",
-    "open-source",
-    "automation",
-    "quality"
+    "migration",
+    "testing",
+    "open-source"
   ],
   "skills": "./skills/"
 }

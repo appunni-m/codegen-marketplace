@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Migration Parity Tests"
+  short_description: "Build live-oracle migration parity suites"
+  default_prompt: "Use $build-migration-parity-tests to create and run a source-to-target migration parity test suite."

@@ -10,13 +10,13 @@
     {
       "name": "opensource",
       "source": "./plugins/opensource",
-      "description": "Evidence-first open-source guidance for documentation quality and safe, standardized Makefile command interfaces.",
+      "description": "Evidence-first open-source guidance for documentation, Makefile interfaces, and live-oracle migration parity tests.",
       "tags": [
         "documentation",
         "makefile",
-        "open-source",
-        "automation",
-        "quality"
+        "migration",
+        "testing",
+        "open-source"
       ]
     },
     {

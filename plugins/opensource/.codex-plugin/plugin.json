@@ -1,7 +1,7 @@
 {
   "name": "opensource",
   "version": "0.1.0",
-  "description": "Evidence-first open-source guidance for documentation quality and safe, standardized Makefile command interfaces.",
+  "description": "Evidence-first open-source guidance for documentation, Makefile interfaces, and live-oracle migration parity tests.",
   "author": {
     "name": "Appunni M",
     "url": "https://github.com/appunni-m"
@@ -12,27 +12,28 @@
   "keywords": [
     "documentation",
     "makefile",
-    "open-source",
-    "automation",
-    "quality"
+    "migration",
+    "testing",
+    "open-source"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Open Source",
-    "shortDescription": "Improve project docs and Makefile workflows.",
-    "longDescription": "Creates and audits evidence-backed project documentation, and standardizes safe Makefile commands while preserving native build tools and contributor compatibility.",
+    "shortDescription": "Improve docs, Makefiles, and parity tests.",
+    "longDescription": "Creates evidence-backed project documentation, standardizes safe Makefile commands, and builds runnable source-to-target migration parity suites against live reference behavior.",
     "developerName": "Appunni M",
     "category": "Developer Tools",
     "capabilities": [
       "Documentation",
       "Makefiles",
-      "Open Source Quality"
+      "Migration Parity Tests"
     ],
     "websiteURL": "https://github.com/appunni-m/codegen-marketplace",
     "defaultPrompt": [
       "Create and verify documentation for this project.",
       "Audit this README and public API documentation.",
-      "Standardize and verify this project\u2019s Makefile commands."
+      "Standardize and verify this project\u2019s Makefile commands.",
+      "Build a live-oracle parity suite for this implementation migration."
     ],
     "brandColor": "#2563EB"
   }

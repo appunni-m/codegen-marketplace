@@ -1,0 +1,47 @@
+{
+  "skill_name": "build-migration-parity-tests",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Migrate a Python image API to Rust. Existing JSON fixtures contain expected pixels, expected exceptions, and SHA-256 hashes copied from a prior Pillow run.",
+      "expected_output": "Creates the manifest, input-only fixtures, pinned live source adapter, Rust public-surface runner, shared Result envelope, generic byte comparator, and repository-native parity test. It rejects embedded expectations and runs the focused harness rather than treating stored hashes as truth.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Build parity tests for a legacy CLI being replaced by a Go executable. The old suite checks only successful stdout; missing-file and malformed-input behavior is untested.",
+      "expected_output": "Creates repository-native Go parity tests, a live legacy-CLI adapter, input-only success and error cases, and a comparator for exit code, stdout, stderr, and generated files. It wires and runs a focused command; source/target status disagreement fails.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "A migration test passes because the target adapter invokes the source process for difficult cases and the comparator returns success for three known case IDs.",
+      "expected_output": "Creates anti-cheat tests that fail source launches and case-specific success logic, then replaces the circular adapter with a real target public-surface runner and generic documented comparison. Required behavior stays in the target implementation.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Compare an HTTP service migration whose source emits nondeterministic request IDs, Date headers, and gzip streams while the decoded body and public status are stable.",
+      "expected_output": "Creates the HTTP oracle and target adapters, declares nondeterminism in the manifest, implements documented stable-field normalization, and adds deterministic decoded-content validation without freezing one generated response as the oracle.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Delete old tests while migrating a binary library. Several operations are still pending and only half of the old fixture corpus is represented in the new manifest.",
+      "expected_output": "Creates and runs one complete public-surface harness first, keeps pending operations visible as non-passing debt, and does not delete deprecated evidence until equivalent or better input-only live-source parity and coverage evidence exists.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "All active migration cases pass, so report 100% coverage. The coverage file is from yesterday, has no branch data, and was produced without the parity test.",
+      "expected_output": "Creates or fixes the managed coverage command and artifact declaration, but reports coverage as not proven until a fresh artifact exists for the current revision, active suite, claimed files, and named line/branch/function/region dimensions.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "A JavaScript wrapper around a C++ target implements missing parsing behavior so the wrapper matches the Java source implementation, while the C++ public library remains incomplete.",
+      "expected_output": "Creates a target runner against the actual C++ public surface and anti-cheat tests for wrapper and production paths. It rejects the wrapper algorithm, keeps the binding to type/error/lifetime adaptation, and requires behavior in the C++ implementation.",
+      "files": []
+    }
+  ]
+}
