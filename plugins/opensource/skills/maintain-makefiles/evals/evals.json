@@ -1,0 +1,53 @@
+{
+  "skill_name": "maintain-makefiles",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Standardize this repository's Make interface. CI and contributor docs already call the legacy targets compile, unit, and tidy, while a new policy asks for build, test, and clean.",
+      "expected_output": "Inventories callers and preserves the legacy contract, then adds thin compatibility aliases rather than breaking CI. Documents alias parity, keeps the native build tool authoritative, and verifies old and new target pairs produce the same result and exit status.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Fix this C project's Makefile. A serial clean build passes, but parallel builds intermittently link before a generated header exists, and every second build recompiles most objects.",
+      "expected_output": "Repairs the dependency graph instead of hiding it with serialization: models the generated header and complete prerequisites, distinguishes directory order-only prerequisites, checks automatic variables and dependency files, then proves clean, no-op, selective, and repeated bounded parallel behavior.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Audit this unfamiliar Makefile before running it. It performs parse-time shell discovery, includes generated files, downloads tools, publishes from release, and computes the clean directory from an override.",
+      "expected_output": "Starts with static inspection because parsing and dry-run modes can execute work. Classifies parse-time, include-remake, network, publishing, and cleanup risks; does not invoke Make until safe; separates package from publish and validates destructive paths in a disposable scope.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "The maintainer says this Makefile is POSIX portable, but it uses GNU functions, order-only prerequisites, .ONESHELL, and recursive make. Make the portability contract honest.",
+      "expected_output": "Selects and states an explicit dialect and minimum version. Either removes extensions and tests the promised POSIX implementations and shells, or declares GNU Make and retains justified features. It uses $(MAKE) for recursion and verifies flags, overrides, and jobserver behavior.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Improve a .ONESHELL Makefile whose recipe changes directory, runs a generator, and then copies its output. The generator failure is currently hidden when the copy command succeeds.",
+      "expected_output": "Explains the changed shell and failure semantics, hardens the recipe so every required command propagates failure, quotes Make versus shell variables correctly, and verifies that an injected intermediate failure leaves no current-looking partial target.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Add installation and packaging commands for a small CLI. Distributions need PREFIX overrides, DESTDIR staging, uninstall checks, local archives, and a separately authorized registry upload.",
+      "expected_output": "Applies only relevant GNU target conventions, preserves command-line overrides, proves a staged install under a temporary DESTDIR without real-prefix writes, checks owned uninstall behavior, makes package a local artifact, and keeps publish an explicit external side effect.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Review and improve only the Makefile command interface. While following recipes you notice unrelated architecture and application-code problems. Keep the work strictly in scope.",
+      "expected_output": "Limits changes and ranked findings to the Makefile contract, graph, recipes, variables, safety, portability, and verification. It inspects delegated tools only for evidence, records any direct blocker separately, and does not expand into a general code, CI, packaging, or architecture review.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Standardize multi-architecture release builds for amd64 and arm64 across Linux, macOS, and Windows. Developers build natively, CI cross-compiles some variants, the current Makefile derives the target from uname, and every binary is written to build/app.",
+      "expected_output": "Records the build, host, and target systems and supported tuples; provides explicit canonical platform overrides translated into the native tool's vocabulary; isolates binaries, caches, and packages in per-target paths; does not run target binaries without a declared compatible runner; and verifies native builds, representative cross builds, artifact inspection, and collision-free package names without moving the native build graph into Make.",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain Makefiles"
+  short_description: "Standardize and verify reliable Make commands"
+  default_prompt: "Use $maintain-makefiles to improve and verify this project’s Makefile command interface."

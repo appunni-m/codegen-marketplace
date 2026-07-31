@@ -10,12 +10,12 @@
     {
       "name": "opensource",
       "source": "./plugins/opensource",
-      "description": "Evidence-first documentation guidance for audience journeys, public APIs, open-source trust, and release artifacts.",
+      "description": "Evidence-first open-source guidance for documentation quality and safe, standardized Makefile command interfaces.",
       "tags": [
         "documentation",
-        "readme",
+        "makefile",
         "open-source",
-        "api",
+        "automation",
         "quality"
       ]
     },

@@ -1,7 +1,7 @@
 {
   "name": "opensource",
   "version": "0.1.0",
-  "description": "Evidence-first documentation guidance for audience journeys, public APIs, open-source trust, and release artifacts.",
+  "description": "Evidence-first open-source guidance for documentation quality and safe, standardized Makefile command interfaces.",
   "author": {
     "name": "Appunni M",
     "url": "https://github.com/appunni-m"
@@ -11,9 +11,9 @@
   "license": "MIT",
   "keywords": [
     "documentation",
-    "readme",
+    "makefile",
     "open-source",
-    "api",
+    "automation",
     "quality"
   ],
   "skills": "./skills/"

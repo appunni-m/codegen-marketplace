@@ -1,7 +1,7 @@
 {
   "name": "opensource",
   "version": "0.1.0",
-  "description": "Evidence-first documentation guidance for audience journeys, public APIs, open-source trust, and release artifacts.",
+  "description": "Evidence-first open-source guidance for documentation quality and safe, standardized Makefile command interfaces.",
   "author": {
     "name": "Appunni M",
     "url": "https://github.com/appunni-m"
@@ -11,28 +11,28 @@
   "license": "MIT",
   "keywords": [
     "documentation",
-    "readme",
+    "makefile",
     "open-source",
-    "api",
+    "automation",
     "quality"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Open Source",
-    "shortDescription": "Create verified, audience-first project documentation.",
-    "longDescription": "Creates and audits README flows, source API documentation, contributor and security material, examples, and packaged documentation using evidence-backed quality gates.",
+    "shortDescription": "Improve project docs and Makefile workflows.",
+    "longDescription": "Creates and audits evidence-backed project documentation, and standardizes safe Makefile commands while preserving native build tools and contributor compatibility.",
     "developerName": "Appunni M",
     "category": "Developer Tools",
     "capabilities": [
       "Documentation",
-      "Open Source",
-      "Quality"
+      "Makefiles",
+      "Open Source Quality"
     ],
     "websiteURL": "https://github.com/appunni-m/codegen-marketplace",
     "defaultPrompt": [
       "Create and verify documentation for this project.",
       "Audit this README and public API documentation.",
-      "Prepare this project’s docs for an open-source release."
+      "Standardize and verify this project\u2019s Makefile commands."
     ],
     "brandColor": "#2563EB"
   }

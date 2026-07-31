@@ -4,6 +4,6 @@ export default defineConfig({
   version: '0.1.0',
   targets: ['claude', 'codex', 'cursor', 'vercel'],
   description:
-    'Evidence-first documentation guidance for audience journeys, public APIs, open-source trust, and release artifacts.',
-  keywords: ['documentation', 'readme', 'open-source', 'api', 'quality'],
+    'Evidence-first open-source guidance for documentation quality and safe, standardized Makefile command interfaces.',
+  keywords: ['documentation', 'makefile', 'open-source', 'automation', 'quality'],
 });
