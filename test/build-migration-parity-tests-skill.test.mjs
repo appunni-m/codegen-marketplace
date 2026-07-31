@@ -8,7 +8,11 @@ async function read(relativePath) {
   return fs.readFile(`${root}/${relativePath}`, 'utf8');
 }
 
-test('migration parity test builder stays compact and language agnostic', async () => {
+function compact(value) {
+  return value.replace(/\s+/g, ' ');
+}
+
+test('migration parity builder stays compact and broadly triggered', async () => {
   const skill = await read('SKILL.md');
   const lines = skill.split('\n').length;
   const words = skill.trim().split(/\s+/).length;
@@ -16,120 +20,113 @@ test('migration parity test builder stays compact and language agnostic', async 
   assert.ok(lines <= 220, `SKILL.md has ${lines} lines`);
   assert.ok(words <= 1500, `SKILL.md has ${words} words`);
   assert.match(skill, /^name: build-migration-parity-tests$/m);
-  assert.match(skill, /^description: [Bb]uild.+migration.+parity.+$/m);
+  assert.match(skill, /^description: Build.+migration.+parity.+$/m);
+  assert.match(skill, /API, CLI, ABI, protocol, service, file format, or library/i);
   assert.doesNotMatch(skill, /\[(?:TODO|TBD)[^\]]*\]/);
-  assert.match(skill, /language-agnostic/i);
-  assert.match(skill, /API, CLI, ABI, protocol, file format, service, or library/i);
-  assert.match(skill, /public-behavior parity/i);
-  assert.match(skill, /not a general implementation rewrite/i);
 });
 
-test('skill builds a runnable harness rather than stopping at verification advice', async () => {
-  const skill = await read('SKILL.md');
+test('skill requires executable parity, coverage, benchmark, aggregation, and docs lanes', async () => {
+  const skill = compact(await read('SKILL.md'));
 
-  assert.match(skill, /create or update actual repository files/i);
-  assert.match(skill, /Do not stop at a report, plan, checklist, or audit/i);
-  assert.match(skill, /Completion requires runnable checked-in test code/i);
-  assert.match(skill, /one public surface/i);
-  assert.match(skill, /manifest.*input fixtures.*source oracle.*target runner.*comparator/is);
-  assert.match(skill, /repository-native test target/i);
-  assert.match(skill, /run the harness/i);
-  assert.match(skill, /verification is the final stage/i);
+  assert.match(skill, /Create or update executable repository files/i);
+  assert.match(skill, /Do not stop at an audit, design, or name inventory/i);
+  assert.match(skill, /live oracle.*public targets.*comparator.*parity result/is);
+  assert.match(skill, /managed instrumented execution.*coverage result/is);
+  assert.match(skill, /correctness-gated measurements.*benchmark result/is);
+  assert.match(skill, /aggregate status.*generated documentation/is);
+  assert.match(skill, /repository-native parity, coverage, benchmark, aggregation, docs/is);
 });
 
-test('builder enforces the live differential parity pipeline', async () => {
-  const skill = await read('SKILL.md');
+test('manifest is a fixed specification rather than a result or extension registry', async () => {
+  const skill = compact(await read('SKILL.md'));
+  const manifest = compact(await read('references/manifest-contract.md'));
 
-  assert.match(
-    skill,
-    /input-only fixture.*live source oracle.*live target implementation.*normalized Result.*evidence ledger/is,
+  assert.match(skill, /fixed versioned interfaces and reject unknown fields/i);
+  assert.match(skill, /not a dynamic schema/i);
+  assert.match(skill, /reviewed schema version.*deterministic migration/is);
+  assert.match(manifest, /Do not add a numeric `version`/i);
+  for (const observedState of ['current revisions', 'pass/fail', 'timings', 'run IDs']) {
+    assert.match(manifest, new RegExp(observedState, 'i'));
+  }
+  assert.match(manifest, /Do not store `active`,\s*`pending`, `blocked`/i);
+  assert.match(manifest, /extension maps.*catch-all metadata/i);
+});
+
+test('contract supports canonical nested identities and several target profiles', async () => {
+  const manifest = compact(await read('references/manifest-contract.md'));
+  const standard = compact(await read('references/standard.md'));
+
+  assert.match(manifest, /`PIL\.ImageFont`, not `font`/);
+  assert.match(manifest, /Surface IDs may contain dots/i);
+  assert.match(manifest, /Several oracles are allowed/i);
+  assert.match(manifest, /target profile.*runtime\/backend\/feature/is);
+  assert.match(standard, /C ABI and compile-time surface/i);
+  assert.match(standard, /Image and file-format surface/i);
+  assert.match(standard, /detect, inspect, verify, decode.*encode/is);
+});
+
+test('parity input is a typed public workflow and allows legitimate public field names', async () => {
+  const manifest = compact(
+    `${await read('references/manifest-contract.md')} ${await read('references/standard.md')}`,
   );
-  assert.match(skill, /source implementation is the oracle/i);
-  assert.match(skill, /target implementation is the system under test/i);
-  assert.match(skill, /oracle startup.*test failure/is);
-  assert.match(skill, /result count.*input case count/is);
-  assert.match(skill, /source ok.*target error.*fail/is);
-  assert.match(skill, /source error.*target ok.*fail/is);
-  assert.match(skill, /case-id-specific/i);
+
+  assert.match(manifest, /typed parameter table/i);
+  assert.match(manifest, /assets \+ ordered public steps \+ bindings \+ observed steps/i);
+  assert.match(manifest, /constructor.*methods, ABI handle lifetimes/is);
+  assert.match(manifest, /Value descriptors are exact discriminated objects/i);
+  assert.match(manifest, /legitimate public parameters\s+named `status`, `output`, `expected`, or `error`/i);
+  assert.match(manifest, /Input digests are allowed and encouraged/i);
+  assert.match(manifest, /Expected output digests remain forbidden/i);
 });
 
-test('reference preserves manifest, fixture, result, and status contracts', async () => {
-  const reference = await read('references/standard.md');
+test('coverage and benchmarks use distinct strict interfaces', async () => {
+  const manifest = compact(await read('references/manifest-contract.md'));
+  const evidence = compact(await read('references/evidence-contract.md'));
 
-  for (const contract of [
-    'tests/fixtures/manifest.yaml',
-    'input_only',
-    'live_oracle',
-    'result_comparison',
-    'active',
-    'pending',
-    'unsupported',
-    'deprecated',
-    'case_id',
-    'assets',
-    'params',
-    'environment',
-    'Result envelope',
-    'status',
-    'value',
-    'error',
-    'output shape',
-    'public surface',
+  assert.match(manifest, /Code coverage is many-to-many/i);
+  assert.match(manifest, /unverifiable free-form repository-test ID registry/i);
+  assert.match(manifest, /measurement boundaries are `observed_steps`, `whole_workflow`, `process`, and `artifact`/i);
+  assert.match(manifest, /weighted real-world profiles/i);
+  assert.match(evidence, /integer covered and total counts/i);
+  assert.match(evidence, /budget.*`not_proven`.*correctness gate/is);
+  assert.match(evidence, /Never compare benchmark baselines across incompatible/is);
+});
+
+test('result and aggregate interfaces preserve multi-profile evidence identity', async () => {
+  const evidence = compact(await read('references/evidence-contract.md'));
+
+  for (const schema of [
+    'migration-parity/parity-result@1',
+    'migration-parity/coverage-result@1',
+    'migration-parity/benchmark-result@1',
+    'migration-parity/status-report@1',
   ]) {
-    assert.match(reference, new RegExp(contract, 'i'), `missing contract: ${contract}`);
+    assert.match(evidence, new RegExp(schema.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
 
-  for (const forbidden of [
-    'expected',
-    'golden',
-    'oracle',
-    'output',
-    'pixels',
-    'sha256',
-    'status',
-  ]) {
-    assert.match(reference, new RegExp(`\\b${forbidden}\\b`, 'i'));
-  }
-
-  assert.match(reference, /Pending is not passing/i);
-  assert.match(reference, /Do not delete first.*Migrate, prove, then delete/is);
-  assert.match(reference, /pillow-rs project profile/i);
+  assert.match(evidence, /one comparison for every selected case\/target-profile pair/i);
+  assert.match(evidence, /manifest path, schema, and digest match/i);
+  assert.match(evidence, /missing, stale, cancelled, invalid.*`not_proven`/is);
+  assert.match(evidence, /specification reference.*current evidence status/is);
 });
 
-test('skill keeps parity, coverage, and reproducibility claims distinct', async () => {
-  const skill = await read('SKILL.md');
-  const reference = await read('references/standard.md');
+test('deprecation and anti-cheat rules do not confuse fixtures with public support', async () => {
+  const skill = compact(await read('SKILL.md'));
+  const standard = compact(await read('references/standard.md'));
 
-  assert.match(skill, /Passing parity does not prove coverage/i);
-  assert.match(skill, /Coverage does not prove parity/i);
-  assert.match(skill, /fresh.*ingested coverage artifact/is);
-  assert.match(skill, /not proven/i);
-  assert.match(reference, /manifest path and hash/i);
-  assert.match(reference, /input file list and hash/i);
-  assert.match(reference, /asset file list and hash/i);
-  assert.match(reference, /run id/i);
-  assert.match(reference, /coverage snapshot id/i);
-  assert.match(reference, /dirty\/clean status/i);
+  assert.match(skill, /Never mark `support\.status: deprecated` merely because old fixtures moved/i);
+  assert.match(skill, /Do not delete first/i);
+  assert.match(skill, /case-specific comparison/i);
+  assert.match(skill, /circular oracles/i);
+  assert.match(standard, /Fixture deprecation is not public API deprecation/i);
+  assert.match(standard, /coverage exclusions manufacture completeness/i);
+  assert.match(standard, /budget pass ignores correctness/i);
 });
 
-test('anti-cheat rules reject circular and hidden parity mechanisms', async () => {
-  const skill = await read('SKILL.md');
-  const reference = await read('references/standard.md');
-
-  assert.match(skill, /target output.*oracle output/is);
-  assert.match(skill, /target.*launch.*source oracle/is);
-  assert.match(skill, /wrapper.*algorithms/is);
-  assert.match(skill, /test-only parity branches/i);
-  assert.match(reference, /active runner reads deprecated fixture roots/i);
-  assert.match(reference, /coverage exclusions/i);
-  assert.match(reference, /embedded expected output/i);
-  assert.match(reference, /unclassified source\/target public names/i);
-});
-
-test('evals probe failures that superficial differential test builders miss', async () => {
+test('evals probe strict interface and evidence failures', async () => {
   const payload = JSON.parse(await read('evals/evals.json'));
   assert.equal(payload.skill_name, 'build-migration-parity-tests');
-  assert.ok(payload.evals.length >= 7);
+  assert.ok(payload.evals.length >= 9);
 
   const prompts = payload.evals.map((entry) => entry.prompt).join('\n');
   const expected = payload.evals.map((entry) => entry.expected_output).join('\n');
@@ -139,31 +136,33 @@ test('evals probe failures that superficial differential test builders miss', as
     'Rust',
     'CLI',
     'HTTP',
-    'nondeterministic',
-    'pending',
+    'C ABI',
+    'codec',
+    'benchmark',
     'coverage',
-    'wrapper',
+    'unknown field',
   ]) {
     assert.match(prompts, new RegExp(scenario, 'i'), `missing eval scenario: ${scenario}`);
   }
 
   for (const behavior of [
-    'creates',
     'live source',
     'input-only',
-    'Result envelope',
-    'not proven',
+    'target profile',
+    'not_proven',
     'public surface',
     'does not delete',
-    'anti-cheat',
+    'correctness-gated',
+    'fixed schema',
   ]) {
     assert.match(expected, new RegExp(behavior, 'i'), `missing eval behavior: ${behavior}`);
   }
 });
 
-test('skill UI metadata explicitly invokes the skill', async () => {
+test('skill UI metadata invokes the complete evidence-system workflow', async () => {
   const metadata = await read('agents/openai.yaml');
   assert.match(metadata, /display_name: "Build Migration Parity Tests"/);
-  assert.match(metadata, /short_description: "Build live-oracle migration parity suites"/);
+  assert.match(metadata, /short_description: "Build strict migration evidence systems"/);
   assert.match(metadata, /default_prompt: "Use \$build-migration-parity-tests /);
+  assert.match(metadata, /parity, coverage, benchmark, and generated status documentation/i);
 });

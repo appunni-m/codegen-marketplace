@@ -1,439 +1,341 @@
-# Universal Migration Parity Standard
+# Universal Migration Parity Build Standard
 
-Use this checklist for any source-to-target behavior migration. Adapt runners
-and output shapes to the ecosystem without weakening the evidence rules.
+Use this procedure for API, CLI, ABI, protocol, service, and file-format
+migrations. The exact data interfaces live in
+[the manifest contract](manifest-contract.md) and
+[the evidence contract](evidence-contract.md).
 
 ## Contents
 
-- Builder deliverables
-- 1. Repository and manifest
-- 2. Input cases and assets
-- 3. Source and target execution
-- 4. Results, comparison, and output shapes
-- 5. Public-surface accounting
-- 6. Coverage and evidence
-- 7. Anti-cheat gates
-- 8. Migration, reproducibility, and reporting
-- 9. Runtime adapters
-- 10. Research basis
-- 11. Project profile
+- 1. Build order
+- 2. Public inventory
+- 3. Specification and input design
+- 4. Oracle and target execution
+- 5. Comparison
+- 6. Coverage
+- 7. Benchmarks
+- 8. Aggregation and documentation
+- 9. Anti-cheat and migration gates
+- 10. Domain profiles
 
-## Builder deliverables
+## 1. Build order
 
-This is a test-construction standard. Applying it must create executable,
-repository-native files rather than only a design or audit:
+Create executable repository-native files:
 
 ```text
-manifest + input fixtures + assets
-source oracle adapter + target public-surface adapter
-shared Case/Result model + operation registry
-generic comparator + normalization policy
-parity test entry point + anti-cheat/schema tests
-maintained test command + managed coverage artifact
+canonical manifest + parity/coverage/benchmark inputs + assets
+public inventory discovery + strict loaders + reference validation
+live oracle adapters + public target-profile adapters
+workflow result model + generic comparator
+managed coverage integration + deterministic benchmark runner
+fixed lane results + compatibility-aware aggregate
+generated specification/status documentation + drift checks
 ```
 
-Use the repository's established test framework and implementation languages.
-Do not build a second universal framework beside pytest, unittest, Cargo tests,
-Go tests, JUnit, Jest, native C/C++ tests, or the project's equivalent.
+Use the existing project test framework and maintained command surface. Avoid a
+second generic framework beside Cargo tests, pytest, Go tests, JUnit, Jest,
+native C/C++ tests, or the project equivalent.
 
-The harness boundary should be equivalent to:
+Build one end-to-end slice to validate the interface, then continue to the
+requested denominator. A broad manifest with placeholders is not a scoped
+suite.
+
+## 2. Public inventory
+
+1. Pin the source contract and public-inventory authority.
+2. Discover source names from authoritative metadata plus explicit project
+   policy.
+3. Discover public target names for every consumer-visible target boundary.
+4. Preserve source spelling, case, nesting, and symbol identity.
+5. Classify independently observable behavior as endpoints. Include constants,
+   records, layouts, error domains, macros, and protocol operations when they
+   have public observations.
+6. Classify only namespaces, imports, markers, or metadata without an
+   independent observation as non-endpoints.
+7. Model each public target once and each behavior-relevant
+   backend/runtime/feature combination as a target profile.
+8. Fail when a source name or target endpoint is absent, duplicated, or mapped
+   only by an undeclared convenience alias.
+
+Do not use fixture directory names as public identities. For example, a
+filesystem folder named `font` can store `PIL.ImageFont` cases only when
+`storage_slug` explicitly records that mapping.
+
+## 3. Specification and input design
+
+### Manifest
+
+Declare:
+
+- exact oracle and component versions;
+- public targets without mutable checkout revisions;
+- target profiles;
+- structured commands;
+- one indexed input file set per lane;
+- reusable many-to-many coverage components;
+- canonical public surfaces and operations;
+- typed source parameters and observable result contracts;
+- per-target bindings and support declarations;
+- semantic requirements and performance budgets;
+- explicit lane applicability;
+- generated documentation destinations.
+
+The manifest is product and test policy. It is not the current run ledger.
+Runner readiness, pass/fail, measurements, snapshots, and current revisions
+belong in results.
+
+### Parity inputs
+
+Represent public behavior as workflows:
 
 ```text
-load_cases(manifest) -> Case[]
-run_source(case) -> Result
-run_target(case) -> Result
-compare(source_result, target_result, policy) -> Diff[]
+assets + ordered public steps + bindings + observed steps
 ```
 
-The source adapter may be a separate pinned process. The target adapter should
-exercise the same public surface a real consumer uses. An operation registry may
-select handlers by manifest operation; no production or comparator behavior may
-select by case ID.
+This supports:
 
-Build one active surface completely before broad scaffolding. Completion means
-its checked-in fixtures, adapters, comparison, command, and tests run. A
-manifest full of pending rows or unimplemented adapter stubs is not a built
-parity suite.
+- a single function call;
+- constructor plus method;
+- handle creation, ABI call, and cleanup;
+- detect, inspect, verify, decode, and encode pipelines;
+- CLI setup and invocation;
+- protocol request sequences.
 
-## 1. Repository and manifest
+Validate every step operation, receiver, parameter name, parameter type,
+binding, asset, target profile, observation, and requirement reference.
 
-Use one active fixture root:
+Do not put expected behavior in inputs. An invalid call is represented only by
+its invalid public arguments; the live oracle determines the public error.
 
-```text
-tests/fixtures/
-  manifest.yaml
-  assets/
-  inputs/
-```
+### Coverage inputs
 
-Optional roots are `tests/deprecated/`, `tests/support/`, `tests/oracles/`, and
-`docs/`. Active runners read only `tests/fixtures`; generated run output belongs
-under an ignored build or coverage directory.
+Select canonical parity cases and/or declared maintained commands. Map the plan
+to target profiles, reusable components, and coverage requirements.
 
-The single manifest is `tests/fixtures/manifest.yaml`. It indexes identities,
-public surfaces, operations, inputs, assets, parameter/branch/region intent,
-out-of-scope behavior, status, and migration state. It is not an output store.
+Use coverage-only commands for defensive/internal paths only when necessary.
+They cannot satisfy parity requirements and must not move production behavior
+behind coverage-only code.
 
-Minimum manifest:
+### Benchmark inputs
 
-```yaml
-version: 1
-source:
-  name: source-system
-  version: "exact-version-or-revision"
-  runtime: "verified oracle runtime"
-  contract: "observable behavior selected as truth"
-target:
-  name: target-system
-  version: "current checkout-or-build"
-  runtime: "public target entrypoint"
-  contract: "observable target surface"
-policy:
-  input_only: true
-  live_oracle: true
-  result_comparison: true
-  coverage_required_for_claims: true
-surfaces: []
-```
+Declare:
 
-Each surface records stable IDs, source/target paths, input and asset roots,
-status, explicit exclusions, and operations. Each operation declares its kind,
-public status, input file, output shape, required parameter values, relevant
-branches, and coverage regions when applicable.
+- measured subjects: oracle and/or target profiles;
+- input kind: parity case, workflow, process command, or artifact;
+- timing boundary and measured step IDs;
+- metrics;
+- warmup, iterations, samples, concurrency, and cache policy;
+- correctness gate;
+- optional weighted suites.
 
-Operation statuses:
+Keep actual measurements and baseline comparisons in results.
 
-- `active`: has cases and must execute and pass;
-- `pending`: known target gap with reason and blocker;
-- `unsupported`: source exposes an unsupported/error contract which target must
-  match;
-- `deprecated`: reference-only material ignored by active runners;
-- `non-endpoint`: public name that is not independently callable behavior.
+### Assets
 
-Pending is not passing. Unsupported is tested behavior, not a synonym for
-pending. Deprecated evidence cannot satisfy active coverage.
+Keep all active assets deterministic and provenance-bound. Input digests are
+valid because they identify stimulus bytes. Generated assets need a maintained
+command and seed. Reject absolute paths, traversal, undeclared network access,
+and generated oracle/target output reused as an active input.
 
-## 2. Input cases and assets
+## 4. Oracle and target execution
 
-Input document:
+The oracle adapter must:
 
-```json
-{
-  "version": 1,
-  "surface": "Parser",
-  "operation": "parse",
-  "cases": [
-    {
-      "case_id": "Parser.parse.empty_input",
-      "operation": "parse",
-      "inputs": {
-        "assets": {},
-        "params": {"text": ""},
-        "environment": {}
-      }
-    }
-  ]
-}
-```
-
-Only `case_id`, `operation`, and `inputs` are allowed on a case. Only `assets`,
-`params`, and optional declarative `environment` are allowed under `inputs`.
-Environment describes an input condition such as locale, platform feature,
-protocol version, runtime option, or plugin availability—not an answer.
-
-Recursively reject these keys from active input JSON:
-
-```text
-actual baseline encoded_ref_bytes encoded_ref_path error expect_error
-expectation expected golden hash oracle output outputs pixels pixels_hex
-raw_path ref_bytes ref_path sha256 status
-```
-
-Use globally unique deterministic IDs:
-
-```text
-<Surface>.<operation>.<short_independent_path>
-```
-
-Reject random values, timestamps, host paths, machine names, and unstable
-counters in IDs. Add cases only for a distinct operation, parameter branch,
-mode/type, format/protocol variant, asset family, success/error path, boundary,
-historical divergence, or documented edge behavior.
-
-Treat two rows as semantic duplicates when surface, operation, parameter class,
-branch, mode, asset family, and live source status are the same.
-
-Asset descriptors:
-
-```json
-{"kind": "ref", "path": "fonts/example.ttf"}
-```
-
-Allowed kinds are `ref`, `inline_bytes`, `generated_input`, `builtin`,
-`missing_ref`, and `remote_mock`.
-
-- Canonicalize paths beneath the fixture asset root.
-- Reject absolute paths, traversal, and writes to fixture assets.
-- Require a deterministic seed and maintained command for generated inputs.
-- Replace network dependencies with deterministic local fixtures unless the
-  network itself is the public contract.
-- Never use generated run output as an active asset without explicit review.
-
-## 3. Source and target execution
-
-The live source oracle must:
-
-- verify exact source and runtime identity;
-- isolate user/global state where possible;
-- pin dependencies, plugins, features, locale, timezone, and seeds that affect
-  observable behavior;
-- accept only fixture inputs through a stable transport;
-- call the declared source public surface;
-- emit one normalized Result for every input case;
-- fail on startup, timeout, crash, non-zero exit, malformed output, duplicates,
-  missing IDs, extra IDs, or count mismatch;
-- record bounded stdout/stderr on infrastructure failure;
+- verify exact implementation/runtime/component identity;
+- isolate ambient state where possible;
+- pin locale, timezone, plugins, features, and seeds that affect behavior;
+- accept only the declared workflow and assets;
+- call the public source contract;
+- emit exactly one workflow result per selected case;
 - never read target output.
 
-The live target runner must:
+The target adapter must:
 
-- call the target public API, CLI, ABI, protocol, wire, or file-format surface;
-- use the same independent input and declared environment;
-- convert native values/errors into the shared envelope;
-- never read oracle output from target production code;
-- never launch the source from target production code;
-- never use fixture identity to change production behavior.
+- verify target/profile identity and record immutable revision later in the
+  result;
+- exercise the same public surface a consumer uses;
+- accept the independent workflow and assets;
+- convert native public values and errors into the shared result interface;
+- never launch the oracle from production code;
+- never read source results or fixture expectations;
+- never change behavior by case ID.
 
-Bindings may convert types, map errors, and manage handles/lifetimes. They must
-not implement target algorithms, interpret cases, hide mismatches, or move core
-behavior out of the target merely to satisfy parity.
+Bindings may convert types, map public errors, and manage handles or lifetimes.
+They must not implement target algorithms, interpret semantic fixture intent,
+or hide target gaps.
 
-## 4. Results, comparison, and output shapes
+Treat adapter startup, timeout, crash, malformed transport, duplicate IDs,
+missing IDs, extra IDs, and count mismatch as infrastructure failures.
 
-Success Result envelope:
+## 5. Comparison
 
-```json
-{"case_id":"Surface.operation.case","status":"ok","value":{}}
-```
+Compare:
 
-Error Result envelope:
+1. selected case and target-profile ID sets;
+2. workflow completion status;
+3. observed step ID sets;
+4. public ok/error status per step;
+5. declared observation fields and values.
 
-```json
-{
-  "case_id": "Surface.operation.case",
-  "status": "error",
-  "error": {
-    "class": "ValueError",
-    "kind": "invalid_argument",
-    "message": "stable public message",
-    "stage": "parse"
-  }
-}
-```
+Use exact equality for deterministic scalar, structured, byte, image, mask,
+layout, and encoded-file observations unless the public contract declares
+another fixed comparison.
 
-The comparator matches case ID and status first. It then compares the declared
-output shape or public error contract. It must be generic and independent of
-case IDs.
+Valid reusable normalization includes:
 
-Common output shapes include scalar, sequence, object, bytes, image, mask,
-encoded file, metrics, protocol response, CLI result, and error.
+- tuple/list representation equivalence when the contract does not distinguish
+  them;
+- deterministic map ordering;
+- platform-neutral newlines when raw bytes are not the contract;
+- bounded removal of runtime object addresses;
+- a declared numeric representation rule.
 
-- Structured values compare presence, absence, values, public ordering, and
-  observable numeric precision/type.
-- Byte-like output compares raw bytes exactly when deterministic. Hashes are
-  diagnostic only when raw bytes are practical.
-- CLI output can include exit code, stdout, stderr, and generated files.
-- Protocol output can include status, headers, body, trailers, and public
-  ordering rules.
-- Errors compare status, class/category, stable kind, stable message or declared
-  pattern, stage, and exit/status code when observable.
+Invalid normalization includes:
 
-Valid reusable normalization includes tuple/list equivalence, deterministic map
-ordering, contract-approved path reduction, specified float representation,
-runtime JSON encoding for bytes, and platform-neutral newlines when raw bytes
-are not the contract.
+- accepting any error;
+- ignoring bytes, error class, or status;
+- arbitrary rounding;
+- hash-only comparison when bytes are available;
+- case-specific branches;
+- suppressing undeclared target fields;
+- using expected values from input fixtures.
 
-Invalid normalization includes ignoring bytes or error classes, accepting any
-error, arbitrary rounding, hash-only comparison when bytes exist,
-case-ID-specific behavior, and suppressing undeclared fields.
+For public nondeterminism, compare declared stable observations and add a
+deterministic secondary validation. Do not freeze one prior output as truth.
 
-For nondeterministic output, declare the unstable fields and reason in the
-manifest. Compare stable public observations and add a deterministic secondary
-validation such as decoding. Never freeze one nondeterministic run as truth.
+## 6. Coverage
 
-Parity truth table:
+Parity case mapping, public-surface coverage, and function/line/branch/region
+coverage are distinct.
 
-| Source | Target | Comparison | Outcome |
-| --- | --- | --- | --- |
-| ok | ok | equal | pass |
-| ok | ok | different | fail |
-| ok | error | n/a | fail |
-| error | ok | n/a | fail |
-| error | error | public errors equal | pass |
-| error | error | public errors differ | fail |
+Run only maintained approved coverage commands. Preserve:
 
-## 5. Public-surface accounting
+- command and run identity;
+- target profile and immutable revision;
+- selected cases/commands;
+- input digests;
+- collector version;
+- artifact-ingestion and snapshot identity;
+- component/file identity;
+- integer covered and total counts;
+- uncovered locations;
+- threshold calculations.
 
-For each source namespace and target module:
+Claim a dimension only when its snapshot is fresh for the current compatible
+target profile and selected suite. Test success is not coverage. Line coverage
+is not branch or region coverage. Old snapshots are not current evidence.
 
-- discover public names and signatures through the ecosystem's authoritative
-  metadata plus explicit project policy;
-- classify every public source name and target endpoint;
-- require every active operation to name an input file;
-- require every discovered active input file to map to one manifest operation;
-- require every case operation to map to a runner arm;
-- require every runner arm to map back to the manifest;
-- report unclassified source/target public names;
-- keep lower-level component tests separate from public migration parity.
+Do not add exclusions, unreachable shims, or coverage-only production behavior
+to manufacture a threshold.
 
-A public-surface percentage needs an explicit denominator. Do not call a suite
-complete merely because all currently listed rows pass.
+## 7. Benchmarks
 
-## 6. Coverage and evidence
+Run a workload only after its declared correctness gate:
 
-Parity pass, public-surface coverage, line coverage, branch coverage, function
-coverage, and region coverage are separate measurements.
+- `parity_pass` — compatible parity evidence passes;
+- `source_target_match` — a benchmark workflow preflight matches;
+- `successful_execution` — appropriate for a target-only operational
+  measurement;
+- `not_applicable` — only for non-behavioral artifact measurement.
 
-Use a durable evidence ledger:
+Preserve:
 
-1. discover approved commands and latest results;
-2. run only the exact approved immutable command, cwd, shell, suite, and
-   declared artifacts;
-3. retain run identity and poll until terminal;
-4. inspect fresh artifact ingestion;
-5. capture coverage snapshot IDs;
-6. query only the summaries/files/regions needed for the claim;
-7. report uncovered dimensions explicitly.
+- manifest and input identity;
+- workload and suite policy;
+- timing boundary;
+- measured subject and profile;
+- machine, OS, architecture, CPU, memory, power mode, and toolchain;
+- raw-sample reference and descriptive statistics;
+- absolute or relative budget calculation;
+- baseline compatibility decision.
 
-“100% coverage” for a target is valid only when the snapshot is fresh for the
-current revision, contains the active parity suite and claimed target, reports
-totals for the named dimension, has zero uncovered items in that dimension, and
-all active manifest rows passed. Otherwise report `not proven`.
+Support more than call latency. Real migrations may need throughput,
+allocations, peak/resident memory, artifact size, encoded size, startup time,
+CPU time, process-level comparisons, and weighted workload suites.
 
-Never equate test success with coverage, coverage with parity, line coverage
-with branch/region coverage, or an old/stale artifact with current evidence.
+Never compare results across incompatible workload, machine, target profile,
+backend, feature, revision, or measurement policy.
 
-## 7. Anti-cheat gates
+## 8. Aggregation and documentation
 
-Fail the suite or review when:
+Aggregate by manifest digest, input digests, requirement, operation, target
+profile, immutable revision, and lane-specific context.
 
-- active JSON contains embedded expected output/error/status;
-- an active runner reads deprecated fixture roots;
-- target production code reads oracle or fixture paths;
-- target production code launches the source oracle;
-- target output becomes oracle output;
-- target or wrapper contains test-only parity branches;
-- wrappers implement algorithms or source-specific fixture behavior;
-- comparator contains case-specific success logic;
-- mismatch fields are silently ignored;
-- oracle and input result sets differ;
-- manifest and discovered input files differ;
-- operation, runner-arm, and manifest indexes are not bijective;
-- source or target public names remain unclassified;
-- coverage exclusions or stale artifacts manufacture completeness.
+Missing, stale, failed, cancelled, invalid, dirty-target, and incompatible
+evidence stays visible as `not_proven`. A dirty target is never current proof.
+Do not infer pass from a support declaration or an old result.
 
-Audit for direct string/path use, subprocess edges, conditional compilation,
-test-only feature flags, broad normalization, exclusions, and case IDs in
-production code. Static checks are evidence, not proof of absence.
+Generate:
 
-## 8. Migration, reproducibility, and reporting
+1. public specification reference from manifest and indexed inputs;
+2. current parity, coverage, and benchmark status from the aggregate.
 
-Migrate one public surface at a time:
+Record generator/schema version, manifest identity, target profile/revision,
+and evidence IDs in generated output. Regenerate and diff checked-in pages or
+publish immutable output.
 
-1. inventory old tests and fixtures;
-2. identify both public surfaces;
-3. create manifest rows;
-4. create or retain input-only cases;
-5. implement the live source oracle;
-6. implement the public target runner;
-7. normalize Results;
-8. compare exactly;
-9. run narrow parity;
-10. run the maintained evidence/coverage command;
-11. add missing independent behavior paths;
-12. mark superseded material deprecated;
-13. prove equivalent or better evidence;
-14. remove old material;
-15. commit.
+## 9. Anti-cheat and migration gates
 
-Do not delete first. Migrate, prove, then delete.
+Fail review or CI when:
 
-Record for reproduction:
+- a consumer maintains a parallel operation inventory;
+- an unknown field or unsupported schema is accepted;
+- a parameter/input/reference is not declared;
+- expected or observed output appears in active parity inputs;
+- measured coverage or performance appears in manifest/input files;
+- source and target ID sets differ;
+- production or wrapper code reads fixture/oracle paths;
+- target code launches the oracle;
+- comparator behavior selects by case ID;
+- wrappers implement migrated algorithms;
+- mismatches are ignored;
+- coverage exclusions manufacture completeness;
+- budget pass ignores correctness;
+- incompatible evidence is aggregated;
+- generated docs hide missing/stale evidence;
+- deprecated fixtures are removed before mapping and equivalent evidence.
 
-- source and target repository/version/build identities;
-- immutable revision and dirty/clean status;
-- manifest path and hash;
-- input file list and hash;
-- asset file list and hash;
-- oracle runtime path/version;
-- target runtime/toolchain version;
-- behavior-relevant dependency/plugin/feature versions;
-- command identity and run id;
-- coverage snapshot id when claimed;
-- counters, terminal status, and exact failing case IDs.
+When migrating old material:
 
-The final report includes commit, changed files, commands, pass/fail counts,
-evidence IDs, coverage only when proven, pending rows, deprecated evidence
-removed/retained, skipped checks with reasons, and final worktree status.
+1. inventory old operations, scenarios, assets, results, and consumers;
+2. map operations and scenarios to canonical requirements;
+3. migrate independent inputs and deterministic assets;
+4. replace embedded expectations with live oracle execution;
+5. add coverage and benchmark specifications where applicable;
+6. run equivalent or stronger evidence;
+7. move old files to a deprecated archive;
+8. prove active consumers no longer read the archive;
+9. remove only with retained mapping and evidence.
 
-## 9. Runtime adapters
+Fixture deprecation is not public API deprecation.
 
-Adapters change transport, not truth:
+## 10. Domain profiles
 
-- Python/Ruby/JavaScript: isolate environments and lock imports/packages.
-- C/C++/Rust/Go: call the public library or CLI, preserve ABI/build modes, and
-  separate host tooling from target execution.
-- JVM/.NET: pin runtime and dependency resolution; normalize declared public
-  exceptions/status, not implementation stack traces.
-- CLI: compare exit code, stdout, stderr, and generated files according to the
-  declared contract.
-- HTTP/gRPC/services: use a deterministic local server topology; compare public
-  status, headers/metadata, payload, streaming order, and protocol errors.
-- Binary libraries/FFI: keep bindings thin and compare owned bytes, layouts, and
-  public error/status behavior without duplicating algorithms in the binding.
+### High-level object API
 
-## 10. Research basis
+Use nested public surfaces for modules, classes, and methods. Represent receiver
+construction as a workflow setup step. Preserve binding targets separately when
+Rust, Python, JavaScript, native, WASM, CPU, or GPU consumers expose distinct
+public behavior.
 
-- McKeeman, “Differential Testing for Software”:
-  <https://dblp.org/rec/journals/dtj/McKeeman98.html>
-- LLVM libc differential fuzz tests compare libc implementations:
-  <https://libc.llvm.org/dev/fuzzing.html>
-- LLVM libFuzzer deterministic-target guidance:
-  <https://llvm.org/docs/LibFuzzer.html>
-- Reproducible Builds documentation:
-  <https://reproducible-builds.org/docs/>
-- Bazel test execution and hermeticity specification:
-  <https://bazel.build/reference/test-encyclopedia>
+### C ABI and compile-time surface
 
-These sources support same-input comparison, deterministic inputs/execution,
-declared environments, and independently verifiable evidence. The manifest and
-anti-cheat rules in this standard are the migration policy, not claims that
-those sources define this exact schema.
+Inventory functions, constants, enum variants, flags, macros, records, tags,
+types, and errors. Treat compile visibility, value, size, alignment, offsets,
+error codes, and handle lifecycle as observable endpoints where applicable.
+Use workflows for allocation/call/release sequences. Keep C/WASM wrappers thin.
 
-## 11. pillow-rs project profile
+### Image and file-format surface
 
-Instantiate the universal roles as:
+Use one public format surface per format and explicit operations such as
+detect, inspect, verify, decode, decode-sequence, encode, and encode-sequence.
+Map one asset to several observed operations without copying outputs into
+inputs. Keep generated oracle observations in results, not in an executable
+coverage matrix treated as input truth.
 
-```text
-source implementation = Pillow 12.2.0
-source oracle = .oracle-venv/bin/python executing PIL public APIs
-target implementation = pillow-rs
-target runner = Rust tests calling pillow_rs root public API
-coverage ledger = Coverage MCP
-active fixture root = pillow-rs/tests/fixtures
-single manifest = pillow-rs/tests/fixtures/manifest.yaml
-```
+### CLI and protocol surface
 
-Migration order:
-
-1. move Font/ImageFont parity into the single manifest;
-2. share input-only validation, oracle execution, Result comparison, and
-   manifest-accounting checks;
-3. migrate image-backend parity;
-4. migrate codec inputs from `image-slash-star` without stored outputs;
-5. use `fontdone` for public-surface accounting and pending-route visibility,
-   not as the direct schema.
-
-Keep Python and JavaScript bindings thin, keep target behavior in Rust core,
-reject output/error expectations in active JSON, require Coverage MCP evidence
-for coverage claims, and treat deprecated fixture roots as reference only.
+Model argv/stdin/files or request/response fields as declared public
+parameters. Compare exit/status, stdout/stderr, headers, body, trailers,
+streaming order, generated files, and public errors according to the operation
+result contract.

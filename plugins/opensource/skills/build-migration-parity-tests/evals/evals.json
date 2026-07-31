@@ -27,8 +27,8 @@
     },
     {
       "id": 5,
-      "prompt": "Delete old tests while migrating a binary library. Several operations are still pending and only half of the old fixture corpus is represented in the new manifest.",
-      "expected_output": "Creates and runs one complete public-surface harness first, keeps pending operations visible as non-passing debt, and does not delete deprecated evidence until equivalent or better input-only live-source parity and coverage evidence exists.",
+      "prompt": "Delete old tests while migrating a binary library. Several operations have no executable input mapping and only half of the old fixture corpus is represented in the new manifest.",
+      "expected_output": "Creates and runs one complete public-surface harness first, reports missing input and result evidence as not_proven outside the manifest, and does not delete deprecated evidence until equivalent or better input-only live-source parity, coverage, and benchmark evidence exists.",
       "files": []
     },
     {
@@ -41,6 +41,24 @@
       "id": 7,
       "prompt": "A JavaScript wrapper around a C++ target implements missing parsing behavior so the wrapper matches the Java source implementation, while the C++ public library remains incomplete.",
       "expected_output": "Creates a target runner against the actual C++ public surface and anti-cheat tests for wrapper and production paths. It rejects the wrapper algorithm, keeps the binding to type/error/lifetime adaptation, and requires behavior in the C++ implementation.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Rebuild a C ABI in safe Rust. The source inventory includes functions, macros, constants, enum variants, record layouts, error values, and handle lifetimes; the targets are Rust core, C ABI, and WASM target profiles.",
+      "expected_output": "Builds one fixed schema manifest preserving exact C spelling and observable compile/runtime subjects, models the three public target profiles separately, uses input-only workflows for handle creation/call/release, and emits one live source comparison per case and target profile.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Migrate an image codec suite whose generated coverage matrix mixes source assets, expected pixels, expected errors, stored encoded output, decode/inspect/verify status, and no benchmark protocol.",
+      "expected_output": "Separates the codec specification from evidence, creates input-only detect/inspect/verify/decode/encode workflows, keeps generated pixels/errors/bytes in results, maps many operations to coverage components, and adds correctness-gated latency, throughput, memory, and encoded-size benchmark workloads.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "A manifest claims a strict interface but accepts an unknown field, stores a current target commit and runner status, and recursively rejects a legitimate public input parameter named expected.",
+      "expected_output": "Rejects the unknown field with the fixed schema, moves current revision and readiness to generated results, validates the expected argument through the operation parameter contract, and allows input asset digests while rejecting expected output digests.",
       "files": []
     }
   ]
