@@ -3,7 +3,7 @@
 set -eu
 
 package="coverage-mcp"
-version="0.8.3"
+version="0.8.4"
 expected_version="${package} ${version}"
 lock_owned=false
 

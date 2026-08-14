@@ -25,16 +25,16 @@
     "bootstrap": {
       "manager": "cargo",
       "package": "coverage-mcp",
-      "version": "=0.8.3",
+      "version": "=0.8.4",
       "platforms": ["macos", "linux", "wsl"],
       "nativeWindows": false,
       "binaryOverride": "COVERAGE_MCP_BIN",
       "runtimeDirectoryOverride": "COVERAGE_MCP_RUNTIME_DIR",
       "installWaitTimeoutSeconds": 900,
       "installWaitTimeoutOverride": "COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS",
-      "defaultInstallRoot": "~/.coverage-mcp/runtime/0.8.3",
-      "installLockFile": "<runtime-dir>/.install-0.8.3.lock",
-      "releasePrerequisite": "coverage-mcp 0.8.3 published on crates.io"
+      "defaultInstallRoot": "~/.coverage-mcp/runtime/0.8.4",
+      "installLockFile": "<runtime-dir>/.install-0.8.4.lock",
+      "releasePrerequisite": "coverage-mcp 0.8.4 published on crates.io"
     },
     "localDevelopment": {
       "command": "cargo",
