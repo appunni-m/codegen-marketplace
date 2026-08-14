@@ -4,9 +4,9 @@ Testing workflows backed by the local
 [Coverage MCP](https://github.com/appunni-m/coverage-mcp) server.
 
 Coverage MCP is a native Rust executable. Codex launches the bundled
-`./bin/coverage-mcp-launcher`, which reuses an exact 0.8.4 binary from
-`COVERAGE_MCP_BIN`, `PATH`, or `~/.coverage-mcp/runtime/0.8.4`. On a cache miss,
-one launcher acquires `.install-0.8.4.lock`, installs the exact published crate
+`./bin/coverage-mcp-launcher`, which reuses an exact 0.8.5 binary from
+`COVERAGE_MCP_BIN`, `PATH`, or `~/.coverage-mcp/runtime/0.8.5`. On a cache miss,
+one launcher acquires `.install-0.8.5.lock`, installs the exact published crate
 with Cargo, and all waiting sessions reuse it. The MCP startup timeout is 900
 seconds for that first compile; later sessions start from the cache.
 
@@ -58,7 +58,7 @@ For another host, or to prewarm Codex, install the published native binary.
 This plugin does not invoke Coverage MCP through `uvx`, `pip`, Node, or `npx`:
 
 ```bash
-cargo install coverage-mcp --version '=0.8.4' --locked
+cargo install coverage-mcp --version '=0.8.5' --locked
 coverage-mcp --version
 ```
 
@@ -76,14 +76,14 @@ The published Codex manifest keeps the runtime version pinned because an
 installed plugin cannot safely infer a user's Coverage MCP checkout or track a
 moving Git branch. Use the explicit Cargo manifest option for local
 development; it never falls back to a guessed path. Do not publish this plugin
-version until Coverage MCP 0.8.4 exists on crates.io.
+version until Coverage MCP 0.8.5 exists on crates.io.
 This plugin revision is synchronized with Coverage MCP schema revision 7 and
 its eleven-tool inventory; verify those values through `GET /health` and
 `tools/list` after upgrading.
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.8.4/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.8.5/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -130,7 +130,7 @@ starts the rebuilt checkout without an install. Update a manually installed
 native binary separately after a published release:
 
 ```bash
-cargo install coverage-mcp --version '=0.8.4' --locked --force
+cargo install coverage-mcp --version '=0.8.5' --locked --force
 ```
 
 After stopping the old daemon, new connectors resolve the updated executable.
