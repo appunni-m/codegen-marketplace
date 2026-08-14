@@ -4,7 +4,7 @@ All notable changes to this marketplace are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and plugin versions
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - 2026-08-14
+## [0.5.0] - 2026-08-15
 
 ### Added
 
@@ -37,6 +37,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Synchronize the marketplace README, testing plugin, agent skill, generated
   host guidance, compatibility declaration, and local cache around the same
   schema-7, eleven-tool shared-daemon contract.
+- Pin the automatic Codex bootstrap to Coverage MCP 0.8.2 after its Linux and
+  clean-registry release gates pass.
 - Add absolute executable and repository overrides to the Pi MCP installer.
 - Add an explicit `--cargo-manifest` Pi launcher and checkout-local Cargo
   instructions so local development uses `cargo run` without a separate build
