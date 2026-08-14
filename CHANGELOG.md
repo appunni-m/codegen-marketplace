@@ -14,6 +14,16 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Add a deterministic documentation inventory script and cross-project skill
   evaluation cases.
 
+### Changed
+
+- Update the testing plugin and Gemini Coverage MCP connectors to launch the
+  native Rust `coverage-mcp connect` executable instead of treating the Rust
+  repository as a Python package through `uvx` or `pip`.
+- Align the testing workflow with Coverage MCP schema revision 8, explicit
+  `get_run_data` run IDs, narrow composable coverage projections, and separate
+  stdio versus HTTP-daemon behavior.
+- Add absolute executable and repository overrides to the Pi MCP installer.
+
 ## [0.4.1] - 2026-07-21
 
 ### Changed

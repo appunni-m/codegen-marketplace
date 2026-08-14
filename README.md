@@ -59,9 +59,9 @@ gemini extensions install https://github.com/appunni-m/codegen-marketplace
 ```
 
 Gemini has one repository-level extension slot, owned by `rust-development`.
-The combined extension also configures Coverage MCP through `uvx`, so installing
-the repository provides both Rust guidance and testing/coverage tools. Restart
-Gemini CLI after installation or update.
+The combined extension also exposes Coverage MCP through the native
+`coverage-mcp` executable, so install that binary before starting Gemini.
+Restart Gemini CLI after installation or update.
 
 ### Kiro
 
@@ -102,27 +102,50 @@ Restart Pi after installing the adapter.
 
 ## Coverage MCP
 
-The `testing` plugin launches a stdio connector for
-[Coverage MCP](https://github.com/appunni-m/coverage-mcp). The connector uses
-the public HTTPS Git repository and starts or reuses one user-level HTTP daemon.
-It deliberately tracks upstream `main`; this is declared in
-`plugins/testing/compatibility.json` and checked by the marketplace tests.
+The `testing` plugin launches a native stdio connector for
+[Coverage MCP](https://github.com/appunni-m/coverage-mcp). Coverage MCP is a
+Rust executable; the marketplace does not pretend that the Rust repository is
+a Python package and does not invoke it through `uvx` or `pip`.
+
+Install the binary once:
+
+```bash
+cargo install --git https://github.com/appunni-m/coverage-mcp.git \
+  --locked coverage-mcp
+coverage-mcp --version
+```
+
+The connector runs `coverage-mcp connect` in the MCP client's repository
+working directory. Add `--repo /absolute/path/to/repository` when the host does
+not set that working directory. The connector is a direct stdio process: it
+opens `<repo>/.coverage-mcp/coverage.duckdb` and does not start an HTTP daemon.
 
 Run the same connector manually with:
 
 ```bash
-uvx --from git+https://github.com/appunni-m/coverage-mcp.git@main \
-  coverage-mcp connect
+coverage-mcp connect --repo /absolute/path/to/repository
 ```
 
-Python 3.12 or newer is required. Verify the server:
+Verify the stdio handshake before opening an MCP client:
 
 ```bash
-curl http://127.0.0.1:59471/health
+printf '%s\n' \
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"probe","version":"1"}}}' \
+  | coverage-mcp connect --repo /absolute/path/to/repository
 ```
 
-The response must include `version`; `common_db_path` must identify the daemon's
-common registry, and `run_concurrency` reports the active worker count.
+The first response must contain `result.serverInfo.name` equal to
+`coverage-mcp`. If the MCP client reports `connection closed: initialize
+response`, inspect the command's stderr: the child exited before the
+handshake, usually because the host is still configured with `uvx`, `pip`, a
+missing native binary, or a locked database.
+
+For HTTP and dashboard use, start a separate loopback daemon:
+
+```bash
+coverage-mcp serve
+curl http://127.0.0.1:59471/health
+```
 
 Dashboard:
 
@@ -130,18 +153,20 @@ Dashboard:
 http://localhost:59471/
 ```
 
-Agents remind users to open this dashboard in a browser after a managed test or
-coverage task reaches a terminal state.
+The dashboard is available only when `coverage-mcp serve` is running. Agents
+may remind users to open it after a managed test or coverage task reaches a
+terminal state; they must not open it automatically.
 
-One daemon serves every repository and lazily opens one database per shared Git
-root. Every linked worktree reuses its repository database at:
+Standalone stdio mode opens one database per selected Git root. Every linked
+worktree reuses its repository database at:
 
 ```text
 <shared-git-root>/.coverage-mcp/coverage.duckdb
 ```
 
-Do not start a daemon per repository or worktree. Coverage MCP resolves the
-shared Git root so worktree runs retain one baseline lineage.
+Coverage MCP resolves the shared Git root so worktree runs retain one baseline
+lineage. Do not point two processes at the same database at once; the database
+lease will reject the second opener.
 
 ### What The Plugin Installs
 
@@ -149,11 +174,12 @@ Installing `testing@codegen-marketplace` copies the testing plugin into the
 agent's user-level plugin cache. It provides:
 
 - the `use-coverage-mcp` skill
-- a stdio MCP connector backed by `uvx` and the public HTTPS Git repository
+- a stdio MCP connector backed by the native `coverage-mcp` executable
 - agent prompts and plugin documentation
 
-`uvx` installs or updates the isolated Python package as needed, and the
-connector starts the daemon on demand. The plugin never copies a DuckDB.
+The plugin does not install the Rust binary or copy a DuckDB. Install
+`coverage-mcp` separately and keep the executable on the MCP host's `PATH`, or
+configure its absolute path.
 
 ### Updating
 
@@ -166,25 +192,26 @@ codex plugin add testing@codegen-marketplace
 
 Start a new Codex thread after a plugin update.
 
-Update the server when Coverage MCP parsing, storage, API, dashboard, or
+Update the native server when Coverage MCP parsing, storage, API, dashboard, or
 performance code changes:
 
 ```bash
-python -m pip install --upgrade \
-  "coverage-mcp @ git+https://github.com/appunni-m/coverage-mcp.git@main"
+cargo install --git https://github.com/appunni-m/coverage-mcp.git \
+  --locked --force coverage-mcp
 ```
 
 Restart agent connectors after updating. Each repository's
-`.coverage-mcp/coverage.duckdb` remains in place and is reopened lazily.
+`.coverage-mcp/coverage.duckdb` remains in place and is reopened by the new
+native process.
 
-Verify the running package version and common registry path:
+Verify the native package version:
 
 ```bash
-curl http://127.0.0.1:59471/health
+coverage-mcp --version
 ```
 
-Restart connectors after upstream changes so their tool inventory matches
-Coverage MCP `main`.
+If an HTTP daemon is also in use, restart it and verify `/health` so its tool
+inventory matches the updated Coverage MCP binary.
 
 ### Approved Test Runs
 

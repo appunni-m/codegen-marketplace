@@ -3,22 +3,31 @@
 Testing workflows backed by the local
 [Coverage MCP](https://github.com/appunni-m/coverage-mcp) server.
 
-The plugin launches a lightweight stdio connector with `uvx`. The connector
-installs Coverage MCP from its public HTTPS Git repository, starts or reuses
-one user-level HTTP daemon, and selects the agent's Git repository lazily.
-The source is deliberately tracked from upstream `main`; the machine-readable
-connector declaration is in `compatibility.json`.
+Coverage MCP is a native Rust executable. Install it separately; this plugin
+does not invoke the Rust repository through `uvx` or `pip`:
 
 ```bash
-uvx --from git+https://github.com/appunni-m/coverage-mcp.git@main \
-  coverage-mcp connect
+cargo install --git https://github.com/appunni-m/coverage-mcp.git \
+  --locked coverage-mcp
+coverage-mcp --version
+```
+
+The plugin's stdio connector runs `coverage-mcp connect` in the MCP client's
+current repository. Use an explicit `--repo` when the host does not provide a
+repository working directory. The machine-readable connector declaration is
+in `compatibility.json`.
+
+```bash
+coverage-mcp connect --repo /absolute/path/to/repository
 ```
 
 ## Installation Boundary
 
 The testing plugin installs the `use-coverage-mcp` skill and configures the
-stdio connector. `uvx` manages its isolated Python environment; the connector
-starts the HTTP daemon on demand. The plugin does not copy any DuckDB.
+stdio connector. The connector opens the selected repository's
+`.coverage-mcp/coverage.duckdb`; it does not start an HTTP daemon or copy any
+DuckDB. Run `coverage-mcp serve` separately when the dashboard or HTTP MCP
+transport is needed.
 
 ## Gemini CLI
 
@@ -30,8 +39,8 @@ Install or update the repository extension, then restart Gemini CLI:
 gemini extensions install https://github.com/appunni-m/codegen-marketplace
 ```
 
-The extension launches the same `uvx` connector and exposes its tools alongside
-the Rust development context.
+The extension launches the same native `coverage-mcp` connector and exposes its
+tools alongside the Rust development context.
 
 Update the plugin with:
 
@@ -40,29 +49,29 @@ codex plugin marketplace upgrade codegen-marketplace
 codex plugin add testing@codegen-marketplace
 ```
 
-Update the server separately:
+Update the native server separately:
 
 ```bash
-python -m pip install --upgrade \
-  "coverage-mcp @ git+https://github.com/appunni-m/coverage-mcp.git@main"
+cargo install --git https://github.com/appunni-m/coverage-mcp.git \
+  --locked --force coverage-mcp
 ```
 
-New connectors resolve the updated package. Existing history remains in each
+New connectors resolve the updated executable. Existing history remains in each
 repository's `.coverage-mcp/coverage.duckdb`.
 
 Verify the running version:
 
 ```bash
-curl http://127.0.0.1:59471/health
+coverage-mcp --version
 ```
 
-The response must include `version`; `common_db_path` must identify the daemon
-registry, and `run_concurrency` reports the active worker count. Restart the
-connector after upstream changes so its tool inventory matches `main`.
+For a separately running HTTP daemon, use `curl http://127.0.0.1:59471/health`.
+Restart the connector after upstream changes so its tool inventory matches the
+updated binary.
 
 After a test or coverage task completes, open
-<http://localhost:59471/> in a browser to view progress, run history, and
-coverage details.
+<http://localhost:59471/> in a browser only when a separate `coverage-mcp serve`
+process is running; do not open the browser automatically.
 
 Register test commands only after a human approves the complete command,
 working directory, and artifact paths.
@@ -131,6 +140,15 @@ MCP configuration:
 pi install /path/to/codegen-marketplace/plugins/testing
 pi install npm:pi-mcp-adapter
 node /path/to/codegen-marketplace/plugins/testing/scripts/install-pi-mcp.mjs
+```
+
+The installer expects `coverage-mcp` on `PATH`. For an absolute binary or a
+host whose working directory is not the repository, pass explicit values:
+
+```bash
+node /path/to/codegen-marketplace/plugins/testing/scripts/install-pi-mcp.mjs \
+  --command /absolute/path/to/coverage-mcp \
+  --repo /absolute/path/to/repository
 ```
 
 The installer merges `coverage-mcp` into `~/.config/mcp/mcp.json` and preserves

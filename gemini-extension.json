@@ -1,18 +1,13 @@
 {
   "schemaVersion": "0.1.0",
   "name": "rust-development",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.",
   "contextFileName": "GEMINI.md",
   "mcpServers": {
     "coverage-mcp": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/appunni-m/coverage-mcp.git@main",
-        "coverage-mcp",
-        "connect"
-      ]
+      "command": "coverage-mcp",
+      "args": ["connect"]
     }
   }
 }

@@ -82,13 +82,8 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   assert.deepEqual(compatibility.coverageMcp, {
     healthUrl: 'http://127.0.0.1:59471/health',
     connector: {
-      command: 'uvx',
-      args: [
-        '--from',
-        'git+https://github.com/appunni-m/coverage-mcp.git@main',
-        'coverage-mcp',
-        'connect',
-      ],
+      command: 'coverage-mcp',
+      args: ['connect'],
     },
   });
 
@@ -109,9 +104,8 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     path.join(pluginRoot, 'skills', 'use-coverage-mcp', 'SKILL.md'),
   ]) {
     const documentation = await fs.readFile(documentationPath, 'utf8');
-    assert.match(documentation, /coverage-mcp\.git@main|upstream `main`/, documentationPath);
+    assert.match(documentation, /coverage-mcp|native Rust executable/, documentationPath);
     assert.doesNotMatch(documentation, />=0\.6\.0,<0\.7\.0/, documentationPath);
-    assert.match(documentation, /common_db_path/, documentationPath);
   }
 
   const geminiContext = await fs.readFile(
@@ -128,14 +122,17 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   );
   assert.ok(skill.split('\n').length <= 180, 'Coverage MCP skill exceeds its context budget');
   assert.ok(skill.trim().split(/\s+/).length <= 1000, 'Coverage MCP skill is too verbose');
+  const normalizedSkill = skill.replace(/\s+/g, ' ');
   for (const requiredGuidance of [
     'human_approved=true',
     'idempotency_key',
     'coverage_ingest',
     'tools/list',
     '.coverage-mcp/coverage.duckdb',
+    'schema-revision 8',
+    'latest-run selection',
     'No current worktree snapshot means "not measured", not "unchanged".',
   ]) {
-    assert.ok(skill.includes(requiredGuidance), `skill is missing: ${requiredGuidance}`);
+    assert.ok(normalizedSkill.includes(requiredGuidance), `skill is missing: ${requiredGuidance}`);
   }
 });

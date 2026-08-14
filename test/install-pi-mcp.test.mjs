@@ -44,21 +44,18 @@ test('merges coverage-mcp without replacing existing configuration', async () =>
       installer,
       '--config',
       config.path,
-      '--source',
-      'git+https://example.com/coverage-mcp.git@branch',
+      '--command',
+      '/opt/coverage-mcp',
+      '--repo',
+      '/workspace/project',
     ]);
 
     const result = JSON.parse(await fs.readFile(config.path, 'utf8'));
     assert.deepEqual(result.settings, { toolPrefix: 'short' });
     assert.deepEqual(result.mcpServers.existing, { command: 'example-server' });
     assert.deepEqual(result.mcpServers['coverage-mcp'], {
-      command: 'uvx',
-      args: [
-        '--from',
-        'git+https://example.com/coverage-mcp.git@branch',
-        'coverage-mcp',
-        'connect',
-      ],
+      command: '/opt/coverage-mcp',
+      args: ['connect', '--repo', '/workspace/project'],
       lifecycle: 'lazy',
     });
 
@@ -79,13 +76,8 @@ test('creates a new shared MCP configuration', async () => {
     assert.deepEqual(result, {
       mcpServers: {
         'coverage-mcp': {
-          command: 'uvx',
-          args: [
-            '--from',
-            'git+https://github.com/appunni-m/coverage-mcp.git@main',
-            'coverage-mcp',
-            'connect',
-          ],
+          command: 'coverage-mcp',
+          args: ['connect'],
           lifecycle: 'lazy',
         },
       },
@@ -114,5 +106,6 @@ test('prints command help', async () => {
   const { stdout } = await execFileAsync(process.execPath, [installer, '--help']);
   assert.match(stdout, /Usage: install-pi-mcp\.mjs/);
   assert.match(stdout, /--config/);
-  assert.match(stdout, /--source/);
+  assert.match(stdout, /--command/);
+  assert.match(stdout, /--repo/);
 });

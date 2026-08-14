@@ -5,20 +5,23 @@ import os from 'node:os';
 import path from 'node:path';
 
 const DEFAULT_CONFIG = path.join(os.homedir(), '.config', 'mcp', 'mcp.json');
-const DEFAULT_SOURCE = 'git+https://github.com/appunni-m/coverage-mcp.git@main';
+const DEFAULT_COMMAND = 'coverage-mcp';
 
 function usage() {
-  return `Usage: install-pi-mcp.mjs [--config <path>] [--source <git-requirement>]
+  return `Usage: install-pi-mcp.mjs [--config <path>] [--command <path>] [--repo <path>]
 
 Adds or updates coverage-mcp in a shared Pi MCP configuration without
-replacing other servers or top-level settings.
+replacing other servers or top-level settings. The command must be the native
+Coverage MCP Rust executable; the repository path is optional and defaults to
+the MCP client's current working directory.
 `;
 }
 
 function parseArgs(args) {
   const options = {
     configPath: DEFAULT_CONFIG,
-    source: DEFAULT_SOURCE,
+    command: DEFAULT_COMMAND,
+    repo: null,
   };
 
   for (let index = 0; index < args.length; index += 1) {
@@ -26,7 +29,7 @@ function parseArgs(args) {
     if (argument === '--help' || argument === '-h') {
       return { help: true, ...options };
     }
-    if (argument !== '--config' && argument !== '--source') {
+    if (argument !== '--config' && argument !== '--command' && argument !== '--repo') {
       throw new Error(`Unknown argument: ${argument}`);
     }
 
@@ -38,8 +41,10 @@ function parseArgs(args) {
 
     if (argument === '--config') {
       options.configPath = value;
+    } else if (argument === '--command') {
+      options.command = value;
     } else {
-      options.source = value;
+      options.repo = value;
     }
   }
 
@@ -72,20 +77,24 @@ function readConfig(configPath) {
   return config;
 }
 
-function validateSource(value) {
-  if (!value.startsWith('git+https://')) {
-    throw new Error(`Coverage MCP source must use git+https: ${value}`);
+function validateCommand(value) {
+  if (!value.trim()) {
+    throw new Error('Coverage MCP command must not be empty');
   }
   return value;
 }
 
-function install({ configPath, source }) {
+function install({ configPath, command, repo }) {
   const resolvedPath = path.resolve(configPath);
   const config = readConfig(resolvedPath);
   config.mcpServers ??= {};
+  const args = ['connect'];
+  if (repo) {
+    args.push('--repo', repo);
+  }
   config.mcpServers['coverage-mcp'] = {
-    command: 'uvx',
-    args: ['--from', validateSource(source), 'coverage-mcp', 'connect'],
+    command: validateCommand(command),
+    args,
     lifecycle: 'lazy',
   };
 
