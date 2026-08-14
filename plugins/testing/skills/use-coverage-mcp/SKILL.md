@@ -10,19 +10,19 @@ logs, coverage snapshots, and worktree lineage. Use its bounded schema-revision
 8 queries instead of running suites directly or loading whole logs, reports, and
 source files into model context.
 
-Use `tools/list` for schema; follow this skill for workflow, trust boundaries,
-and token-efficient defaults.
+Use `tools/list` for schema; this skill sets policy and token-efficient defaults.
 
 ## Preconditions
 
-- The connector is the native `coverage-mcp connect` executable. Verify
-  `coverage-mcp --version` before relying on the host configuration; do not use
-  `uvx`, `uv run`, or `pip` for this Rust-only repository.
+- The connector is either native `coverage-mcp connect` or an explicit Cargo
+  launcher: `cargo run --locked --manifest-path <checkout>/Cargo.toml --
+  connect`. Never use `uvx`, `uv run`, or `pip` here.
 - Stdio mode selects one repository and opens
   `<shared-git-root>/.coverage-mcp/coverage.duckdb`. It does not start an HTTP
-  daemon. Use `coverage-mcp serve` separately for `/health` and the dashboard.
+  daemon. Use `cargo run --locked --manifest-path <checkout>/Cargo.toml -- serve`
+  locally, or `coverage-mcp serve`, for `/health` and dashboard.
 - Never create a second database per agent/worktree, copy a DuckDB, or bypass
-  the approved run ledger when MCP is unavailable.
+  approved run ledger when MCP is unavailable.
 
 ## Response Policy
 
@@ -69,7 +69,7 @@ Call `run_test` with the registration ID or name, `wait=false`, and one stable
 - Fetch run state with `get_run_data(detailed=false)` and pass the
   required `run_id` explicitly. To inspect the latest run, use
   `data.latest_run.id` from `project_context`; there is no implicit latest-run
-  selection. This is read-only and only returns durable run data. When
+  selection. Read-only; returns durable run data. When
   `terminal` is false, wait at least the returned ETA-aware `poll_after_ms`
   before the next status fetch. Do not poll immediately.
 - Cancel only when the user no longer wants the run, using

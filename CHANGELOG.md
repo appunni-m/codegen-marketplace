@@ -23,6 +23,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `get_run_data` run IDs, narrow composable coverage projections, and separate
   stdio versus HTTP-daemon behavior.
 - Add absolute executable and repository overrides to the Pi MCP installer.
+- Add an explicit `--cargo-manifest` Pi launcher and checkout-local Cargo
+  instructions so local development uses `cargo run` without a separate build
+  or install; portable plugin manifests retain the native executable default.
 
 ## [0.4.1] - 2026-07-21
 

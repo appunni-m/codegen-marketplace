@@ -8,8 +8,8 @@ async function read(pathname) {
 
 test('release metadata uses stable plugin versions and the native Coverage MCP connector', async () => {
   const expectedVersions = new Map([
-    ['plugins/testing/.claude-plugin/plugin.json', '0.4.0'],
-    ['plugins/testing/.codex-plugin/plugin.json', '0.4.0'],
+    ['plugins/testing/.claude-plugin/plugin.json', '0.4.1'],
+    ['plugins/testing/.codex-plugin/plugin.json', '0.4.1'],
     ['plugins/rust-development/gemini-extension.json', '0.3.1'],
   ]);
 
@@ -33,6 +33,10 @@ test('release metadata uses stable plugin versions and the native Coverage MCP c
     const contents = await read(pathname);
     assert.match(contents, /coverage-mcp/, pathname);
     assert.doesNotMatch(contents, /uvx --from|python -m pip install/, pathname);
+  }
+
+  for (const pathname of ['README.md', 'plugins/testing/README.md']) {
+    assert.match(await read(pathname), /cargo run --locked/, pathname);
   }
 });
 

@@ -4,6 +4,17 @@
     "connector": {
       "command": "coverage-mcp",
       "args": ["connect"]
+    },
+    "localDevelopment": {
+      "command": "cargo",
+      "args": [
+        "run",
+        "--locked",
+        "--manifest-path",
+        "<coverage-mcp-checkout>/Cargo.toml",
+        "--",
+        "connect"
+      ]
     }
   }
 }

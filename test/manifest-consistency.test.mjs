@@ -85,6 +85,17 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
       command: 'coverage-mcp',
       args: ['connect'],
     },
+    localDevelopment: {
+      command: 'cargo',
+      args: [
+        'run',
+        '--locked',
+        '--manifest-path',
+        '<coverage-mcp-checkout>/Cargo.toml',
+        '--',
+        'connect',
+      ],
+    },
   });
 
   const manifest = await json(path.join(pluginRoot, '.codex-plugin', 'plugin.json'));
@@ -105,6 +116,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   ]) {
     const documentation = await fs.readFile(documentationPath, 'utf8');
     assert.match(documentation, /coverage-mcp|native Rust executable/, documentationPath);
+    assert.match(documentation, /cargo run --locked/, documentationPath);
     assert.doesNotMatch(documentation, />=0\.6\.0,<0\.7\.0/, documentationPath);
   }
 

@@ -8,19 +8,20 @@ const DEFAULT_CONFIG = path.join(os.homedir(), '.config', 'mcp', 'mcp.json');
 const DEFAULT_COMMAND = 'coverage-mcp';
 
 function usage() {
-  return `Usage: install-pi-mcp.mjs [--config <path>] [--command <path>] [--repo <path>]
+  return `Usage: install-pi-mcp.mjs [--config <path>] [--command <path>] [--cargo-manifest <path>] [--repo <path>]
 
 Adds or updates coverage-mcp in a shared Pi MCP configuration without
-replacing other servers or top-level settings. The command must be the native
-Coverage MCP Rust executable; the repository path is optional and defaults to
-the MCP client's current working directory.
+replacing other servers or top-level settings. By default it uses the native
+Coverage MCP Rust executable. Pass --cargo-manifest for an explicit checkout-
+local Cargo launcher; there is no implicit path fallback.
 `;
 }
 
 function parseArgs(args) {
   const options = {
     configPath: DEFAULT_CONFIG,
-    command: DEFAULT_COMMAND,
+    command: null,
+    cargoManifest: null,
     repo: null,
   };
 
@@ -29,7 +30,12 @@ function parseArgs(args) {
     if (argument === '--help' || argument === '-h') {
       return { help: true, ...options };
     }
-    if (argument !== '--config' && argument !== '--command' && argument !== '--repo') {
+    if (
+      argument !== '--config' &&
+      argument !== '--command' &&
+      argument !== '--cargo-manifest' &&
+      argument !== '--repo'
+    ) {
       throw new Error(`Unknown argument: ${argument}`);
     }
 
@@ -43,9 +49,15 @@ function parseArgs(args) {
       options.configPath = value;
     } else if (argument === '--command') {
       options.command = value;
+    } else if (argument === '--cargo-manifest') {
+      options.cargoManifest = value;
     } else {
       options.repo = value;
     }
+  }
+
+  if (options.command && options.cargoManifest) {
+    throw new Error('--command and --cargo-manifest are mutually exclusive');
   }
 
   return { help: false, ...options };
@@ -84,16 +96,32 @@ function validateCommand(value) {
   return value;
 }
 
-function install({ configPath, command, repo }) {
+function validateManifest(value) {
+  if (!value.trim()) {
+    throw new Error('Coverage MCP Cargo manifest must not be empty');
+  }
+  return value;
+}
+
+function install({ configPath, command, cargoManifest, repo }) {
   const resolvedPath = path.resolve(configPath);
   const config = readConfig(resolvedPath);
   config.mcpServers ??= {};
-  const args = ['connect'];
+  const args = cargoManifest
+    ? [
+        'run',
+        '--locked',
+        '--manifest-path',
+        validateManifest(cargoManifest),
+        '--',
+        'connect',
+      ]
+    : ['connect'];
   if (repo) {
     args.push('--repo', repo);
   }
   config.mcpServers['coverage-mcp'] = {
-    command: validateCommand(command),
+    command: cargoManifest ? 'cargo' : validateCommand(command ?? DEFAULT_COMMAND),
     args,
     lifecycle: 'lazy',
   };

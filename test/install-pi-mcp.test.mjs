@@ -87,6 +87,38 @@ test('creates a new shared MCP configuration', async () => {
   }
 });
 
+test('configures an explicit checkout-local Cargo launcher', async () => {
+  const config = await temporaryConfig();
+  try {
+    await execFileAsync(process.execPath, [
+      installer,
+      '--config',
+      config.path,
+      '--cargo-manifest',
+      '/workspace/coverage-mcp/Cargo.toml',
+      '--repo',
+      '/workspace/project',
+    ]);
+    const result = JSON.parse(await fs.readFile(config.path, 'utf8'));
+    assert.deepEqual(result.mcpServers['coverage-mcp'], {
+      command: 'cargo',
+      args: [
+        'run',
+        '--locked',
+        '--manifest-path',
+        '/workspace/coverage-mcp/Cargo.toml',
+        '--',
+        'connect',
+        '--repo',
+        '/workspace/project',
+      ],
+      lifecycle: 'lazy',
+    });
+  } finally {
+    await config.cleanup();
+  }
+});
+
 test('does not overwrite malformed JSON', async () => {
   const config = await temporaryConfig();
   await fs.writeFile(config.path, '{not-json');
@@ -107,5 +139,6 @@ test('prints command help', async () => {
   assert.match(stdout, /Usage: install-pi-mcp\.mjs/);
   assert.match(stdout, /--config/);
   assert.match(stdout, /--command/);
+  assert.match(stdout, /--cargo-manifest/);
   assert.match(stdout, /--repo/);
 });

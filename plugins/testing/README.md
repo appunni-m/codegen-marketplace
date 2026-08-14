@@ -3,8 +3,29 @@
 Testing workflows backed by the local
 [Coverage MCP](https://github.com/appunni-m/coverage-mcp) server.
 
-Coverage MCP is a native Rust executable. Install it separately; this plugin
-does not invoke the Rust repository through `uvx` or `pip`:
+Coverage MCP is a native Rust executable. For checkout-local development, run
+it through Cargo; this avoids a separate build or install:
+
+```bash
+cargo run --locked --manifest-path /absolute/path/to/coverage-mcp/Cargo.toml \
+  -- connect --repo /absolute/path/to/repository
+```
+
+The first invocation may compile bundled DuckDB; warm it with `-- --version`
+before connecting if the MCP host has a short startup timeout.
+
+To use that launcher in the local Codex registration, replace the server
+explicitly:
+
+```bash
+codex mcp remove coverage-mcp
+codex mcp add coverage-mcp -- cargo run --locked \
+  --manifest-path /absolute/path/to/coverage-mcp/Cargo.toml \
+  -- connect --repo /absolute/path/to/repository
+```
+
+For a host without the checkout or Cargo, install the native binary. This
+plugin does not invoke the Rust repository through `uvx` or `pip`:
 
 ```bash
 cargo install --git https://github.com/appunni-m/coverage-mcp.git \
@@ -12,10 +33,14 @@ cargo install --git https://github.com/appunni-m/coverage-mcp.git \
 coverage-mcp --version
 ```
 
-The plugin's stdio connector runs `coverage-mcp connect` in the MCP client's
-current repository. Use an explicit `--repo` when the host does not provide a
-repository working directory. The machine-readable connector declaration is
-in `compatibility.json`.
+The portable plugin's stdio connector runs `coverage-mcp connect` in the MCP
+client's current repository. Use an explicit `--repo` when the host does not
+provide a repository working directory. The machine-readable connector
+declaration is in `compatibility.json`.
+
+The published manifest keeps that native default because an installed plugin
+cannot safely infer a user's Coverage MCP checkout. Use the explicit Cargo
+manifest option for local development; it never falls back to a guessed path.
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
@@ -26,8 +51,10 @@ coverage-mcp connect --repo /absolute/path/to/repository
 The testing plugin installs the `use-coverage-mcp` skill and configures the
 stdio connector. The connector opens the selected repository's
 `.coverage-mcp/coverage.duckdb`; it does not start an HTTP daemon or copy any
-DuckDB. Run `coverage-mcp serve` separately when the dashboard or HTTP MCP
-transport is needed.
+DuckDB. Run `cargo run --locked --manifest-path
+<coverage-mcp-checkout>/Cargo.toml -- serve` separately during local
+development, or `coverage-mcp serve` for an installed binary, when the
+dashboard or HTTP MCP transport is needed.
 
 ## Gemini CLI
 
@@ -49,7 +76,9 @@ codex plugin marketplace upgrade codegen-marketplace
 codex plugin add testing@codegen-marketplace
 ```
 
-Update the native server separately:
+For local source changes, restart the Cargo-launched connector; no build or
+install is required. Update the native server separately for an installed
+binary:
 
 ```bash
 cargo install --git https://github.com/appunni-m/coverage-mcp.git \
@@ -59,10 +88,11 @@ cargo install --git https://github.com/appunni-m/coverage-mcp.git \
 New connectors resolve the updated executable. Existing history remains in each
 repository's `.coverage-mcp/coverage.duckdb`.
 
-Verify the running version:
+Verify the local checkout launcher:
 
 ```bash
-coverage-mcp --version
+cargo run --locked --manifest-path /absolute/path/to/coverage-mcp/Cargo.toml \
+  -- --version
 ```
 
 For a separately running HTTP daemon, use `curl http://127.0.0.1:59471/health`.
@@ -142,8 +172,15 @@ pi install npm:pi-mcp-adapter
 node /path/to/codegen-marketplace/plugins/testing/scripts/install-pi-mcp.mjs
 ```
 
-The installer expects `coverage-mcp` on `PATH`. For an absolute binary or a
-host whose working directory is not the repository, pass explicit values:
+The installer uses `coverage-mcp` on `PATH` by default. For local checkout
+development, pass the Cargo manifest explicitly; for an installed binary or a
+host whose working directory is not the repository, pass a command and repo:
+
+```bash
+node /path/to/codegen-marketplace/plugins/testing/scripts/install-pi-mcp.mjs \
+  --cargo-manifest /absolute/path/to/coverage-mcp/Cargo.toml \
+  --repo /absolute/path/to/repository
+```
 
 ```bash
 node /path/to/codegen-marketplace/plugins/testing/scripts/install-pi-mcp.mjs \
