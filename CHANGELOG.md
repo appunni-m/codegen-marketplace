@@ -8,6 +8,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Add the testing plugin's `run-coverage-campaign` skill, bounded handoff
+  contracts, and evaluation suite for Luna Max execution with Sol High strategy
+  and recovery.
 - Add the `opensource` plugin with the `opensource-documentation` skill for
   audience-first README flows, source API contracts, community and security
   documentation, release artifacts, and evidence-backed validation.

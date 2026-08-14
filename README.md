@@ -13,7 +13,7 @@ toolkit from the
 | Plugin | Purpose | Targets |
 | --- | --- | --- |
 | `rust-development` | Rust implementation, debugging, documentation, crate research, coding standards, and unsafe review | Claude Code, Codex, Cursor, Gemini CLI, Kiro, Vercel Skills CLI, Pi |
-| `testing` | Human-approved test runs, bounded summaries, coverage history, exact missing lines, and worktree baseline comparisons | Claude Code, Codex, Gemini CLI (combined extension), Pi |
+| `testing` | Human-approved test runs, bounded summaries, coverage history, worktree comparisons, and model-routed input campaigns | Claude Code, Codex, Gemini CLI (combined extension), Pi |
 | `opensource` | Evidence-first README, source API, contributor, security, release, and packaged-documentation guidance | Claude Code, Codex, Cursor, Vercel Skills CLI, Pi |
 
 ## Install
@@ -209,6 +209,7 @@ Installing `testing@codegen-marketplace` copies the testing plugin into the
 agent's user-level plugin cache. It provides:
 
 - the `use-coverage-mcp` skill
+- the `run-coverage-campaign` skill for Luna Max execution with Sol High strategy
 - a stdio MCP connector backed by the native `coverage-mcp` executable
 - agent prompts and plugin documentation
 

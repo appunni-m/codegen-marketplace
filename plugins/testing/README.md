@@ -112,6 +112,15 @@ worktree comparison, and regression investigation. The skill contains the full
 agent workflow and explains why Coverage MCP should be used instead of reading
 raw logs and reports.
 
+The plugin also includes `run-coverage-campaign` for high-throughput,
+input-driven coverage work in Codex. Start the main task on GPT-5.6 Luna with
+Max reasoning. The skill keeps Luna as the only writer for implementation,
+testing, pruning, and validation, and delegates bounded read-only strategy and
+recovery packets to GPT-5.6 Sol with High reasoning. It verifies the Coverage
+MCP repository context and baseline before editing, defaults to 100 candidates
+in ten attributable families, and stops rather than silently using foreign or
+unmanaged coverage evidence.
+
 Coverage MCP `tools/list` describes concrete input and output fields,
 nullability, bounds, and status enums for every tool. Agents can discover the
 wire contract without source-code context. The server instructions plus

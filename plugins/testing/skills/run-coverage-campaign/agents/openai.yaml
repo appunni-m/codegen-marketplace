@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Coverage Campaign"
+  short_description: "Route coverage strategy to Sol and execution to Luna"
+  default_prompt: "Use $run-coverage-campaign to generate, implement, and validate an input-driven coverage batch."
