@@ -4,10 +4,13 @@ All notable changes to this marketplace are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and plugin versions
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.5.0] - 2026-08-14
 
 ### Added
 
+- Add a plugin-relative Codex launcher that bootstraps the exact published
+  Coverage MCP crate with Cargo under a versioned install lock, caches the
+  binary, and then enters the shared-daemon stdio flow automatically.
 - Add the testing plugin's `run-coverage-campaign` skill, bounded handoff
   contracts, and evaluation suite for Luna Max execution with Sol High strategy
   and recovery.
@@ -19,16 +22,25 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Update the testing plugin and Gemini Coverage MCP connectors to launch the
-  native Rust `coverage-mcp connect` executable instead of treating the Rust
-  repository as a Python package through `uvx` or `pip`.
-- Align the testing workflow with Coverage MCP schema revision 8, explicit
-  `get_run_data` run IDs, narrow composable coverage projections, and separate
-  stdio versus HTTP-daemon behavior.
+- Update Gemini and the non-Codex testing connectors to launch native Rust
+  `coverage-mcp connect`; the Codex bootstrap ultimately executes the same
+  binary instead of treating the repository as a Python package.
+- Align the testing workflow with Coverage MCP schema revision 7 and its
+  eleven-tool contract, explicit `get_run_data` run IDs, narrow composable
+  coverage projections, and separate standalone versus shared-daemon behavior.
+- Restore automatic shared-daemon startup for the Rust stdio connector: every
+  project session reuses one fixed loopback daemon instead of competing for
+  repository DuckDB ownership. Only the daemon holds its ownership lease;
+  HTTP clients and stdio bridges remain independently concurrent.
+- Move the Codex connector declaration into the plugin-root `.mcp.json` used by
+  the current bundled-MCP plugin contract.
+- Synchronize the marketplace README, testing plugin, agent skill, generated
+  host guidance, compatibility declaration, and local cache around the same
+  schema-7, eleven-tool shared-daemon contract.
 - Add absolute executable and repository overrides to the Pi MCP installer.
 - Add an explicit `--cargo-manifest` Pi launcher and checkout-local Cargo
   instructions so local development uses `cargo run` without a separate build
-  or install; portable plugin manifests retain the native executable default.
+  or install; non-Codex connectors retain the native executable default.
 
 ## [0.4.1] - 2026-07-21
 
@@ -94,6 +106,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Restrict the CI workflow token to read-only repository contents.
 
+[0.5.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.5.0
 [0.4.1]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.4.1
 [0.4.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.4.0
 [0.3.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.3.0

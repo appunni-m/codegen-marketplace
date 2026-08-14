@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "coverage-mcp": {
+      "command": "./bin/coverage-mcp-launcher",
+      "args": [],
+      "startup_timeout_sec": 900
+    }
+  }
+}

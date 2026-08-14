@@ -3,8 +3,27 @@
 Testing workflows backed by the local
 [Coverage MCP](https://github.com/appunni-m/coverage-mcp) server.
 
-Coverage MCP is a native Rust executable. For checkout-local development, run
-it through Cargo; this avoids a separate build or install:
+Coverage MCP is a native Rust executable. Codex launches the bundled
+`./bin/coverage-mcp-launcher`, which reuses an exact 0.8.0 binary from
+`COVERAGE_MCP_BIN`, `PATH`, or `~/.coverage-mcp/runtime/0.8.0`. On a cache miss,
+one launcher acquires `.install-0.8.0.lock`, installs the exact published crate
+with Cargo, and all waiting sessions reuse it. The MCP startup timeout is 900
+seconds for that first compile; later sessions start from the cache.
+
+Cargo must already be installed, just as `npx` requires Node or `uvx` requires
+its own runtime. The plugin does not install Rust and does not fall back to an
+unpinned Git branch. Set `COVERAGE_MCP_RUNTIME_DIR` to relocate its cache.
+`COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS` changes the default 900-second wait for
+another first-session install; the MCP host startup timeout must be at least as
+large.
+
+The bundled launcher is POSIX `sh` and supports macOS, Linux, and WSL. Native
+Windows bootstrap is not currently claimed; install the pinned crate manually,
+disable the bundled server, and register the absolute
+`coverage-mcp.exe connect` command with the MCP host.
+
+For checkout-local development, run Coverage MCP through Cargo; this avoids a
+separate build or install:
 
 ```bash
 cargo run --locked --manifest-path /absolute/path/to/coverage-mcp/Cargo.toml \
@@ -14,8 +33,16 @@ cargo run --locked --manifest-path /absolute/path/to/coverage-mcp/Cargo.toml \
 The first invocation may compile bundled DuckDB; warm it with `-- --version`
 before connecting if the MCP host has a short startup timeout.
 
-To use that launcher in the local Codex registration, replace the server
-explicitly:
+The plugin-bundled server and a global `codex mcp` registration are separate.
+For checkout-local development, first disable the bundled server in
+`~/.codex/config.toml`:
+
+```toml
+[plugins."testing".mcp_servers.coverage-mcp]
+enabled = false
+```
+
+Then register the Cargo launcher globally:
 
 ```bash
 codex mcp remove coverage-mcp
@@ -24,37 +51,56 @@ codex mcp add coverage-mcp -- cargo run --locked \
   -- connect --repo /absolute/path/to/repository
 ```
 
-For a host without the checkout or Cargo, install the native binary. This
-plugin does not invoke the Rust repository through `uvx` or `pip`:
+Remove the global registration and re-enable the bundled server when returning
+to the installed binary so Codex does not load two copies of the tool set.
+
+For another host, or to prewarm Codex, install the published native binary.
+This plugin does not invoke Coverage MCP through `uvx`, `pip`, Node, or `npx`:
 
 ```bash
-cargo install --git https://github.com/appunni-m/coverage-mcp.git \
-  --locked coverage-mcp
+cargo install coverage-mcp --version '=0.8.0' --locked
 coverage-mcp --version
 ```
 
-The portable plugin's stdio connector runs `coverage-mcp connect` in the MCP
-client's current repository. Use an explicit `--repo` when the host does not
-provide a repository working directory. The machine-readable connector
-declaration is in `compatibility.json`.
+The Codex bootstrap ultimately runs `coverage-mcp connect` in the MCP client's
+current repository. The connector starts or reuses the daemon on
+`127.0.0.1:59471` and routes the current Git repository to it. Only the daemon
+process holds its ownership lease; stdio bridges and direct HTTP clients do not
+lock one another. The daemon
+remains available after an individual connector exits. Use an explicit
+`--repo` for native host configurations that do not provide a repository
+working directory. The bundled connector is in `.mcp.json`, and the
+machine-readable bootstrap/runtime contract is in `compatibility.json`.
 
-The published manifest keeps that native default because an installed plugin
-cannot safely infer a user's Coverage MCP checkout. Use the explicit Cargo
-manifest option for local development; it never falls back to a guessed path.
+The published Codex manifest keeps the runtime version pinned because an
+installed plugin cannot safely infer a user's Coverage MCP checkout or track a
+moving Git branch. Use the explicit Cargo manifest option for local
+development; it never falls back to a guessed path. Do not publish this plugin
+version until Coverage MCP 0.8.0 exists on crates.io.
+This plugin revision is synchronized with Coverage MCP schema revision 7 and
+its eleven-tool inventory; verify those values through `GET /health` and
+`tools/list` after upgrading.
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
+~/.coverage-mcp/runtime/0.8.0/bin/coverage-mcp connect \
+  --repo /absolute/path/to/repository
 ```
 
 ## Installation Boundary
 
-The testing plugin installs the `use-coverage-mcp` skill and configures the
-stdio connector. The connector opens the selected repository's
-`.coverage-mcp/coverage.duckdb`; it does not start an HTTP daemon or copy any
-DuckDB. Run `cargo run --locked --manifest-path
-<coverage-mcp-checkout>/Cargo.toml -- serve` separately during local
-development, or `coverage-mcp serve` for an installed binary, when the
-dashboard or HTTP MCP transport is needed.
+The testing plugin installs the `use-coverage-mcp` skill, its Cargo bootstrap,
+and the stdio connector. Racing cache misses serialize only the Cargo install
+through the versioned installer lock, which is released before startup. Normal
+`connect` processes are lightweight bridges; they do not open DuckDB or take
+the daemon ownership lease. The first bridge starts the daemon, whose process
+alone holds `<common-db-parent>/daemon.lock` while listening on the fixed
+default port `59471`. Any number of HTTP clients and stdio bridges may connect
+concurrently, subject to configured runtime limits. The daemon lazily opens the
+selected repository's
+`.coverage-mcp/coverage.duckdb`, so multiple projects can connect concurrently
+without becoming competing database owners. Explicit `connect --db` remains
+standalone mode.
 
 ## Gemini CLI
 
@@ -76,17 +122,20 @@ codex plugin marketplace upgrade codegen-marketplace
 codex plugin add testing@codegen-marketplace
 ```
 
-For local source changes, restart the Cargo-launched connector; no build or
-install is required. Update the native server separately for an installed
-binary:
+Start a new Codex task after reinstalling so the task loads the refreshed
+skills and bundled MCP connector.
+
+For local source changes, stop the old Cargo-launched daemon; the next connector
+starts the rebuilt checkout without an install. Update a manually installed
+native binary separately after a published release:
 
 ```bash
-cargo install --git https://github.com/appunni-m/coverage-mcp.git \
-  --locked --force coverage-mcp
+cargo install coverage-mcp --version '=0.8.0' --locked --force
 ```
 
-New connectors resolve the updated executable. Existing history remains in each
-repository's `.coverage-mcp/coverage.duckdb`.
+After stopping the old daemon, new connectors resolve the updated executable.
+Existing history remains in each repository's
+`.coverage-mcp/coverage.duckdb`.
 
 Verify the local checkout launcher:
 
@@ -95,13 +144,12 @@ cargo run --locked --manifest-path /absolute/path/to/coverage-mcp/Cargo.toml \
   -- --version
 ```
 
-For a separately running HTTP daemon, use `curl http://127.0.0.1:59471/health`.
-Restart the connector after upstream changes so its tool inventory matches the
-updated binary.
+After `connect` has started, use `curl http://127.0.0.1:59471/health`. Stop the
+old daemon after updating the binary; the next connector automatically starts
+the new one so its tool inventory matches.
 
-After a test or coverage task completes, open
-<http://localhost:59471/> in a browser only when a separate `coverage-mcp serve`
-process is running; do not open the browser automatically.
+After a test or coverage task completes, the managed dashboard is available at
+<http://localhost:59471/>; do not open the browser automatically.
 
 Register test commands only after a human approves the complete command,
 working directory, and artifact paths.
@@ -199,3 +247,15 @@ node /path/to/codegen-marketplace/plugins/testing/scripts/install-pi-mcp.mjs \
 
 The installer merges `coverage-mcp` into `~/.config/mcp/mcp.json` and preserves
 existing servers. Restart Pi after installing the adapter.
+
+## Support and security
+
+- Report Coverage MCP runtime bugs in the
+  [Coverage MCP issue tracker](https://github.com/appunni-m/coverage-mcp/issues).
+- Report plugin packaging or documentation bugs in the
+  [marketplace issue tracker](https://github.com/appunni-m/codegen-marketplace/issues),
+  and follow its
+  [contribution guide](https://github.com/appunni-m/codegen-marketplace/blob/main/CONTRIBUTING.md).
+- Report suspected vulnerabilities privately through the
+  [Coverage MCP security policy](https://github.com/appunni-m/coverage-mcp/security/policy)
+  rather than a public issue.

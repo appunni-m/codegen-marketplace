@@ -1,6 +1,6 @@
 {
   "name": "testing",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
   "author": {
     "name": "Appunni M",
@@ -17,16 +17,11 @@
     "quality"
   ],
   "skills": "./skills/",
-  "mcpServers": {
-    "coverage-mcp": {
-      "command": "coverage-mcp",
-      "args": ["connect"]
-    }
-  },
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Testing",
     "shortDescription": "Run tests and track coverage without flooding context.",
-    "longDescription": "Runs human-approved test commands, records bounded results and artifacts, and compares each worktree with its frozen coverage baseline.",
+    "longDescription": "Bootstraps a pinned native Coverage MCP binary with Cargo, runs human-approved tests, records bounded evidence, and compares worktrees with frozen baselines.",
     "developerName": "Appunni M",
     "category": "Developer Tools",
     "capabilities": [

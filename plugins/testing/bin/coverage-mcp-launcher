@@ -1,0 +1,163 @@
+#!/bin/sh
+
+set -eu
+
+package="coverage-mcp"
+version="0.8.0"
+expected_version="${package} ${version}"
+lock_owned=false
+
+matches_version() {
+  candidate="$1"
+  [ -x "${candidate}" ] || return 1
+  actual_version=$("${candidate}" --version 2>/dev/null || true)
+  [ "${actual_version}" = "${expected_version}" ]
+}
+
+launch() {
+  candidate="$1"
+  shift
+  exec "${candidate}" connect "$@"
+}
+
+release_lock() {
+  if [ "${lock_owned}" = true ]; then
+    rm -f "${lock_dir}/pid"
+    rmdir "${lock_dir}" 2>/dev/null || true
+    lock_owned=false
+  fi
+}
+
+remove_stale_lock() {
+  [ -d "${lock_dir}" ] || return 0
+  [ ! -L "${lock_dir}" ] || return 0
+  rm -f "${lock_dir}/pid"
+  rmdir "${lock_dir}" 2>/dev/null || true
+}
+
+if [ -n "${COVERAGE_MCP_BIN:-}" ]; then
+  if ! matches_version "${COVERAGE_MCP_BIN}"; then
+    echo "COVERAGE_MCP_BIN must point to executable ${expected_version}: ${COVERAGE_MCP_BIN}" >&2
+    exit 1
+  fi
+  launch "${COVERAGE_MCP_BIN}" "$@"
+fi
+
+path_binary=$(command -v "${package}" 2>/dev/null || true)
+if [ -n "${path_binary}" ] && matches_version "${path_binary}"; then
+  launch "${path_binary}" "$@"
+fi
+
+bootstrap_timeout="${COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS:-900}"
+case "${bootstrap_timeout}" in
+  ''|*[!0-9]*)
+    echo "COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS must be a positive integer." >&2
+    exit 1
+    ;;
+  0)
+    echo "COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS must be greater than zero." >&2
+    exit 1
+    ;;
+esac
+
+if [ -n "${COVERAGE_MCP_RUNTIME_DIR:-}" ]; then
+  runtime_dir="${COVERAGE_MCP_RUNTIME_DIR}"
+else
+  : "${HOME:?HOME is required when COVERAGE_MCP_RUNTIME_DIR is unset}"
+  runtime_dir="${HOME}/.coverage-mcp/runtime"
+fi
+install_root="${runtime_dir}/${version}"
+cached_binary="${install_root}/bin/${package}"
+lock_dir="${runtime_dir}/.install-${version}.lock"
+
+if matches_version "${cached_binary}"; then
+  launch "${cached_binary}" "$@"
+fi
+
+cargo_binary=$(command -v cargo 2>/dev/null || true)
+if [ -z "${cargo_binary}" ]; then
+  echo "Coverage MCP ${version} is not installed and Cargo is unavailable." >&2
+  echo "Install Rust/Cargo or set COVERAGE_MCP_BIN to an exact ${expected_version} executable." >&2
+  exit 1
+fi
+
+mkdir -p "${runtime_dir}"
+started_at=$(date +%s)
+missing_pid_polls=0
+
+while ! mkdir "${lock_dir}" 2>/dev/null; do
+  if matches_version "${cached_binary}"; then
+    launch "${cached_binary}" "$@"
+  fi
+
+  lock_pid=""
+  if [ -f "${lock_dir}/pid" ]; then
+    IFS= read -r lock_pid < "${lock_dir}/pid" || true
+  fi
+  case "${lock_pid}" in
+    ''|*[!0-9]*)
+      missing_pid_polls=$((missing_pid_polls + 1))
+      if [ "${missing_pid_polls}" -ge 5 ]; then
+        remove_stale_lock
+        missing_pid_polls=0
+        continue
+      fi
+      ;;
+    *)
+      missing_pid_polls=0
+      if ! kill -0 "${lock_pid}" 2>/dev/null; then
+        remove_stale_lock
+        continue
+      fi
+      ;;
+  esac
+
+  now=$(date +%s)
+  if [ $((now - started_at)) -ge "${bootstrap_timeout}" ]; then
+    echo "Timed out waiting for the Coverage MCP ${version} install lock: ${lock_dir}" >&2
+    exit 1
+  fi
+  sleep 1
+done
+
+lock_owned=true
+printf '%s\n' "$$" > "${lock_dir}/pid"
+trap 'release_lock' 0
+trap 'release_lock; exit 129' 1
+trap 'release_lock; exit 130' 2
+trap 'release_lock; exit 131' 3
+trap 'release_lock; exit 143' 15
+
+if matches_version "${cached_binary}"; then
+  release_lock
+  launch "${cached_binary}" "$@"
+fi
+
+install_stamp=$(date +%s)
+temporary_root="${runtime_dir}/.install-${version}.${install_stamp}.$$.tmp"
+mkdir -p "${temporary_root}"
+echo "Installing ${expected_version} once with Cargo; later MCP sessions reuse ${install_root}." >&2
+
+if ! "${cargo_binary}" install "${package}" \
+  --version "=${version}" \
+  --locked \
+  --bin "${package}" \
+  --root "${temporary_root}" 1>&2; then
+  echo "Cargo could not install ${expected_version}. The exact release must be published before this plugin version is distributed." >&2
+  exit 1
+fi
+
+temporary_binary="${temporary_root}/bin/${package}"
+if ! matches_version "${temporary_binary}"; then
+  echo "Cargo installed an unexpected Coverage MCP binary at ${temporary_binary}." >&2
+  exit 1
+fi
+
+if [ -e "${install_root}" ]; then
+  preserved_root="${runtime_dir}/${version}.invalid.${install_stamp}.$$"
+  mv "${install_root}" "${preserved_root}"
+  echo "Preserved the invalid previous runtime at ${preserved_root}." >&2
+fi
+mv "${temporary_root}" "${install_root}"
+release_lock
+launch "${cached_binary}" "$@"

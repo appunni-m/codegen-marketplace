@@ -37,7 +37,13 @@ test('authored target manifests match each plugin config', async () => {
       try {
         const manifest = await json(manifestPath);
         assert.equal(manifest.name, plugin.name, manifestPath);
-        assert.equal(manifest.version, version, manifestPath);
+        const localCodexVersion = `${version}+codex.`;
+        assert.ok(
+          manifest.version === version ||
+            (metadataDirectory === '.codex-plugin' &&
+              manifest.version.startsWith(localCodexVersion)),
+          `${manifestPath}: ${manifest.version} must match ${version} or use a Codex cachebuster`,
+        );
         assert.equal(manifest.description, description, manifestPath);
       } catch (error) {
         if (error.code !== 'ENOENT') {
@@ -81,9 +87,40 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   const compatibility = await json(path.join(pluginRoot, 'compatibility.json'));
   assert.deepEqual(compatibility.coverageMcp, {
     healthUrl: 'http://127.0.0.1:59471/health',
+    schemaRevision: 7,
+    toolCount: 11,
+    sharedDaemon: {
+      autoStart: true,
+      survivesConnectorExit: true,
+      defaultHost: '127.0.0.1',
+      defaultPort: 59471,
+      ownershipLockFile: '<common-db-parent>/daemon.lock',
+      connectionLock: false,
+      logFile: '<common-db-parent>/daemon.log',
+      projectDatabase: '<canonical-git-root>/.coverage-mcp/coverage.duckdb',
+    },
     connector: {
+      command: './bin/coverage-mcp-launcher',
+      args: [],
+      startupTimeoutSeconds: 900,
+    },
+    nativeConnector: {
       command: 'coverage-mcp',
       args: ['connect'],
+    },
+    bootstrap: {
+      manager: 'cargo',
+      package: 'coverage-mcp',
+      version: '=0.8.0',
+      platforms: ['macos', 'linux', 'wsl'],
+      nativeWindows: false,
+      binaryOverride: 'COVERAGE_MCP_BIN',
+      runtimeDirectoryOverride: 'COVERAGE_MCP_RUNTIME_DIR',
+      installWaitTimeoutSeconds: 900,
+      installWaitTimeoutOverride: 'COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS',
+      defaultInstallRoot: '~/.coverage-mcp/runtime/0.8.0',
+      installLockFile: '<runtime-dir>/.install-0.8.0.lock',
+      releasePrerequisite: 'coverage-mcp 0.8.0 published on crates.io',
     },
     localDevelopment: {
       command: 'cargo',
@@ -96,17 +133,30 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
         'connect',
       ],
     },
+    standalone: {
+      argument: '--db',
+      environment: 'COVERAGE_MCP_DB',
+    },
   });
 
   const manifest = await json(path.join(pluginRoot, '.codex-plugin', 'plugin.json'));
-  assert.deepEqual(manifest.mcpServers['coverage-mcp'], compatibility.coverageMcp.connector);
+  assert.equal(manifest.mcpServers, './.mcp.json');
+  const bundledMcp = await json(path.join(pluginRoot, '.mcp.json'));
+  assert.deepEqual(
+    bundledMcp.mcpServers['coverage-mcp'],
+    {
+      command: compatibility.coverageMcp.connector.command,
+      args: compatibility.coverageMcp.connector.args,
+      startup_timeout_sec: compatibility.coverageMcp.connector.startupTimeoutSeconds,
+    },
+  );
 
   const geminiManifest = await json(
     path.join(pluginsRoot, 'rust-development', 'gemini-extension.json'),
   );
   assert.deepEqual(
     geminiManifest.mcpServers['coverage-mcp'],
-    compatibility.coverageMcp.connector,
+    compatibility.coverageMcp.nativeConnector,
   );
 
   for (const documentationPath of [
@@ -141,7 +191,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     'coverage_ingest',
     'tools/list',
     '.coverage-mcp/coverage.duckdb',
-    'schema-revision 8',
+    'schema-revision 7',
     'latest-run selection',
     'No current worktree snapshot means "not measured", not "unchanged".',
   ]) {

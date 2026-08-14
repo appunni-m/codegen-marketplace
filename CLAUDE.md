@@ -189,9 +189,13 @@ Authoritative source files for the `testing` plugin are:
 
 - `plugins/testing/README.md` for marketplace/user-facing connector guidance.
 - `plugins/testing/skills/use-coverage-mcp/SKILL.md` for the agent workflow.
+- `plugins/testing/.codex-plugin/plugin.json` and `plugins/testing/.mcp.json`
+  for the bundled Codex connector.
+- `plugins/testing/bin/coverage-mcp-launcher` for pinned first-session install,
+  cache, and installer-lock behavior.
 - `plugins/testing/compatibility.json` and
   `plugins/testing/scripts/install-pi-mcp.mjs` when connector invocation or
-  source URL changes.
+  runtime compatibility changes.
 - Root `README.md` when examples or installation guidance change.
 
 Do not edit generated root artifacts to patch Coverage MCP guidance. Edit the
@@ -199,6 +203,8 @@ plugin source files above, then run the required marketplace build/check
 workflow if generated outputs are affected. After publishing or pushing, refresh
 the local Codex install with `codex plugin add testing@codegen-marketplace` and
 verify the cached plugin under `~/.codex/plugins/cache/codegen-marketplace/testing/`.
+Never publish a testing-plugin runtime pin before that exact Coverage MCP crate
+version is available from crates.io.
 
 ### Constraints
 

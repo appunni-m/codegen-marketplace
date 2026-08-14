@@ -7,20 +7,21 @@ description: Use when an agent needs to run or review tests, inspect coverage, c
 
 Coverage MCP is the local system of record for approved test commands, retained
 logs, coverage snapshots, and worktree lineage. Use its bounded schema-revision
-8 queries instead of running suites directly or loading whole logs, reports, and
+7 queries instead of running suites directly or loading whole logs, reports, and
 source files into model context.
 
 Use `tools/list` for schema; this skill sets policy and token-efficient defaults.
 
 ## Preconditions
 
-- The connector is either native `coverage-mcp connect` or an explicit Cargo
-  launcher: `cargo run --locked --manifest-path <checkout>/Cargo.toml --
-  connect`. Never use `uvx`, `uv run`, or `pip` here.
-- Stdio mode selects one repository and opens
-  `<shared-git-root>/.coverage-mcp/coverage.duckdb`. It does not start an HTTP
-  daemon. Use `cargo run --locked --manifest-path <checkout>/Cargo.toml -- serve`
-  locally, or `coverage-mcp serve`, for `/health` and dashboard.
+- Codex's pinned Cargo bootstrap executes `coverage-mcp connect`; other hosts
+  may run it directly or through `cargo run --locked --manifest-path
+  <checkout>/Cargo.toml -- connect`. Never substitute Python or Node launchers.
+- Stdio selects a repository and forwards to the daemon on port `59471`. Only
+  the daemon holds its ownership lease; HTTP and stdio never lock each other.
+  The daemon owns
+  `<shared-git-root>/.coverage-mcp/coverage.duckdb`; connectors must not open
+  stores. Explicit `connect --db` is standalone mode.
 - Never create a second database per agent/worktree, copy a DuckDB, or bypass
   approved run ledger when MCP is unavailable.
 
@@ -148,7 +149,6 @@ Report only the fields needed for the task, including:
 - parser warnings, missing/stale artifacts, or missing baseline/current state
 
 Keep test failure, coverage regression, absent artifact, parser failure,
-missing baseline, and unmeasured coverage distinct. If a separate
-`coverage-mcp serve` process is running, tell the user the dashboard is
-available at <http://localhost:59471/> after the managed task reaches a
+missing baseline, and unmeasured coverage distinct. Tell the user the managed
+dashboard is available at <http://localhost:59471/> after the task reaches a
 terminal state. Do not open the browser automatically.

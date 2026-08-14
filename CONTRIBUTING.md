@@ -63,4 +63,9 @@ artifacts even when the authored plugin shape is unchanged.
    intended release diff.
 5. Review `git diff --check`, `git status --short`, third-party notices, and the
    complete diff against the release base.
-6. Create an annotated `vX.Y.Z` tag only after CI passes on the release commit.
+6. When the testing plugin's bundled MCP declaration or Coverage MCP guidance
+   changes, validate `.mcp.json`, `compatibility.json`, and the POSIX bootstrap
+   tests. Confirm the pinned crate exists on crates.io, install a cachebuster
+   build, inspect its cached files, and test it from a new Codex task with both
+   an exact PATH binary and an isolated empty runtime cache.
+7. Create an annotated `vX.Y.Z` tag only after CI passes on the release commit.
