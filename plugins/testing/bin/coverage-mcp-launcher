@@ -3,7 +3,19 @@
 set -eu
 
 package="coverage-mcp"
-version="0.8.5"
+version="${COVERAGE_MCP_VERSION:-}"
+case "${version}" in
+  ''|*[!0-9.]*|.*|*.|*..*|*.*.*.*)
+    echo "COVERAGE_MCP_VERSION must be a stable x.y.z release supplied by the MCP configuration." >&2
+    exit 1
+    ;;
+  *.*.*)
+    ;;
+  *)
+    echo "COVERAGE_MCP_VERSION must be a stable x.y.z release supplied by the MCP configuration." >&2
+    exit 1
+    ;;
+esac
 expected_version="${package} ${version}"
 lock_owned=false
 

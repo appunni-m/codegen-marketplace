@@ -3,6 +3,9 @@
     "coverage-mcp": {
       "command": "./bin/coverage-mcp-launcher",
       "args": [],
+      "env": {
+        "COVERAGE_MCP_VERSION": "0.8.6"
+      },
       "startup_timeout_sec": 900
     }
   }

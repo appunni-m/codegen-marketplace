@@ -102,6 +102,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     connector: {
       command: './bin/coverage-mcp-launcher',
       args: [],
+      versionEnvironment: 'COVERAGE_MCP_VERSION',
       startupTimeoutSeconds: 900,
     },
     nativeConnector: {
@@ -111,16 +112,16 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     bootstrap: {
       manager: 'cargo',
       package: 'coverage-mcp',
-      version: '=0.8.5',
+      version: '=0.8.6',
       platforms: ['macos', 'linux', 'wsl'],
       nativeWindows: false,
       binaryOverride: 'COVERAGE_MCP_BIN',
       runtimeDirectoryOverride: 'COVERAGE_MCP_RUNTIME_DIR',
       installWaitTimeoutSeconds: 900,
       installWaitTimeoutOverride: 'COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS',
-      defaultInstallRoot: '~/.coverage-mcp/runtime/0.8.5',
-      installLockFile: '<runtime-dir>/.install-0.8.5.lock',
-      releasePrerequisite: 'coverage-mcp 0.8.5 published on crates.io',
+      defaultInstallRoot: '~/.coverage-mcp/runtime/0.8.6',
+      installLockFile: '<runtime-dir>/.install-0.8.6.lock',
+      releasePrerequisite: 'coverage-mcp 0.8.6 published on crates.io',
     },
     localDevelopment: {
       command: 'cargo',
@@ -147,6 +148,10 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     {
       command: compatibility.coverageMcp.connector.command,
       args: compatibility.coverageMcp.connector.args,
+      env: {
+        [compatibility.coverageMcp.connector.versionEnvironment]:
+          compatibility.coverageMcp.bootstrap.version.slice(1),
+      },
       startup_timeout_sec: compatibility.coverageMcp.connector.startupTimeoutSeconds,
     },
   );

@@ -111,12 +111,13 @@ a Python package and does not invoke it through `uvx`, `pip`, Node, or `npx`.
 
 Codex runs the plugin-relative `./bin/coverage-mcp-launcher`. It first honors
 an exact `COVERAGE_MCP_BIN`, then checks `PATH`, then checks the versioned cache
-at `~/.coverage-mcp/runtime/0.8.5`. If no exact Coverage MCP 0.8.5 binary is
+at `~/.coverage-mcp/runtime/0.8.6`. The bundled `.mcp.json` supplies
+`COVERAGE_MCP_VERSION=0.8.6` to the launcher. If no exact Coverage MCP 0.8.6 binary is
 available, one launcher acquires
-`~/.coverage-mcp/runtime/.install-0.8.5.lock` and runs:
+`~/.coverage-mcp/runtime/.install-0.8.6.lock` and runs:
 
 ```bash
-cargo install coverage-mcp --version '=0.8.5' --locked \
+cargo install coverage-mcp --version '=0.8.6' --locked \
   --bin coverage-mcp --root <temporary-install-root>
 ```
 
@@ -185,7 +186,7 @@ For a non-Codex host, or to prewarm the binary before the first Codex task,
 install the published version explicitly:
 
 ```bash
-cargo install coverage-mcp --version '=0.8.5' --locked
+cargo install coverage-mcp --version '=0.8.6' --locked
 coverage-mcp --version
 ```
 
@@ -213,7 +214,7 @@ Run a PATH installation manually, or invoke the Codex-managed cache directly:
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.8.5/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.8.6/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -301,7 +302,7 @@ changes. To update a manually installed server after a published Coverage MCP
 release:
 
 ```bash
-cargo install coverage-mcp --version '=0.8.5' --locked --force
+cargo install coverage-mcp --version '=0.8.6' --locked --force
 ```
 
 Stop the old shared daemon after updating; the next agent connector starts the

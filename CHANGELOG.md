@@ -37,8 +37,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Synchronize the marketplace README, testing plugin, agent skill, generated
   host guidance, compatibility declaration, and local cache around the same
   schema-7, eleven-tool shared-daemon contract.
-- Pin the automatic Codex bootstrap to Coverage MCP 0.8.5 after its Linux and
+- Pin the automatic Codex bootstrap to Coverage MCP 0.8.6 after its Linux and
   clean-registry release gates pass.
+- Pass the pinned Coverage MCP release into the Codex launcher through the
+  bundled MCP JSON environment instead of hard-coding it in the launcher.
 - Add absolute executable and repository overrides to the Pi MCP installer.
 - Add an explicit `--cargo-manifest` Pi launcher and checkout-local Cargo
   instructions so local development uses `cargo run` without a separate build

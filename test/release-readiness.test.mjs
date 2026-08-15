@@ -34,6 +34,9 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
     {
       command: './bin/coverage-mcp-launcher',
       args: [],
+      env: {
+        COVERAGE_MCP_VERSION: '0.8.6',
+      },
       startup_timeout_sec: 900,
     },
   );
@@ -56,7 +59,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   });
   assert.equal(compatibility.coverageMcp.bootstrap.manager, 'cargo');
   assert.equal(compatibility.coverageMcp.bootstrap.package, 'coverage-mcp');
-  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.8.5');
+  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.8.6');
   assert.deepEqual(compatibility.coverageMcp.bootstrap.platforms, [
     'macos',
     'linux',
@@ -65,7 +68,8 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.equal(compatibility.coverageMcp.bootstrap.nativeWindows, false);
 
   const launcher = await read('plugins/testing/bin/coverage-mcp-launcher');
-  assert.match(launcher, /version="0\.8\.5"/);
+  assert.match(launcher, /version="\$\{COVERAGE_MCP_VERSION:-\}"/);
+  assert.match(launcher, /stable x\.y\.z release supplied by the MCP configuration/);
   assert.match(launcher, /cargo_binary.*install/);
   assert.match(launcher, /\.install-\$\{version\}\.lock/);
   if (process.platform !== 'win32') {
