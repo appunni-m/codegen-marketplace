@@ -4,6 +4,32 @@ All notable changes to this marketplace are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and plugin versions
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-08-15
+
+### Added
+
+- Release `rust-development` as 0.3.2 with the `release-rust-crate` skill: an
+  evidence-first workflow for SemVer and MSRV review, package inspection,
+  workspace ordering, first crates.io publication, GitHub OIDC Trusted
+  Publishing, immutable action pins, binary artifacts, clean-consumer checks,
+  and fix-forward recovery. Include a deterministic non-publishing release
+  audit and realistic evaluation fixtures.
+
+### Fixed
+
+- Pin the testing plugin to Coverage MCP 0.9.0, whose stdio connector
+  automatically replaces a verified older daemon on the fixed loopback port.
+  New owners use a capability-authenticated graceful handoff; the first
+  upgrade from a legacy owner uses its active lease identity. Unknown port
+  occupants, different registries, equal-version incompatibilities, and
+  downgrade attempts remain fail-closed.
+- Keep the installer lock limited to one-time Cargo bootstrap. HTTP clients
+  and any number of stdio bridges remain concurrent and never acquire the
+  daemon ownership lease.
+- Remove the legacy direct-database connector configuration. Stdio and
+  compaction clients always route through the shared daemon, which is the only
+  process that opens project stores.
+
 ## [0.5.0] - 2026-08-15
 
 ### Added
@@ -27,7 +53,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   binary instead of treating the repository as a Python package.
 - Align the testing workflow with Coverage MCP schema revision 7 and its
   eleven-tool contract, explicit `get_run_data` run IDs, narrow composable
-  coverage projections, and separate standalone versus shared-daemon behavior.
+  coverage projections, and one shared-daemon transport contract.
 - Restore automatic shared-daemon startup for the Rust stdio connector: every
   project session reuses one fixed loopback daemon instead of competing for
   repository DuckDB ownership. Only the daemon holds its ownership lease;
@@ -110,6 +136,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Restrict the CI workflow token to read-only repository contents.
 
+[0.5.1]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.5.1
 [0.5.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.5.0
 [0.4.1]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.4.1
 [0.4.0]: https://github.com/appunni-m/codegen-marketplace/releases/tag/v0.4.0

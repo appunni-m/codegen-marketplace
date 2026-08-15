@@ -1,7 +1,7 @@
 # Rust Development
 
 Rust engineering plugin for implementation, review, debugging, documentation,
-crate research, coding standards, and unsafe-code analysis.
+crate research and releases, coding standards, and unsafe-code analysis.
 
 ## Overview
 
@@ -23,6 +23,7 @@ narrower match.
 - **crate-info** - Selected and available crate versions, features, and dependency context
 - **rust-features** - Stable release, edition, and feature research
 - **unsafe-review** - Unsafe Rust, FFI, layout, aliasing, and soundness review
+- **release-rust-crate** - Production crate readiness, crates.io publishing, GitHub release CI, and recovery
 
 ## Coverage MCP
 

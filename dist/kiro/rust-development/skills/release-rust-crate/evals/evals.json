@@ -1,0 +1,53 @@
+{
+  "skill_name": "release-rust-crate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Prepare my first crates.io release for a small Rust library. The repository is public and CI is green, but the crate name has never been published and I want future releases to use GitHub OIDC.",
+      "expected_output": "Audits manifest metadata, SemVer, MSRV, docs, licenses, features, package contents, clean source state, and exact hosted CI. It explains that Trusted Publishing cannot bootstrap an unclaimed crate, uses a narrowly scoped short-lived manual token only after explicit publish authority, never exposes or stores it in GitHub, verifies registry propagation and a clean downstream consumer, configures the exact trusted publisher, revokes the bootstrap token, and tags the exact immutable commit.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Release this five-crate Cargo workspace. Three crates are public, two are publish=false, and the public CLI depends by path on the two public libraries.",
+      "expected_output": "Builds the publishable dependency graph from Cargo metadata, confirms every path dependency has a compatible registry version, excludes publish=false members, packages each archive, publishes dependencies before dependents, waits on exact registry visibility with bounded queries, tracks per-package state, and never tries to overwrite already published workspace versions after a partial failure.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "cargo publish says eleven files are dirty. Just add --allow-dirty so we can ship 1.2.0 now.",
+      "expected_output": "Refuses the dirty bypass, inventories the changed and packaged files without discarding unrelated work, synchronizes version/lockfile/changelog/docs, runs the full package and project gates, commits the exact release contents, requires hosted CI on that commit, and publishes only from a separate clean checkout after explicit authorization.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Review our GitHub Actions Rust release workflow. It uses actions by @v tags, stores CARGO_REGISTRY_TOKEN as a repository secret, and publishes from the same pull_request_target job that runs tests.",
+      "expected_output": "Treats the workflow as privileged supply-chain code, separates untrusted validation from publication, pins every external action to a reviewed full SHA, limits default permissions, confines id-token: write to a protected publish environment, replaces the long-lived secret with crates.io Trusted Publishing for an existing crate, validates tag/version identity, and places every required gate before token minting.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "cargo publish timed out. Retry it until it succeeds, then force-move v0.4.0 to whatever commit is currently checked out.",
+      "expected_output": "Does not blindly retry or move the tag. It preserves redacted diagnostics, queries the exact crate version because upload may have succeeded before index polling timed out, verifies source/tag identity if present, retries only when bounded evidence proves absence, and uses a new version/tag to fix an already public mismatch.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Ship a Rust CLI to crates.io plus prebuilt Linux, macOS, and Windows binaries on GitHub. We only have a Linux runner today.",
+      "expected_output": "Separates the source crate from prebuilt channels, does not call cross-compilation runtime verification, defines exact target/platform support, adds native or explicitly limited matrix evidence, packages licenses and predictable names, generates checksums after final archives, smoke-tests install/version/help and one operation, considers SBOM/attestation, and labels any unexecuted platform unsupported or not proven.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Audit whether version 0.9.3 is production-ready, but do not commit, tag, publish, create a GitHub release, add owners, or yank anything.",
+      "expected_output": "Stays read-only except for safe local build artifacts, runs the structural audit and authorized repository gates, inspects SemVer/MSRV/features/dependencies/docs/licenses/package archive/workflows and exact registry state, distinguishes prepared from CI-proven/published/consumer-verified/released, reports blockers and evidence, and performs none of the prohibited mutations.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "The just-published crate is broken on stable and its docs.rs build failed. Delete 2.0.0, replace its tag, and upload corrected bytes under the same version.",
+      "expected_output": "Explains that crates.io versions are immutable and cannot be deleted or overwritten, does not move the public tag, assesses whether an explicitly authorized yank is appropriate, prepares and fully verifies a corrected new version, publishes migration/advisory guidance, and verifies stable, docs.rs-compatible packaging and clean downstream use before the fix-forward release.",
+      "files": []
+    }
+  ]
+}

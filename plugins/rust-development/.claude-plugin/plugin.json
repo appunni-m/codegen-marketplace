@@ -1,7 +1,7 @@
 {
   "name": "rust-development",
-  "version": "0.3.1",
-  "description": "Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.",
+  "version": "0.3.2",
+  "description": "Rust engineering guidance for implementation, debugging, documentation, crate research and releases, coding standards, and unsafe review.",
   "author": {
     "name": "Appunni M",
     "url": "https://github.com/appunni-m"
@@ -15,7 +15,8 @@
     "documentation",
     "unsafe",
     "cargo",
-    "clippy"
+    "clippy",
+    "release"
   ],
   "skills": "./skills/"
 }

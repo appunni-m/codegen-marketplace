@@ -1,8 +1,8 @@
 ---
 schemaVersion: 0.1.0
 name: rust-development
-description: Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.
-version: 0.3.1
+description: Rust engineering guidance for implementation, debugging, documentation, crate research and releases, coding standards, and unsafe review.
+version: 0.3.2
 ---
 
 # Rust Development
@@ -15,6 +15,7 @@ Use this power to implement, review, debug, document, and research Rust code.
 - Systematic root-cause debugging
 - Rustdoc and public-contract review
 - Cargo crate and Rust release research
+- Production crate release and crates.io publishing
 - Repository-aware coding standards
 - Evidence-based unsafe-code review
 
@@ -27,3 +28,4 @@ Use this power to implement, review, debug, document, and research Rust code.
 - `skills/crate-info/SKILL.md` - Crate versions, features, and dependency context
 - `skills/rust-features/SKILL.md` - Rust release and edition research
 - `skills/unsafe-review/SKILL.md` - Unsafe Rust and FFI review
+- `skills/release-rust-crate/SKILL.md` - Crate release readiness, CI publishing, and recovery

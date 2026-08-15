@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Rust Crate"
+  short_description: "Audit and ship production-ready Rust crates"
+  default_prompt: "Use $release-rust-crate to prepare and safely publish this Rust crate."

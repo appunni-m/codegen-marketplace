@@ -39,7 +39,7 @@ async function writeCoverageBinary(pathname) {
       '#!/bin/sh',
       'set -eu',
       'if [ "${1:-}" = "--version" ]; then',
-      '  printf "%s\\n" "coverage-mcp 0.8.6"',
+      '  printf "%s\\n" "coverage-mcp 0.9.0"',
       '  exit 0',
       'fi',
       'printf "%s\\n" "$*" >> "${COVERAGE_MCP_PROBE_LOG}"',
@@ -78,7 +78,7 @@ function launcherEnvironment(directory, overrides = {}) {
   return {
     HOME: directory,
     PATH: '/usr/bin:/bin',
-    COVERAGE_MCP_VERSION: '0.8.6',
+    COVERAGE_MCP_VERSION: '0.9.0',
     COVERAGE_MCP_RUNTIME_DIR: path.join(directory, 'runtime'),
     COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS: '10',
     ...overrides,
@@ -145,14 +145,14 @@ test('installs the pinned crate once and reuses the cached binary', async (t) =>
     assert.equal(cargoCalls.length, 1);
     assert.match(
       cargoCalls[0],
-      /^install coverage-mcp --version =0\.8\.6 --locked --bin coverage-mcp --root /,
+      /^install coverage-mcp --version =0\.9\.0 --locked --bin coverage-mcp --root /,
     );
     assert.equal(
       await fs.readFile(probeLog, 'utf8'),
       'connect\nconnect --repo /workspace/second\n',
     );
     await fs.access(
-      path.join(temporary.directory, 'runtime', '0.8.6', 'bin', 'coverage-mcp'),
+      path.join(temporary.directory, 'runtime', '0.9.0', 'bin', 'coverage-mcp'),
     );
   } finally {
     await temporary.cleanup();
@@ -209,7 +209,7 @@ test('fails clearly when neither an exact binary nor Cargo is available', async 
       execFileAsync(launcher, [], {
         env: launcherEnvironment(temporary.directory),
       }),
-      /Coverage MCP 0\.8\.6 is not installed and Cargo is unavailable/,
+      /Coverage MCP 0\.9\.0 is not installed and Cargo is unavailable/,
     );
   } finally {
     await temporary.cleanup();

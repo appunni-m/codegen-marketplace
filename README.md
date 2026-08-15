@@ -12,7 +12,7 @@ toolkit from the
 
 | Plugin | Purpose | Targets |
 | --- | --- | --- |
-| `rust-development` | Rust implementation, debugging, documentation, crate research, coding standards, and unsafe review | Claude Code, Codex, Cursor, Gemini CLI, Kiro, Vercel Skills CLI, Pi |
+| `rust-development` | Rust implementation, debugging, documentation, crate research and releases, coding standards, and unsafe review | Claude Code, Codex, Cursor, Gemini CLI, Kiro, Vercel Skills CLI, Pi |
 | `testing` | Human-approved test runs, bounded summaries, coverage history, worktree comparisons, and model-routed input campaigns | Claude Code, Codex, Gemini CLI (combined extension), Pi |
 | `opensource` | Evidence-first README, source API, contributor, security, release, and packaged-documentation guidance | Claude Code, Codex, Cursor, Vercel Skills CLI, Pi |
 
@@ -111,13 +111,13 @@ a Python package and does not invoke it through `uvx`, `pip`, Node, or `npx`.
 
 Codex runs the plugin-relative `./bin/coverage-mcp-launcher`. It first honors
 an exact `COVERAGE_MCP_BIN`, then checks `PATH`, then checks the versioned cache
-at `~/.coverage-mcp/runtime/0.8.6`. The bundled `.mcp.json` supplies
-`COVERAGE_MCP_VERSION=0.8.6` to the launcher. If no exact Coverage MCP 0.8.6 binary is
+at `~/.coverage-mcp/runtime/0.9.0`. The bundled `.mcp.json` supplies
+`COVERAGE_MCP_VERSION=0.9.0` to the launcher. If no exact Coverage MCP 0.9.0 binary is
 available, one launcher acquires
-`~/.coverage-mcp/runtime/.install-0.8.6.lock` and runs:
+`~/.coverage-mcp/runtime/.install-0.9.0.lock` and runs:
 
 ```bash
-cargo install coverage-mcp --version '=0.8.6' --locked \
+cargo install coverage-mcp --version '=0.9.0' --locked \
   --bin coverage-mcp --root <temporary-install-root>
 ```
 
@@ -129,6 +129,16 @@ neither stdio bridges nor direct HTTP clients take that lease. Both transports
 can create concurrent connections to the same daemon, subject only to its
 configured request and connection-pool limits. The MCP declaration allows 900
 seconds for the first compile; cached starts do not rebuild.
+
+If the pinned connector is newer than the daemon already using port `59471`,
+`connect` verifies that `/health` and the actively held `daemon.lock` identify
+the same Coverage MCP process and common database. It then requests an
+authenticated graceful handoff and starts the pinned binary after the old
+listener and lease are released. The first upgrade from a pre-handoff daemon
+uses its verified legacy PID/executable lease metadata. Unknown listeners,
+different registries, equal-version incompatibilities, and attempts to
+downgrade a newer daemon are refused; the launcher never deletes lock, WAL, or
+database files.
 
 This is the Cargo analogue of `uvx` or `npx`: automatic and version-pinned, but
 it requires an existing Rust/Cargo toolchain just as `npx` requires Node. It
@@ -186,7 +196,7 @@ For a non-Codex host, or to prewarm the binary before the first Codex task,
 install the published version explicitly:
 
 ```bash
-cargo install coverage-mcp --version '=0.8.6' --locked
+cargo install coverage-mcp --version '=0.9.0' --locked
 coverage-mcp --version
 ```
 
@@ -199,6 +209,13 @@ the ownership lease that prevents a duplicate daemon process. HTTP clients and
 stdio bridges do not lock one another. The daemon opens
 each selected repository's `<repo>/.coverage-mcp/coverage.duckdb` lazily and
 remains available when an individual bridge exits.
+
+An already-running stdio bridge also recovers a crashed daemon. When TCP
+refuses the next request, the bridge reuses the now-unlocked stale lease file,
+starts one replacement daemon, and replays that provably undelivered request
+once. It restores daemon health after ambiguous transport failures without
+replaying a write whose commit status is unknown. This recovery creates no
+client lock; concurrent HTTP and stdio connections remain independent.
 
 The published Codex `.mcp.json` uses the plugin-relative bootstrap; it does not
 guess a Coverage MCP checkout. The machine-readable
@@ -214,7 +231,7 @@ Run a PATH installation manually, or invoke the Codex-managed cache directly:
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.8.6/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.9.0/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -232,8 +249,9 @@ The first response must contain `result.serverInfo.name` equal to
 response`, inspect the command's stderr: the child exited before the
 handshake, usually because the host is still configured with `uvx` or `pip`,
 the bootstrap cannot find Cargo or its pinned published crate, a local Cargo
-manifest is missing, `COVERAGE_MCP_BIN` has the wrong version, the daemon is
-incompatible, or a standalone process still owns the selected database.
+manifest is missing, `COVERAGE_MCP_BIN` has the wrong version, automatic daemon
+handoff refused an unverified/equal/newer owner, or another daemon or external
+process still owns the selected database.
 
 The connector starts the loopback daemon automatically. You can still run it
 explicitly through Cargo while developing the server:
@@ -263,8 +281,8 @@ worktree reuses its repository database at:
 
 Coverage MCP resolves the shared Git root so worktree runs retain one baseline
 lineage. Concurrent connectors route through the same daemon instead of
-becoming competing database owners. Supplying `connect --db` explicitly opts
-into standalone stdio and must not target a database the daemon already owns.
+becoming competing database owners. Every connector and compaction request goes
+through that daemon; client processes never open project databases.
 
 ### What The Plugin Installs
 
@@ -293,21 +311,25 @@ codex plugin add testing@codegen-marketplace
 ```
 
 Start a new Codex task after a plugin update so it loads the refreshed skills
-and MCP connector.
+and MCP connector. Codex discovers newly installed plugin tools when a task is
+created; once its stdio connector is loaded, daemon crash recovery happens
+inside that same task without a connector reload.
 
-For local source changes, stop the old Cargo-launched daemon; the next
-connector starts the rebuilt checkout without an install step. The portable
-Codex connector changes runtime versions only when the plugin's pinned version
-changes. To update a manually installed server after a published Coverage MCP
-release:
+Published Coverage MCP upgrades no longer require manually stopping the old
+daemon: the newer connector performs the verified handoff automatically. A
+same-version local rebuild is intentionally not treated as an upgrade; stop
+that development daemon or change the checkout version before reconnecting.
+The portable Codex connector changes runtime versions only when the plugin's
+pinned version changes. To update a manually installed server after a
+published Coverage MCP release:
 
 ```bash
-cargo install coverage-mcp --version '=0.8.6' --locked --force
+cargo install coverage-mcp --version '=0.9.0' --locked --force
 ```
 
-Stop the old shared daemon after updating; the next agent connector starts the
-new native process automatically. Each repository's
-`.coverage-mcp/coverage.duckdb` remains in place and is reopened by the daemon.
+Start a new Codex task after updating the plugin so Codex launches the refreshed
+stdio connector. That connector replaces the verified older daemon and reopens
+each repository's existing `.coverage-mcp/coverage.duckdb` in the new process.
 
 Verify a local checkout launcher:
 

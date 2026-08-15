@@ -8,9 +8,9 @@ async function read(pathname) {
 
 test('release metadata uses stable versions and the pinned Coverage MCP bootstrap', async () => {
   const expectedVersions = new Map([
-    ['plugins/testing/.claude-plugin/plugin.json', '0.5.0'],
-    ['plugins/testing/.codex-plugin/plugin.json', '0.5.0'],
-    ['plugins/rust-development/gemini-extension.json', '0.3.1'],
+    ['plugins/testing/.claude-plugin/plugin.json', '0.5.1'],
+    ['plugins/testing/.codex-plugin/plugin.json', '0.5.1'],
+    ['plugins/rust-development/gemini-extension.json', '0.3.2'],
   ]);
 
   for (const [manifestPath, expectedVersion] of expectedVersions) {
@@ -35,7 +35,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
       command: './bin/coverage-mcp-launcher',
       args: [],
       env: {
-        COVERAGE_MCP_VERSION: '0.8.6',
+        COVERAGE_MCP_VERSION: '0.9.0',
       },
       startup_timeout_sec: 900,
     },
@@ -59,7 +59,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   });
   assert.equal(compatibility.coverageMcp.bootstrap.manager, 'cargo');
   assert.equal(compatibility.coverageMcp.bootstrap.package, 'coverage-mcp');
-  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.8.6');
+  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.9.0');
   assert.deepEqual(compatibility.coverageMcp.bootstrap.platforms, [
     'macos',
     'linux',

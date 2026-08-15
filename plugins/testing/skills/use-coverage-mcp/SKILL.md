@@ -1,35 +1,37 @@
 ---
 name: use-coverage-mcp
-description: Use when an agent needs to run or review tests, inspect coverage, compare a worktree with its baseline, find missing lines, investigate a regression, retrieve a previous test result, or manage test artifacts through Coverage MCP.
+description: Use when an agent needs to run tests, inspect coverage, compare worktrees, find missing lines, investigate regressions, retrieve test results, or manage Coverage MCP artifacts.
 ---
 
 # Use Coverage MCP
 
-Coverage MCP is the local system of record for approved test commands, retained
-logs, coverage snapshots, and worktree lineage. Use its bounded schema-revision
-7 queries instead of running suites directly or loading whole logs, reports, and
-source files into model context.
+Coverage MCP records approved commands, logs, snapshots, and worktree lineage.
+Use bounded schema-revision 7 queries instead of direct suites or whole files.
 
 Use `tools/list` for schema; this skill sets policy and token-efficient defaults.
 
 ## Preconditions
 
-- Codex's pinned Cargo bootstrap executes `coverage-mcp connect`; other hosts
-  may run it directly or through `cargo run --locked --manifest-path
-  <checkout>/Cargo.toml -- connect`. Never substitute Python or Node launchers.
-- Stdio selects a repository and forwards to the daemon on port `59471`. Only
-  the daemon holds its ownership lease; HTTP and stdio never lock each other.
-  The daemon owns
-  `<shared-git-root>/.coverage-mcp/coverage.duckdb`; connectors must not open
-  stores. Explicit `connect --db` is standalone mode.
-- Never create a second database per agent/worktree, copy a DuckDB, or bypass
-  approved run ledger when MCP is unavailable.
+- Codex uses pinned `coverage-mcp connect`; other hosts may run it directly or
+  via `cargo run --locked --manifest-path <checkout>/Cargo.toml -- connect`.
+  Never use Python or Node launchers.
+- Stdio forwards its repository to port `59471`. Only the daemon holds the
+  ownership lease; client connections never lock. A newer connector replaces
+  an older owner only when health and its active lease agree; unknown,
+  equal/newer, or different-database owners fail closed. Only the daemon opens
+  `<shared-git-root>/.coverage-mcp/coverage.duckdb`; connectors have no database
+  override.
+- Existing stdio bridges recreate a crashed daemon after connection refusal
+  and replay that undelivered request once; retry ambiguous failures with the
+  same idempotency key.
+- Never bypass the ledger or create, copy, or open a database. Return
+  `BLOCKED_MCP_CONTEXT` when MCP is unavailable.
 
 ## Response Policy
 
-- Keep `detailed=false` everywhere by default. Only `project_context`,
-  `get_run_data`, `coverage_query`, and `coverage_compare` expose it; set it true
-  once only when their descriptions identify required audit or provenance data.
+- Keep `detailed=false`. Only `project_context`, `get_run_data`,
+  `coverage_query`, and `coverage_compare` expose it; use true only for
+  documented audit or provenance data.
 - `max_words` is the primary response budget. Choose the smallest useful
   budget and continue collections with the opaque `next_cursor` as `cursor`.
 - Never request generic log limits or full stdout/stderr. Use

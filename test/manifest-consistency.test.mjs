@@ -91,13 +91,23 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     toolCount: 11,
     sharedDaemon: {
       autoStart: true,
+      automaticUpgrade: true,
       survivesConnectorExit: true,
+      recoversCrashInExistingConnector: true,
+      connectionRefusedReplay: 'once-after-verified-restart',
+      ambiguousFailureReplay: false,
       defaultHost: '127.0.0.1',
       defaultPort: 59471,
       ownershipLockFile: '<common-db-parent>/daemon.lock',
       connectionLock: false,
       logFile: '<common-db-parent>/daemon.log',
       projectDatabase: '<canonical-git-root>/.coverage-mcp/coverage.duckdb',
+      handoff: {
+        authenticated: true,
+        legacyOwnerFallback: true,
+        unknownOwnerPolicy: 'fail-closed',
+        downgradePolicy: 'refuse',
+      },
     },
     connector: {
       command: './bin/coverage-mcp-launcher',
@@ -112,16 +122,16 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     bootstrap: {
       manager: 'cargo',
       package: 'coverage-mcp',
-      version: '=0.8.6',
+      version: '=0.9.0',
       platforms: ['macos', 'linux', 'wsl'],
       nativeWindows: false,
       binaryOverride: 'COVERAGE_MCP_BIN',
       runtimeDirectoryOverride: 'COVERAGE_MCP_RUNTIME_DIR',
       installWaitTimeoutSeconds: 900,
       installWaitTimeoutOverride: 'COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS',
-      defaultInstallRoot: '~/.coverage-mcp/runtime/0.8.6',
-      installLockFile: '<runtime-dir>/.install-0.8.6.lock',
-      releasePrerequisite: 'coverage-mcp 0.8.6 published on crates.io',
+      defaultInstallRoot: '~/.coverage-mcp/runtime/0.9.0',
+      installLockFile: '<runtime-dir>/.install-0.9.0.lock',
+      releasePrerequisite: 'coverage-mcp 0.9.0 published on crates.io',
     },
     localDevelopment: {
       command: 'cargo',
@@ -133,10 +143,6 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
         '--',
         'connect',
       ],
-    },
-    standalone: {
-      argument: '--db',
-      environment: 'COVERAGE_MCP_DB',
     },
   });
 

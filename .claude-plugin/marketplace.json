@@ -22,14 +22,15 @@
     {
       "name": "rust-development",
       "source": "./plugins/rust-development",
-      "description": "Rust engineering guidance for implementation, debugging, documentation, crate research, coding standards, and unsafe review.",
+      "description": "Rust engineering guidance for implementation, debugging, documentation, crate research and releases, coding standards, and unsafe review.",
       "tags": [
         "rust",
         "debugging",
         "documentation",
         "unsafe",
         "cargo",
-        "clippy"
+        "clippy",
+        "release"
       ]
     },
     {
