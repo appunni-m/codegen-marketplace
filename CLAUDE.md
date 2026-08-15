@@ -190,9 +190,10 @@ Authoritative source files for the `testing` plugin are:
 - `plugins/testing/README.md` for marketplace/user-facing connector guidance.
 - `plugins/testing/skills/use-coverage-mcp/SKILL.md` for the agent workflow.
 - `plugins/testing/.codex-plugin/plugin.json` and `plugins/testing/.mcp.json`
-  for the bundled Codex connector.
-- `plugins/testing/bin/coverage-mcp-launcher` for pinned first-session install,
-  cache, and installer-lock behavior.
+  for the required Codex connector and exact-binary bootstrap. The bootstrap
+  may download a verified release archive or fall back to the pinned crate,
+  but all daemon orchestration belongs to `coverage-mcp connect`; do not add a
+  standalone launcher or lifecycle lock.
 - `plugins/testing/compatibility.json` and
   `plugins/testing/scripts/install-pi-mcp.mjs` when connector invocation or
   runtime compatibility changes.

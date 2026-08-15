@@ -3,22 +3,27 @@
 Testing workflows backed by the local
 [Coverage MCP](https://github.com/appunni-m/coverage-mcp) server.
 
-Coverage MCP is a native Rust executable. Codex launches the bundled
-`./bin/coverage-mcp-launcher`, which reads `COVERAGE_MCP_VERSION=0.9.0` from
-the bundled `.mcp.json` and reuses an exact 0.9.0 binary from `COVERAGE_MCP_BIN`,
-`PATH`, or `~/.coverage-mcp/runtime/0.9.0`. On a cache miss, one launcher
-acquires `.install-0.9.0.lock`, installs the exact published crate
-with Cargo, and all waiting sessions reuse it. The MCP startup timeout is 900
-seconds for that first compile; later sessions start from the cache.
+Coverage MCP is a native Rust executable. Codex declares it as a required
+stdio server in the bundled `.mcp.json`. The configuration checks `PATH` for
+exact `coverage-mcp 0.9.2`, otherwise checks
+`~/.coverage-mcp/runtime/0.9.2`. On a cache miss it downloads the matching
+checksummed GitHub Release archive for macOS or Linux on ARM64 or x86-64,
+verifies the extracted version, atomically fills the cache, and immediately
+executes `coverage-mcp connect`. There is no plugin-owned launcher file, custom
+installer lock, direct HTTP client, or database fallback.
 
-Cargo must already be installed, just as `npx` requires Node or `uvx` requires
-its own runtime. The plugin does not install Rust and does not fall back to an
-unpinned Git branch. Set `COVERAGE_MCP_RUNTIME_DIR` to relocate its cache.
-`COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS` changes the default 900-second wait for
-another first-session install; the MCP host startup timeout must be at least as
-large.
+Supported targets need POSIX `sh`, `curl`, `tar`, and either `sha256sum` or
+`shasum`; they do not need Rust and do not compile bundled DuckDB. If a native
+archive is unavailable or cannot run on the host, an existing Cargo toolchain
+provides an exact-version fallback. Stable Cargo has no registry command
+equivalent to “download this crate and run its binary”; `cargo run coverage-mcp
+connect` only selects a package in the current workspace. The `.mcp.json`
+bootstrap therefore handles exact binary acquisition only and never follows an
+unpinned Git branch. Set `COVERAGE_MCP_RUNTIME_DIR` to relocate the cache. The
+900-second timeout exists for the slow Cargo fallback; prebuilt and cached
+starts do not compile.
 
-The bundled launcher is POSIX `sh` and supports macOS, Linux, and WSL. Native
+The bundled bootstrap is POSIX `sh` and supports macOS, Linux, and WSL. Native
 Windows bootstrap is not currently claimed; install the pinned crate manually,
 disable the bundled server, and register the absolute
 `coverage-mcp.exe connect` command with the MCP host.
@@ -59,16 +64,17 @@ For another host, or to prewarm Codex, install the published native binary.
 This plugin does not invoke Coverage MCP through `uvx`, `pip`, Node, or `npx`:
 
 ```bash
-cargo install coverage-mcp --version '=0.9.0' --locked
+cargo install coverage-mcp --version '=0.9.2' --locked
 coverage-mcp --version
 ```
 
-The Codex bootstrap ultimately runs `coverage-mcp connect` in the MCP client's
-current repository. The connector starts or reuses the daemon on
-`127.0.0.1:59471` and routes the current Git repository to it. Only the daemon
-process holds its ownership lease; stdio bridges and direct HTTP clients do not
-lock one another. The daemon
-remains available after an individual connector exits. Use an explicit
+The bootstrap preserves the MCP client's repository working directory and
+replaces itself with `coverage-mcp connect`. From that point, `connect` owns
+the complete runtime lifecycle: repository selection, fixed-port discovery,
+stale-state recovery, version handoff, daemon startup, and stdio forwarding on
+`127.0.0.1:59471`. Only the daemon process holds its ownership lease; stdio
+bridges and direct HTTP clients do not lock one another. The daemon remains
+available after an individual connector exits. Use an explicit
 `--repo` for native host configurations that do not provide a repository
 working directory. The bundled connector is in `.mcp.json`, and the
 machine-readable bootstrap/runtime contract is in `compatibility.json`.
@@ -88,32 +94,40 @@ daemon uses its verified lease PID. Unknown listeners, different common
 databases, equal-version incompatibilities, and downgrade attempts fail closed.
 No client lock is introduced: HTTP and stdio connections remain concurrent.
 
+When an ungraceful daemon exit leaves durable run state behind, the replacement
+daemon reconciles it as each project store opens. A formerly `running` command
+becomes terminal `interrupted` and is not replayed; a command that was still
+`queued` resumes through the normal worker limit. Agents can continue polling
+the same run IDs, and no database edit or connector reload is required.
+
 The published Codex manifest keeps the runtime version pinned because an
 installed plugin cannot safely infer a user's Coverage MCP checkout or track a
 moving Git branch. Use the explicit Cargo manifest option for local
 development; it never falls back to a guessed path. Do not publish this plugin
-version until Coverage MCP 0.9.0 exists on crates.io.
+version until Coverage MCP 0.9.2 exists on crates.io and all four claimed
+native archives, `SHA256SUMS`, and provenance are published.
 This plugin revision is synchronized with Coverage MCP schema revision 7 and
 its eleven-tool inventory; verify those values through `GET /health` and
 `tools/list` after upgrading.
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.9.0/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.9.2/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
 ## Installation Boundary
 
-The testing plugin installs the `use-coverage-mcp` skill, its Cargo bootstrap,
-and the stdio connector. Racing cache misses serialize only the Cargo install
-through the versioned installer lock, which is released before startup. Normal
-`connect` processes are lightweight bridges; they do not open DuckDB or take
-the daemon ownership lease. The first bridge starts the daemon, whose process
-alone holds `<common-db-parent>/daemon.lock` while listening on the fixed
-default port `59471`. Any number of HTTP clients and stdio bridges may connect
-concurrently, subject to configured runtime limits. The daemon lazily opens the
-selected repository's
+The testing plugin installs the `use-coverage-mcp` skill, an exact-binary
+release bootstrap, and the required stdio connector. Concurrent downloads use
+isolated temporary directories and atomically install the same verified bytes;
+the Cargo fallback also accepts a racing exact binary. The plugin introduces no
+second lifecycle lock. Normal `connect` processes are lightweight bridges;
+they do not open DuckDB or take the daemon ownership lease. The first bridge
+starts the daemon, whose process alone holds `<common-db-parent>/daemon.lock`
+while listening on the fixed default port `59471`. Any number of HTTP clients
+and stdio bridges may connect concurrently, subject to configured runtime
+limits. The daemon lazily opens the selected repository's
 `.coverage-mcp/coverage.duckdb`, so multiple projects can connect concurrently
 without becoming competing database owners. Connector and compaction processes
 always route through the daemon and never open project databases themselves.
@@ -150,7 +164,7 @@ before reconnecting. Update a manually installed native binary separately
 after a published release:
 
 ```bash
-cargo install coverage-mcp --version '=0.9.0' --locked --force
+cargo install coverage-mcp --version '=0.9.2' --locked --force
 ```
 
 Start a new Codex task after reinstalling the plugin. Its connector resolves the

@@ -1,6 +1,6 @@
 {
   "name": "testing",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
   "author": {
     "name": "Appunni M",
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Testing",
     "shortDescription": "Run tests and track coverage without flooding context.",
-    "longDescription": "Bootstraps a pinned native Coverage MCP binary with Cargo, runs human-approved tests, records bounded evidence, and compares worktrees with frozen baselines.",
+    "longDescription": "Bootstraps a verified native Coverage MCP release, runs human-approved tests, records bounded evidence, and compares worktrees with frozen baselines.",
     "developerName": "Appunni M",
     "category": "Developer Tools",
     "capabilities": [

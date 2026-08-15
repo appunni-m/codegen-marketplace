@@ -90,6 +90,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     schemaRevision: 7,
     toolCount: 11,
     sharedDaemon: {
+      orchestrator: 'coverage-mcp connect',
       autoStart: true,
       automaticUpgrade: true,
       survivesConnectorExit: true,
@@ -110,28 +111,45 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
       },
     },
     connector: {
-      command: './bin/coverage-mcp-launcher',
-      args: [],
+      transport: 'stdio',
+      command: '/bin/sh',
+      argsPrefix: ['-eu', '-c'],
+      workingDirectory: 'inherit-client-project',
+      required: true,
       versionEnvironment: 'COVERAGE_MCP_VERSION',
       startupTimeoutSeconds: 900,
+      runtimeCommand: ['coverage-mcp', 'connect'],
     },
     nativeConnector: {
       command: 'coverage-mcp',
       args: ['connect'],
     },
     bootstrap: {
-      manager: 'cargo',
-      package: 'coverage-mcp',
-      version: '=0.9.0',
+      manager: 'github-release',
+      repository: 'appunni-m/coverage-mcp',
+      version: '=0.9.2',
+      scope: 'exact-binary-acquisition-only',
+      customLock: false,
       platforms: ['macos', 'linux', 'wsl'],
+      targets: [
+        'aarch64-apple-darwin',
+        'x86_64-apple-darwin',
+        'aarch64-unknown-linux-gnu',
+        'x86_64-unknown-linux-gnu',
+      ],
       nativeWindows: false,
-      binaryOverride: 'COVERAGE_MCP_BIN',
+      assetPattern: 'coverage-mcp-<version>-<target>.tar.gz',
+      checksumAsset: 'SHA256SUMS',
+      provenance: 'github-sigstore',
       runtimeDirectoryOverride: 'COVERAGE_MCP_RUNTIME_DIR',
-      installWaitTimeoutSeconds: 900,
-      installWaitTimeoutOverride: 'COVERAGE_MCP_BOOTSTRAP_TIMEOUT_SECONDS',
-      defaultInstallRoot: '~/.coverage-mcp/runtime/0.9.0',
-      installLockFile: '<runtime-dir>/.install-0.9.0.lock',
-      releasePrerequisite: 'coverage-mcp 0.9.0 published on crates.io',
+      defaultInstallRoot: '~/.coverage-mcp/runtime/0.9.2',
+      fallback: {
+        manager: 'cargo',
+        package: 'coverage-mcp',
+        version: '=0.9.2',
+        locked: true,
+      },
+      releasePrerequisite: 'coverage-mcp 0.9.2 and all claimed native archives published',
     },
     localDevelopment: {
       command: 'cargo',
@@ -149,18 +167,28 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   const manifest = await json(path.join(pluginRoot, '.codex-plugin', 'plugin.json'));
   assert.equal(manifest.mcpServers, './.mcp.json');
   const bundledMcp = await json(path.join(pluginRoot, '.mcp.json'));
+  const connector = bundledMcp.mcpServers['coverage-mcp'];
+  assert.equal(connector.command, compatibility.coverageMcp.connector.command);
   assert.deepEqual(
-    bundledMcp.mcpServers['coverage-mcp'],
-    {
-      command: compatibility.coverageMcp.connector.command,
-      args: compatibility.coverageMcp.connector.args,
-      env: {
-        [compatibility.coverageMcp.connector.versionEnvironment]:
-          compatibility.coverageMcp.bootstrap.version.slice(1),
-      },
-      startup_timeout_sec: compatibility.coverageMcp.connector.startupTimeoutSeconds,
-    },
+    connector.args.slice(0, 2),
+    compatibility.coverageMcp.connector.argsPrefix,
   );
+  assert.equal(connector.args.length, 3);
+  assert.equal(connector.cwd, undefined);
+  assert.deepEqual(connector.env, {
+    [compatibility.coverageMcp.connector.versionEnvironment]:
+      compatibility.coverageMcp.bootstrap.version.slice(1),
+  });
+  assert.equal(
+    connector.startup_timeout_sec,
+    compatibility.coverageMcp.connector.startupTimeoutSeconds,
+  );
+  assert.equal(connector.required, compatibility.coverageMcp.connector.required);
+  assert.match(connector.args[2], /releases\/download\/v\$\{version\}/);
+  assert.match(connector.args[2], /SHA256SUMS/);
+  assert.match(connector.args[2], /cargo install coverage-mcp/);
+  assert.match(connector.args[2], /exec \"\$\{runtime_binary\}\" connect$/);
+  assert.doesNotMatch(connector.args[2], /daemon\.lock|serve|\/mcp\//);
 
   const geminiManifest = await json(
     path.join(pluginsRoot, 'rust-development', 'gemini-extension.json'),

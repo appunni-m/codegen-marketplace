@@ -8,8 +8,8 @@ async function read(pathname) {
 
 test('release metadata uses stable versions and the pinned Coverage MCP bootstrap', async () => {
   const expectedVersions = new Map([
-    ['plugins/testing/.claude-plugin/plugin.json', '0.5.1'],
-    ['plugins/testing/.codex-plugin/plugin.json', '0.5.1'],
+    ['plugins/testing/.claude-plugin/plugin.json', '0.5.3'],
+    ['plugins/testing/.codex-plugin/plugin.json', '0.5.3'],
     ['plugins/rust-development/gemini-extension.json', '0.3.2'],
   ]);
 
@@ -29,17 +29,19 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   }
 
   const bundledMcp = JSON.parse(await read('plugins/testing/.mcp.json'));
-  assert.deepEqual(
-    bundledMcp.mcpServers['coverage-mcp'],
-    {
-      command: './bin/coverage-mcp-launcher',
-      args: [],
-      env: {
-        COVERAGE_MCP_VERSION: '0.9.0',
-      },
-      startup_timeout_sec: 900,
-    },
-  );
+  const connector = bundledMcp.mcpServers['coverage-mcp'];
+  assert.equal(connector.command, '/bin/sh');
+  assert.deepEqual(connector.args.slice(0, 2), ['-eu', '-c']);
+  assert.equal(connector.args.length, 3);
+  assert.equal(connector.cwd, undefined);
+  assert.deepEqual(connector.env, { COVERAGE_MCP_VERSION: '0.9.2' });
+  assert.equal(connector.startup_timeout_sec, 900);
+  assert.equal(connector.required, true);
+  assert.match(connector.args[2], /releases\/download\/v\$\{version\}/);
+  assert.match(connector.args[2], /Checksum verification failed/);
+  assert.match(connector.args[2], /cargo install coverage-mcp/);
+  assert.match(connector.args[2], /exec \"\$\{runtime_binary\}\" connect$/);
+  assert.doesNotMatch(connector.args[2], /daemon\.lock|serve|\/mcp\//);
   const compatibility = JSON.parse(await read('plugins/testing/compatibility.json'));
   assert.equal(compatibility.coverageMcp.schemaRevision, 7);
   assert.equal(compatibility.coverageMcp.toolCount, 11);
@@ -57,9 +59,22 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
     command: 'coverage-mcp',
     args: ['connect'],
   });
-  assert.equal(compatibility.coverageMcp.bootstrap.manager, 'cargo');
-  assert.equal(compatibility.coverageMcp.bootstrap.package, 'coverage-mcp');
-  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.9.0');
+  assert.equal(compatibility.coverageMcp.bootstrap.manager, 'github-release');
+  assert.equal(compatibility.coverageMcp.bootstrap.repository, 'appunni-m/coverage-mcp');
+  assert.equal(compatibility.coverageMcp.sharedDaemon.orchestrator, 'coverage-mcp connect');
+  assert.equal(compatibility.coverageMcp.connector.workingDirectory, 'inherit-client-project');
+  assert.equal(compatibility.coverageMcp.connector.required, true);
+  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.9.2');
+  assert.equal(compatibility.coverageMcp.bootstrap.scope, 'exact-binary-acquisition-only');
+  assert.equal(compatibility.coverageMcp.bootstrap.customLock, false);
+  assert.equal(compatibility.coverageMcp.bootstrap.checksumAsset, 'SHA256SUMS');
+  assert.equal(compatibility.coverageMcp.bootstrap.provenance, 'github-sigstore');
+  assert.deepEqual(compatibility.coverageMcp.bootstrap.fallback, {
+    manager: 'cargo',
+    package: 'coverage-mcp',
+    version: '=0.9.2',
+    locked: true,
+  });
   assert.deepEqual(compatibility.coverageMcp.bootstrap.platforms, [
     'macos',
     'linux',
@@ -67,21 +82,11 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   ]);
   assert.equal(compatibility.coverageMcp.bootstrap.nativeWindows, false);
 
-  const launcher = await read('plugins/testing/bin/coverage-mcp-launcher');
-  assert.match(launcher, /version="\$\{COVERAGE_MCP_VERSION:-\}"/);
-  assert.match(launcher, /stable x\.y\.z release supplied by the MCP configuration/);
-  assert.match(launcher, /cargo_binary.*install/);
-  assert.match(launcher, /\.install-\$\{version\}\.lock/);
-  if (process.platform !== 'win32') {
-    const mode = (await fs.stat('plugins/testing/bin/coverage-mcp-launcher')).mode & 0o777;
-    assert.equal(mode, 0o755);
-  }
-
   for (const pathname of [
     'README.md',
     'plugins/testing/README.md',
     'plugins/testing/compatibility.json',
-    'plugins/testing/bin/coverage-mcp-launcher',
+    'plugins/testing/.mcp.json',
     'plugins/testing/scripts/install-pi-mcp.mjs',
   ]) {
     const contents = await read(pathname);

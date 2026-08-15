@@ -5,16 +5,15 @@ description: Use when an agent needs to run tests, inspect coverage, compare wor
 
 # Use Coverage MCP
 
-Coverage MCP records approved commands, logs, snapshots, and worktree lineage.
-Use bounded schema-revision 7 queries instead of direct suites or whole files.
-
-Use `tools/list` for schema; this skill sets policy and token-efficient defaults.
+Use bounded schema-revision 7 Coverage MCP queries. Use `tools/list` for schema;
+this skill sets workflow policy.
 
 ## Preconditions
 
-- Codex uses pinned `coverage-mcp connect`; other hosts may run it directly or
-  via `cargo run --locked --manifest-path <checkout>/Cargo.toml -- connect`.
-  Never use Python or Node launchers.
+- Codex's stdio declaration acquires an exact native binary (Cargo fallback),
+  then executes pinned `coverage-mcp connect`, which owns orchestration. Other hosts
+  may run it directly or via `cargo run --locked --manifest-path
+  <checkout>/Cargo.toml -- connect`. Never use Python or Node launchers.
 - Stdio forwards its repository to port `59471`. Only the daemon holds the
   ownership lease; client connections never lock. A newer connector replaces
   an older owner only when health and its active lease agree; unknown,
@@ -24,6 +23,9 @@ Use `tools/list` for schema; this skill sets policy and token-efficient defaults
 - Existing stdio bridges recreate a crashed daemon after connection refusal
   and replay that undelivered request once; retry ambiguous failures with the
   same idempotency key.
+- On project reopen, orphaned `running` jobs become terminal `interrupted`
+  without replay and persisted `queued` jobs resume automatically. Keep using
+  their durable run IDs.
 - Never bypass the ledger or create, copy, or open a database. Return
   `BLOCKED_MCP_CONTEXT` when MCP is unavailable.
 
@@ -72,7 +74,7 @@ Call `run_test` with the registration ID or name, `wait=false`, and one stable
 - Fetch run state with `get_run_data(detailed=false)` and pass the
   required `run_id` explicitly. To inspect the latest run, use
   `data.latest_run.id` from `project_context`; there is no implicit latest-run
-  selection. Read-only; returns durable run data. When
+  selection. When
   `terminal` is false, wait at least the returned ETA-aware `poll_after_ms`
   before the next status fetch. Do not poll immediately.
 - Cancel only when the user no longer wants the run, using
@@ -118,9 +120,8 @@ returned `worktree_id`; registration freezes the available suite baselines.
 
 ## Investigate With Bounded Queries
 
-Each call is one narrow projection. Make multiple independent calls, or chain a
-dependent call using the exact `snapshot_id`, `file_path`, and line range from
-the prior response; never request a raw all-files/all-lines report.
+Make narrow calls. Chain dependent calls with the exact `snapshot_id`,
+`file_path`, and range from the prior response; never request raw all-file data.
 
 Use `coverage_query` with the smallest view:
 

@@ -4,6 +4,36 @@ All notable changes to this marketplace are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and plugin versions
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2026-08-15
+
+### Changed
+
+- Bootstrap Coverage MCP 0.9.2 from checksum-verified GitHub Release archives
+  built natively for macOS and Linux on ARM64 and x86-64. Supported machines no
+  longer compile bundled DuckDB during the first Codex session.
+- Keep exact `cargo install` only as a fallback for unsupported hosts or an
+  unavailable release download. Both acquisition paths atomically populate the
+  versioned cache and then execute `coverage-mcp connect`; neither path owns
+  daemon, HTTP, repository, or database lifecycle.
+- Require release checksums, binary-version validation, four target-mapping
+  tests, integrity-failure tests, and GitHub/Sigstore build provenance.
+
+## [0.5.2] - 2026-08-15
+
+### Fixed
+
+- Replace the plugin-relative launcher file and its installer lock with one
+  required stdio declaration. Its inline bootstrap only installs exact
+  Coverage MCP 0.9.1 when necessary and then executes `coverage-mcp connect`
+  while preserving the client's project working directory.
+- Keep all runtime behavior inside `connect`: one fixed-port daemon ownership
+  lease, automatic compatible-owner discovery and version handoff, stale-lease
+  recovery, repository routing, and concurrent stdio/HTTP connections. The
+  plugin has no direct HTTP or database fallback and no client connection lock.
+- Document daemon-restart reconciliation: orphaned `running` jobs become
+  terminal `interrupted` records without command replay, while persisted
+  `queued` jobs resume through the managed worker limit.
+
 ## [0.5.1] - 2026-08-15
 
 ### Added
