@@ -15,6 +15,7 @@
   "scripts": {
     "build": "aipm build",
     "check": "aipm validate && pnpm lint && pnpm check:skills && pnpm check:docs && pnpm test",
+    "check:coverage-mcp": "node scripts/verify-coverage-mcp-contract.mjs",
     "check:docs": "node scripts/validate-markdown.mjs",
     "check:skills": "node scripts/validate-skills.mjs",
     "lint": "aipm lint .",

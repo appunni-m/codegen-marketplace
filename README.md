@@ -102,6 +102,11 @@ Restart Pi after installing the adapter.
 
 ## Coverage MCP
 
+The schema-9 contract is summarized in the
+[Coverage MCP contract pointer](docs/coverage-mcp-contract.md). The canonical
+server exposes seven task-oriented public tools and enforces the same typed
+contract across HTTP and stdio.
+
 The `testing` plugin launches a native stdio connector for
 [Coverage MCP](https://github.com/appunni-m/coverage-mcp). Coverage MCP is a
 Rust executable; the marketplace does not pretend that the Rust repository is
@@ -110,8 +115,8 @@ a Python package and does not invoke it through `uvx`, `pip`, Node, or `npx`.
 ### Automatic Codex bootstrap
 
 Codex loads a required stdio declaration from the testing plugin's `.mcp.json`.
-The configuration checks `PATH` for exact `coverage-mcp 0.9.2`, then the
-versioned cache at `~/.coverage-mcp/runtime/0.9.2`. On a cache miss it maps the
+The configuration checks `PATH` for exact `coverage-mcp 0.10.0`, then the
+versioned cache at `~/.coverage-mcp/runtime/0.10.0`. On a cache miss it maps the
 host to one of four native GitHub Release archives:
 
 | Host | Release target |
@@ -122,7 +127,7 @@ host to one of four native GitHub Release archives:
 | x86-64 Linux/WSL | `x86_64-unknown-linux-gnu` |
 
 The POSIX bootstrap downloads the exact archive and `SHA256SUMS`, fails closed
-on an integrity mismatch, verifies the extracted binary reports 0.9.2, and
+on an integrity mismatch, verifies the extracted binary reports 0.10.0, and
 atomically fills the cache. Supported targets therefore need no Rust toolchain
 and do not compile DuckDB. If the host is unsupported or GitHub is unavailable,
 an existing Cargo toolchain provides a slower exact-version fallback.
@@ -142,18 +147,18 @@ cached and prebuilt starts do not compile.
 If the pinned connector is newer than the daemon already using port `59471`,
 `connect` verifies that `/health` and the actively held `daemon.lock` identify
 the same Coverage MCP process and common database. It then requests an
-authenticated graceful handoff and starts the pinned binary after the old
+authenticated graceful handoff and starts the pinned binary after the existing
 listener and lease are released. The first upgrade from a pre-handoff daemon
-uses its verified legacy PID/executable lease metadata. Unknown listeners,
+uses its verified PID/executable lease metadata. Unknown listeners,
 different registries, equal-version incompatibilities, and attempts to
 downgrade a newer daemon are refused; the connector never deletes lock, WAL, or
 database files.
 
 This provides the first-install behavior users expect from `uvx` or `npx`.
 Stable Cargo has no registry command that downloads and runs an arbitrary crate
-binary; `cargo run coverage-mcp connect` selects a package from the current
-workspace and is not a crates.io launcher. The MCP bootstrap therefore performs
-only exact executable acquisition. It does not install Rust itself. Set
+binary. For checkout-local development, use `cargo run --package coverage-mcp --
+connect`; the MCP bootstrap performs only exact executable acquisition and does
+not install Rust itself. Set
 `COVERAGE_MCP_RUNTIME_DIR` to relocate the versioned cache. A marketplace
 release must not reference a Coverage MCP version until its crate, four native
 archives, checksums, and provenance are published.
@@ -204,7 +209,7 @@ For a non-Codex host, or to prewarm the binary before the first Codex task,
 install the published version explicitly:
 
 ```bash
-cargo install coverage-mcp --version '=0.9.2' --locked
+cargo install coverage-mcp --version '=0.10.0' --locked
 coverage-mcp --version
 ```
 
@@ -237,14 +242,16 @@ command above require a checkout path. Gemini, Claude, and Pi retain their
 documented native command and therefore need `coverage-mcp` on `PATH` or an
 explicit Cargo/absolute-path registration.
 At this marketplace revision, the synchronized Coverage MCP contract is schema
-revision 7 with eleven tools; `GET /health` and `tools/list` are the runtime
-authorities.
+revision 9 with seven public tools. The server's `tools/list.contract.tools_sha256`
+must equal
+`28fb24dbcc43910e3592d8e4f4c35057acb97e731ceb8a274a2dc96e0b016b16`;
+`GET /health` and `tools/list` remain the runtime authorities.
 
 Run a PATH installation manually, or invoke the Codex-managed cache directly:
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.9.2/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.10.0/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -302,7 +309,7 @@ through that daemon; client processes never open project databases.
 Installing `testing@codegen-marketplace` copies the testing plugin into the
 agent's user-level plugin cache. It provides:
 
-- the `use-coverage-mcp` skill
+- the `coverage-review` workflow skill for managed test and coverage review
 - the `run-coverage-campaign` skill for Luna Max execution with Sol High strategy
 - a required Codex stdio declaration whose inline bootstrap downloads and
   verifies one pinned native binary, then executes `connect`
@@ -327,7 +334,7 @@ and MCP connector. Codex discovers newly installed plugin tools when a task is
 created; once its stdio connector is loaded, daemon crash recovery happens
 inside that same task without a connector reload.
 
-Published Coverage MCP upgrades no longer require manually stopping the old
+Published Coverage MCP upgrades no longer require manually stopping the existing
 daemon: the newer connector performs the verified handoff automatically. A
 same-version local rebuild is intentionally not treated as an upgrade; stop
 that development daemon or change the checkout version before reconnecting.
@@ -336,7 +343,7 @@ pinned version changes. To update a manually installed server after a
 published Coverage MCP release:
 
 ```bash
-cargo install coverage-mcp --version '=0.9.2' --locked --force
+cargo install coverage-mcp --version '=0.10.0' --locked --force
 ```
 
 Start a new Codex task after updating the plugin so Codex launches the refreshed
@@ -353,136 +360,17 @@ cargo run --locked --manifest-path /absolute/path/to/coverage-mcp/Cargo.toml \
 Start a new MCP session and verify `/health` so the automatically managed
 daemon's tool inventory matches the updated Coverage MCP binary.
 
-### Approved Test Runs
+### Coverage workflow
 
-Coverage MCP does not read a YAML suite file. A human approves the exact command,
-working directory, and expected artifacts before registration:
+The [`coverage-review` skill](plugins/testing/skills/coverage-review/SKILL.md)
+is the single home for approval, polling, freshness, lineage, response-budget,
+and reporting policy. Keep this README focused on installation and integration;
+use the canonical Coverage MCP README for the server's wire contract and the
+skill for the agent workflow.
 
-```text
-register_test_command(
-  name="unit",
-  command="pytest --cov=src --cov-report=json",
-  cwd="/path/to/repository",
-  artifact_paths={
-    "coveragepy": {
-      "path": "coverage.json",
-      "required": true,
-      "coverage_format": "coveragepy",
-      "suite": "unit"
-    }
-  },
-  human_approved=true,
-  approved_by="maintainer",
-  approval_note="approved unit coverage command"
-)
-```
-
-Agents then run only the registered id or name:
-
-```text
-run_test(
-  command_ref="unit",
-  idempotency_key="unit:<commit-sha>:requested-check",
-  max_words=500
-)
-```
-
-The call returns a durable run id immediately. Fetch it with `get_run_data` no
-faster than the returned `poll_after_ms`; wait that long after each
-non-terminal response before fetching again. Retries for the same intended run
-must reuse the same idempotency key:
-
-```text
-get_run_data(run_id="returned-run-id", detailed=false, max_words=500)
-```
-
-Once the approved command has completion history, run data responses report a
-median ETA, p90 duration, sample count, estimated start/completion times, and
-queue wait.
-Queue wait models the server's worker lanes. If a required duration has no
-usable history, the server returns a null ETA with an explicit reason instead
-of guessing.
-
-The compact final result contains the important status, counters, freshness,
-artifact, and ingestion fields. Pass `detailed=true` only when full run
-metadata is required. Detailed results still omit embedded stdout/stderr.
-Search retained logs only when needed:
-
-```text
-search_test_logs(
-  run_id="returned-run-id",
-  query=["FAILED", "timeout"],
-  context_lines=5,
-  max_words=400
-)
-```
-
-`query` may be one literal string or a list of literal strings. `max_words` is
-the response budget; `context_lines` only controls which nearby lines are
-considered relevant.
-
-Inspect one file without loading every coverage record:
-
-```text
-coverage_query(
-  view="file",
-  snapshot_id="...",
-  file_path="src/example.py",
-  line_ranges=[{"start": 10, "end": 20}, {"start": 80, "end": 95}]
-)
-```
-
-The default response groups coverage gaps. `line_ranges` is optional and
-returns compact exact covered/uncovered records from up to 10 windows and 200
-unique lines. Duplicate, nested, overlapping, adjacent, and unordered windows
-are normalized before the budget is applied.
-
-Use `cancel_run(run_id, detailed=false)` to cancel obsolete queued or running
-work. Running cancellation and timeouts terminate the command's complete
-process group.
-
-Run retention is count-based per approved command: the newest 100 terminal runs
-are kept by default. Configure the server with `COVERAGE_MCP_RUN_RETENTION` to
-change the limit; coverage snapshots and registered artifacts are unaffected.
-
-Artifacts declaring `coverage_format` are automatically ingested only when the
-managed run creates or modifies them. Read `coverage_ingest.status` and use the
-returned snapshot ID directly:
-
-```text
-coverage_query(view="insights", snapshot_id="...", detailed=false)
-coverage_compare(view="progress", worktree_id="...", suite="unit", detailed=false)
-```
-
-Reserve `ingest_coverage` for external or historical reports not produced by a
-managed registered command. A `not_recorded` result identifies a pre-0.3.3 run
-with no automatic-ingestion decision; do not infer or create a snapshot from
-its potentially stale artifact.
-
-### Agent Policy
-
-Projects can add this to `AGENTS.md`:
-
-```md
-## Coverage MCP
-
-- Reuse the user-level Coverage MCP daemon and the canonical repository's
-  `.coverage-mcp/coverage.duckdb`. Never start one daemon per project or create
-  a database copy per agent or linked worktree.
-- Run tests only through a registered, human-approved command. Ask for explicit
-  approval of the full command, cwd, and artifact paths before registration.
-- Give each intended run a stable idempotency key. Keep the returned run id,
-  fetch `get_run_data(detailed=false)` no sooner than `poll_after_ms`, and
-  reuse the key for every retry.
-- Register each linked worktree once before its first coverage run and retain
-  its `worktree_id`.
-- Declare managed reports with `coverage_format` and a stable suite. Use the
-  snapshot ID from terminal `coverage_ingest`; do not ingest it twice.
-- Use `ingest_coverage` only for reports produced outside the managed runner.
-- Compare worktree progress only with its frozen suite-specific baseline.
-- Query summaries, insights, files, and exact lines before reading source or
-  raw coverage artifacts.
-```
+The [`run-coverage-campaign` skill](plugins/testing/skills/run-coverage-campaign/SKILL.md)
+adds campaign-specific batching and model-routing rules. It composes
+`coverage-review` rather than redefining its evidence policy.
 
 ## Development
 
@@ -515,7 +403,7 @@ them directly.
 │       ├── .claude-plugin/plugin.json
 │       ├── .codex-plugin/plugin.json
 │       ├── scripts/install-pi-mcp.mjs
-│       └── skills/use-coverage-mcp/
+│       └── skills/coverage-review/
 ├── skills/                         # generated
 ├── dist/                           # generated
 ├── .agents/plugins/marketplace.json

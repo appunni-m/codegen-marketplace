@@ -59,6 +59,9 @@ artifacts even when the authored plugin shape is unchanged.
 2. Update `CHANGELOG.md`, plugin manifests, compatibility declarations, and
    installation examples together.
 3. Run `pnpm install --frozen-lockfile`, `pnpm build`, and `pnpm check`.
+   When the canonical Coverage MCP checkout and executable are available, also
+   run `pnpm check:coverage-mcp` to compare the live `tools/list` digest with
+   the marketplace pin.
 4. Confirm `pnpm build` leaves the working tree unchanged except for the
    intended release diff.
 5. Review `git diff --check`, `git status --short`, third-party notices, and the

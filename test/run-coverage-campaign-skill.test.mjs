@@ -22,6 +22,9 @@ test('coverage campaign skill owns explicit model routing and one writer', async
   assert.match(skill, /fork_turns="none"/);
   assert.match(skill, /main Luna agent as the only writer/);
   assert.match(skill, /Do not delegate edits/);
+  assert.match(skill, /coverage-review/);
+  assert.match(skill, /coverage_review\(task="insight"\)/);
+  assert.doesNotMatch(skill, /coverage_review\(focus=/);
   assert.doesNotMatch(skill, /\[(?:TODO|TBD)[^\]]*\]/);
 });
 

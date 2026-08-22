@@ -5,8 +5,8 @@ Testing workflows backed by the local
 
 Coverage MCP is a native Rust executable. Codex declares it as a required
 stdio server in the bundled `.mcp.json`. The configuration checks `PATH` for
-exact `coverage-mcp 0.9.2`, otherwise checks
-`~/.coverage-mcp/runtime/0.9.2`. On a cache miss it downloads the matching
+exact `coverage-mcp 0.10.0`, otherwise checks
+`~/.coverage-mcp/runtime/0.10.0`. On a cache miss it downloads the matching
 checksummed GitHub Release archive for macOS or Linux on ARM64 or x86-64,
 verifies the extracted version, atomically fills the cache, and immediately
 executes `coverage-mcp connect`. There is no plugin-owned launcher file, custom
@@ -16,10 +16,10 @@ Supported targets need POSIX `sh`, `curl`, `tar`, and either `sha256sum` or
 `shasum`; they do not need Rust and do not compile bundled DuckDB. If a native
 archive is unavailable or cannot run on the host, an existing Cargo toolchain
 provides an exact-version fallback. Stable Cargo has no registry command
-equivalent to “download this crate and run its binary”; `cargo run coverage-mcp
-connect` only selects a package in the current workspace. The `.mcp.json`
-bootstrap therefore handles exact binary acquisition only and never follows an
-unpinned Git branch. Set `COVERAGE_MCP_RUNTIME_DIR` to relocate the cache. The
+equivalent to “download this crate and run its binary”. For checkout-local
+development, use `cargo run --package coverage-mcp -- connect`; the `.mcp.json`
+bootstrap handles exact binary acquisition only and never follows an unpinned
+Git branch. Set `COVERAGE_MCP_RUNTIME_DIR` to relocate the cache. The
 900-second timeout exists for the slow Cargo fallback; prebuilt and cached
 starts do not compile.
 
@@ -64,7 +64,7 @@ For another host, or to prewarm Codex, install the published native binary.
 This plugin does not invoke Coverage MCP through `uvx`, `pip`, Node, or `npx`:
 
 ```bash
-cargo install coverage-mcp --version '=0.9.2' --locked
+cargo install coverage-mcp --version '=0.10.0' --locked
 coverage-mcp --version
 ```
 
@@ -77,7 +77,9 @@ bridges and direct HTTP clients do not lock one another. The daemon remains
 available after an individual connector exits. Use an explicit
 `--repo` for native host configurations that do not provide a repository
 working directory. The bundled connector is in `.mcp.json`, and the
-machine-readable bootstrap/runtime contract is in `compatibility.json`.
+machine-readable bootstrap/runtime contract is in `compatibility.json`. The
+server must report schema revision 9, seven public tools, and
+`tools/list.contract.tools_sha256=28fb24dbcc43910e3592d8e4f4c35057acb97e731ceb8a274a2dc96e0b016b16`.
 
 The stdio process can outlive a daemon crash. If the next connection is
 refused, that same bridge uses the released OS lease and its leftover metadata
@@ -89,8 +91,8 @@ operator deletes a lock and no connection lock is added.
 A newer connector automatically replaces an older daemon after verifying that
 its loopback health and actively held `daemon.lock` identify the same process,
 executable, common database, and instance. New daemons use a
-capability-authenticated graceful handoff; the first upgrade from a legacy
-daemon uses its verified lease PID. Unknown listeners, different common
+capability-authenticated graceful handoff; the first upgrade from a
+pre-handoff daemon uses its verified lease PID. Unknown listeners, different common
 databases, equal-version incompatibilities, and downgrade attempts fail closed.
 No client lock is introduced: HTTP and stdio connections remain concurrent.
 
@@ -104,21 +106,21 @@ The published Codex manifest keeps the runtime version pinned because an
 installed plugin cannot safely infer a user's Coverage MCP checkout or track a
 moving Git branch. Use the explicit Cargo manifest option for local
 development; it never falls back to a guessed path. Do not publish this plugin
-version until Coverage MCP 0.9.2 exists on crates.io and all four claimed
+version until Coverage MCP 0.10.0 exists on crates.io and all four claimed
 native archives, `SHA256SUMS`, and provenance are published.
-This plugin revision is synchronized with Coverage MCP schema revision 7 and
-its eleven-tool inventory; verify those values through `GET /health` and
+This plugin revision is synchronized with Coverage MCP schema revision 9 and
+its seven-tool public inventory; verify those values through `GET /health` and
 `tools/list` after upgrading.
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.9.2/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.10.0/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
 ## Installation Boundary
 
-The testing plugin installs the `use-coverage-mcp` skill, an exact-binary
+The testing plugin installs the `coverage-review` workflow skill, an exact-binary
 release bootstrap, and the required stdio connector. Concurrent downloads use
 isolated temporary directories and atomically install the same verified bytes;
 the Cargo fallback also accepts a racing exact binary. The plugin introduces no
@@ -157,14 +159,14 @@ skills and bundled MCP connector. Plugin discovery occurs when Codex creates a
 task; after the connector is present, shared-daemon crash recovery stays within
 the existing task.
 
-Published upgrades no longer require manually stopping the old daemon; the
+Published upgrades no longer require manually stopping the existing daemon; the
 newer connector performs the verified handoff. A same-version local rebuild is
 not an upgrade, so stop that development daemon or change the checkout version
 before reconnecting. Update a manually installed native binary separately
 after a published release:
 
 ```bash
-cargo install coverage-mcp --version '=0.9.2' --locked --force
+cargo install coverage-mcp --version '=0.10.0' --locked --force
 ```
 
 Start a new Codex task after reinstalling the plugin. Its connector resolves the
@@ -186,71 +188,18 @@ After a test or coverage task completes, the managed dashboard is available at
 <http://localhost:59471/>; do not open the browser automatically.
 
 Register test commands only after a human approves the complete command,
-working directory, and artifact paths.
+working directory, and artifact paths. The full approval, execution, polling,
+freshness, lineage, response-budget, and reporting contract lives in the
+[`coverage-review` skill](skills/coverage-review/SKILL.md); it is intentionally
+not duplicated in this integration README.
 
-The plugin includes the `use-coverage-mcp` skill. Codex and other compatible
-agents load that skill for test execution, coverage review, artifact lookup,
-worktree comparison, and regression investigation. The skill contains the full
-agent workflow and explains why Coverage MCP should be used instead of reading
-raw logs and reports.
-
-The plugin also includes `run-coverage-campaign` for high-throughput,
-input-driven coverage work in Codex. Start the main task on GPT-5.6 Luna with
-Max reasoning. The skill keeps Luna as the only writer for implementation,
-testing, pruning, and validation, and delegates bounded read-only strategy and
-recovery packets to GPT-5.6 Sol with High reasoning. It verifies the Coverage
-MCP repository context and baseline before editing, defaults to 100 candidates
-in ten attributable families, and stops rather than silently using foreign or
-unmanaged coverage evidence.
-
-Coverage MCP `tools/list` describes concrete input and output fields,
-nullability, bounds, and status enums for every tool. Agents can discover the
-wire contract without source-code context. The server instructions plus
-`tools/list` are intended to be sufficient to use the MCP effectively; the
-skill supplies the policy and multi-tool workflow around that contract.
-
-Agents start with `project_context(detailed=false)` before rerunning an approved
-suite. Run and snapshot responses include timestamps and freshness fields such
-as `age_seconds` and `age`.
-
-`run_test` queues long suites and returns a durable run id without holding the
-MCP call open. Agents fetch current run state with
-`get_run_data(detailed=false)`, wait at least the returned
-ETA-aware `poll_after_ms` after each non-terminal response, and reuse one stable
-`idempotency_key` for all retries of the same intended run. `get_run_data` is
-read-only and only fetches durable run data; `cancel_run` is the separate
-mutating tool that stops obsolete work and its process group. Full logs remain
-on disk; `search_test_logs` returns only literal matches for one query string or
-a list of query strings, plus bounded surrounding lines. `max_words` is the
-primary response budget, cursor pagination continues collections, and
-`detailed=false` remains the default everywhere.
-
-`coverage_query(view="file")` returns compact metrics and grouped coverage gaps.
-Request bounded `line_ranges` only when exact covered line records are needed;
-duplicate, nested, overlapping, and adjacent windows are normalized.
-
-Artifacts registered with `coverage_format` are automatically ingested when a
-managed run creates or modifies them. Terminal run responses report
-`coverage_ingest.status`, immutable `snapshot_ids`, and per-artifact parser
-outcomes. Agents use those snapshot IDs directly and reserve
-`ingest_coverage` for external or historical reports.
-
-After a command has natural completion history, polls include a median ETA,
-p90 reference, sample count, and estimated timestamps. Queue ETA schedules known
-FIFO work across the server's worker lanes. Missing history is explicit, and an
-overrun is reported separately so agents do not mistake a median estimate for a
-timeout. `poll_after_ms` follows those estimates so agents avoid immediate
-repeat polling for long queued or running jobs. Missing-history jobs use a
-conservative backoff rather than a one-second heartbeat.
-
-The server runs four approved commands concurrently by default. Set
-`COVERAGE_MCP_RUN_CONCURRENCY` to 1-32 before startup; use `1` when suites share
-non-isolated outputs and cannot overlap safely.
-
-The server keeps the newest 100 terminal runs per approved command by default.
-Set `COVERAGE_MCP_RUN_RETENTION` before server startup to change this count-based
-limit. Coverage snapshots and registered artifact files are not pruned with run
-history.
+Use [`run-coverage-campaign`](skills/run-coverage-campaign/SKILL.md) only for
+input-driven campaign work. It composes `coverage-review` and owns only its
+campaign-specific batching and model-routing rules. Coverage MCP remains the
+source of truth for tool schemas, validation, response shapes, and bounded
+projections. Raw LLVM/LCOV inspection remains valid for an independent narrow
+check, while managed reviews add lineage, freshness, provenance, and history
+normalization.
 
 ## Pi
 

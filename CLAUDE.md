@@ -185,10 +185,17 @@ descriptions, server instructions, connector guidance, or the agent workflow,
 update the marketplace in the same change window so installed agents do not
 learn stale behavior.
 
+The schema-9 seven-tool surface is tracked in
+`docs/coverage-mcp-contract.md`; the canonical server owns the
+contract and unsupported names return ordinary unknown-tool errors.
+
 Authoritative source files for the `testing` plugin are:
 
 - `plugins/testing/README.md` for marketplace/user-facing connector guidance.
-- `plugins/testing/skills/use-coverage-mcp/SKILL.md` for the agent workflow.
+- `plugins/testing/skills/coverage-review/SKILL.md` for the shared test and
+  coverage-review workflow, and
+  `plugins/testing/skills/run-coverage-campaign/SKILL.md` for input-driven
+  campaign workflow.
 - `plugins/testing/.codex-plugin/plugin.json` and `plugins/testing/.mcp.json`
   for the required Codex connector and exact-binary bootstrap. The bootstrap
   may download a verified release archive or fall back to the pinned crate,
@@ -197,6 +204,8 @@ Authoritative source files for the `testing` plugin are:
 - `plugins/testing/compatibility.json` and
   `plugins/testing/scripts/install-pi-mcp.mjs` when connector invocation or
   runtime compatibility changes.
+- `scripts/verify-coverage-mcp-contract.mjs` for the live `tools/list` digest
+  check run by `pnpm check`.
 - Root `README.md` when examples or installation guidance change.
 
 Do not edit generated root artifacts to patch Coverage MCP guidance. Edit the

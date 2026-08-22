@@ -87,8 +87,9 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   const compatibility = await json(path.join(pluginRoot, 'compatibility.json'));
   assert.deepEqual(compatibility.coverageMcp, {
     healthUrl: 'http://127.0.0.1:59471/health',
-    schemaRevision: 7,
-    toolCount: 11,
+    schemaRevision: 9,
+    toolCount: 7,
+    toolsSha256: '28fb24dbcc43910e3592d8e4f4c35057acb97e731ceb8a274a2dc96e0b016b16',
     sharedDaemon: {
       orchestrator: 'coverage-mcp connect',
       autoStart: true,
@@ -105,7 +106,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
       projectDatabase: '<canonical-git-root>/.coverage-mcp/coverage.duckdb',
       handoff: {
         authenticated: true,
-        legacyOwnerFallback: true,
+        preHandoffOwnerFallback: true,
         unknownOwnerPolicy: 'fail-closed',
         downgradePolicy: 'refuse',
       },
@@ -127,7 +128,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     bootstrap: {
       manager: 'github-release',
       repository: 'appunni-m/coverage-mcp',
-      version: '=0.9.2',
+      version: '=0.10.0',
       scope: 'exact-binary-acquisition-only',
       customLock: false,
       platforms: ['macos', 'linux', 'wsl'],
@@ -142,14 +143,14 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
       checksumAsset: 'SHA256SUMS',
       provenance: 'github-sigstore',
       runtimeDirectoryOverride: 'COVERAGE_MCP_RUNTIME_DIR',
-      defaultInstallRoot: '~/.coverage-mcp/runtime/0.9.2',
+      defaultInstallRoot: '~/.coverage-mcp/runtime/0.10.0',
       fallback: {
         manager: 'cargo',
         package: 'coverage-mcp',
-        version: '=0.9.2',
+        version: '=0.10.0',
         locked: true,
       },
-      releasePrerequisite: 'coverage-mcp 0.9.2 and all claimed native archives published',
+      releasePrerequisite: 'coverage-mcp 0.10.0 and all claimed native archives published',
     },
     localDevelopment: {
       command: 'cargo',
@@ -201,10 +202,9 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   for (const documentationPath of [
     'README.md',
     path.join(pluginRoot, 'README.md'),
-    path.join(pluginRoot, 'skills', 'use-coverage-mcp', 'SKILL.md'),
   ]) {
     const documentation = await fs.readFile(documentationPath, 'utf8');
-    assert.match(documentation, /coverage-mcp|native Rust executable/, documentationPath);
+    assert.match(documentation, /coverage[- ]mcp|native Rust executable/i, documentationPath);
     assert.match(documentation, /cargo run --locked/, documentationPath);
     assert.doesNotMatch(documentation, />=0\.6\.0,<0\.7\.0/, documentationPath);
   }
@@ -218,21 +218,24 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   assert.match(geminiContext, /project_context\(detailed=false\)/);
 
   const skill = await fs.readFile(
-    path.join(pluginRoot, 'skills', 'use-coverage-mcp', 'SKILL.md'),
+    path.join(pluginRoot, 'skills', 'coverage-review', 'SKILL.md'),
     'utf8',
   );
-  assert.ok(skill.split('\n').length <= 180, 'Coverage MCP skill exceeds its context budget');
-  assert.ok(skill.trim().split(/\s+/).length <= 1000, 'Coverage MCP skill is too verbose');
+  assert.ok(skill.split('\n').length <= 180, 'Coverage review skill exceeds its context budget');
+  assert.ok(skill.trim().split(/\s+/).length <= 1400, 'Coverage review skill is too verbose');
   const normalizedSkill = skill.replace(/\s+/g, ' ');
   for (const requiredGuidance of [
     'human_approved=true',
     'idempotency_key',
     'coverage_ingest',
-    'tools/list',
-    '.coverage-mcp/coverage.duckdb',
-    'schema-revision 7',
-    'latest-run selection',
-    'No current worktree snapshot means "not measured", not "unchanged".',
+    'poll_after_ms',
+    'run_review',
+    'coverage_review',
+    'coverage_import',
+    'BLOCKED_MCP_CONTEXT',
+    'latest run',
+    'unmeasured',
+    'unmeasured coverage',
   ]) {
     assert.ok(normalizedSkill.includes(requiredGuidance), `skill is missing: ${requiredGuidance}`);
   }

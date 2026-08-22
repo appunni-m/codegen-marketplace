@@ -40,7 +40,7 @@ Send Sol High a request with this shape:
       "file_path": "src/example.rs",
       "line_ranges": ["120-137"],
       "metrics": {"uncovered_lines": 12},
-      "source_context": "bounded excerpt"
+      "source_excerpt": "bounded excerpt"
     }
   ],
   "input_surfaces": [

@@ -9,8 +9,10 @@ Increase measured coverage through a bounded state machine. Keep one writer,
 route difficult judgment to Sol High, and keep execution noise with Luna Max.
 
 Read [packet-contracts.md](references/packet-contracts.md) before the first
-strategist handoff. Load `use-coverage-mcp` and follow its approval, run,
-snapshot, comparison, and response-budget rules throughout.
+strategist handoff. Apply the `coverage-review` workflow for approval, run,
+snapshot, comparison, and response-budget rules throughout. This skill owns
+campaign-specific batching and model routing; `coverage-review` owns the shared
+managed-evidence workflow.
 
 ## Establish the execution boundary
 
@@ -35,8 +37,10 @@ snapshot, comparison, and response-budget rules throughout.
 ## Build a bounded strategy packet
 
 1. Query only the evidence needed for the next campaign:
-   `coverage_query(view="targets")`, then one weak file or bounded uncovered
-   range, and source context for those returned ranges. Include relevant public
+   `coverage_review(task="insight")` for the bounded ranked targets and
+   `coverage_review(task="source")` when exact bounded source evidence is required;
+   then inspect one weak file or bounded uncovered range and source context for
+   those returned ranges. Include relevant public
    entry points, maintained input generators, neighboring test patterns, and
    exact registered fast and coverage command names. Use `null` for an unknown
    lane; do not ask the strategist to invent one.
@@ -69,8 +73,10 @@ snapshot, comparison, and response-budget rules throughout.
 3. Classify failures across the full batch. Consolidate identical defects into
    one bounded fix pass, retain the revealing input as a regression case, and
    rerun every affected family before measuring coverage.
-4. Run the approved coverage command through Coverage MCP with one stable
-   `idempotency_key`. Require a terminal run, successful artifact ingestion, and
+4. Run the approved coverage command through Coverage MCP with
+   `reuse_if_unchanged=true` and one stable `idempotency_key`. If the server
+   returns `submission_reused=true`, use that terminal run instead of launching
+   duplicate work. Require a terminal run, successful artifact ingestion, and
    an explicit current snapshot ID. A green test without a valid snapshot is
    not coverage evidence.
 5. Compare the current snapshot with the recorded baseline. Report line,

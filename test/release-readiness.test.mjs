@@ -15,7 +15,15 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
 
   for (const [manifestPath, expectedVersion] of expectedVersions) {
     const manifest = JSON.parse(await read(manifestPath));
-    assert.equal(manifest.version, expectedVersion, manifestPath);
+    if (manifestPath.includes('.codex-plugin')) {
+      assert.match(
+        manifest.version,
+        new RegExp(`^${expectedVersion.replaceAll('.', '\\.')}(\\+codex\\..+)?$`),
+        manifestPath,
+      );
+    } else {
+      assert.equal(manifest.version, expectedVersion, manifestPath);
+    }
     if (manifestPath.includes('.codex-plugin')) {
       assert.equal(manifest.mcpServers, './.mcp.json', manifestPath);
     } else {
@@ -25,7 +33,9 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
         manifestPath,
       );
     }
-    assert.doesNotMatch(manifest.version, /\+codex\./, manifestPath);
+    if (!manifestPath.includes('.codex-plugin')) {
+      assert.doesNotMatch(manifest.version, /\+codex\./, manifestPath);
+    }
   }
 
   const bundledMcp = JSON.parse(await read('plugins/testing/.mcp.json'));
@@ -34,7 +44,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.deepEqual(connector.args.slice(0, 2), ['-eu', '-c']);
   assert.equal(connector.args.length, 3);
   assert.equal(connector.cwd, undefined);
-  assert.deepEqual(connector.env, { COVERAGE_MCP_VERSION: '0.9.2' });
+  assert.deepEqual(connector.env, { COVERAGE_MCP_VERSION: '0.10.0' });
   assert.equal(connector.startup_timeout_sec, 900);
   assert.equal(connector.required, true);
   assert.match(connector.args[2], /releases\/download\/v\$\{version\}/);
@@ -43,8 +53,8 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.match(connector.args[2], /exec \"\$\{runtime_binary\}\" connect$/);
   assert.doesNotMatch(connector.args[2], /daemon\.lock|serve|\/mcp\//);
   const compatibility = JSON.parse(await read('plugins/testing/compatibility.json'));
-  assert.equal(compatibility.coverageMcp.schemaRevision, 7);
-  assert.equal(compatibility.coverageMcp.toolCount, 11);
+  assert.equal(compatibility.coverageMcp.schemaRevision, 9);
+  assert.equal(compatibility.coverageMcp.toolCount, 7);
   assert.equal(compatibility.coverageMcp.sharedDaemon.defaultPort, 59471);
   assert.equal(compatibility.coverageMcp.sharedDaemon.connectionLock, false);
   assert.equal(
@@ -64,7 +74,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.equal(compatibility.coverageMcp.sharedDaemon.orchestrator, 'coverage-mcp connect');
   assert.equal(compatibility.coverageMcp.connector.workingDirectory, 'inherit-client-project');
   assert.equal(compatibility.coverageMcp.connector.required, true);
-  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.9.2');
+  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.10.0');
   assert.equal(compatibility.coverageMcp.bootstrap.scope, 'exact-binary-acquisition-only');
   assert.equal(compatibility.coverageMcp.bootstrap.customLock, false);
   assert.equal(compatibility.coverageMcp.bootstrap.checksumAsset, 'SHA256SUMS');
@@ -72,7 +82,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.deepEqual(compatibility.coverageMcp.bootstrap.fallback, {
     manager: 'cargo',
     package: 'coverage-mcp',
-    version: '=0.9.2',
+    version: '=0.10.0',
     locked: true,
   });
   assert.deepEqual(compatibility.coverageMcp.bootstrap.platforms, [
@@ -106,10 +116,10 @@ test('runtime DuckDB state is ignored', async () => {
   assert.match(gitignore, /^\*\.duckdb\.wal$/m);
 });
 
-test('Coverage MCP reports include the local dashboard handoff', async () => {
-  const skill = await read('plugins/testing/skills/use-coverage-mcp/SKILL.md');
+test('Coverage review workflow includes the local dashboard handoff', async () => {
+  const skill = await read('plugins/testing/skills/coverage-review/SKILL.md');
   assert.match(skill, /http:\/\/localhost:59471\//);
-  assert.match(skill, /reaches a\s+terminal state/);
+  assert.match(skill, /after a\s+terminal run/);
   assert.match(skill, /Do not open the browser automatically/);
 });
 
