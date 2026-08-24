@@ -7,8 +7,9 @@ compatibility claims live in the authored plugin documentation and manifests.
 
 ### Changed
 
-- Synchronize the testing plugin with Coverage MCP `0.10.0`, schema revision 9,
-  and the seven-tool public contract.
+- Synchronize the testing plugin with Coverage MCP `0.11.0`, schema revision 10,
+  and the eight-tool public contract, including bounded duplicate-coverage
+  candidates for named tests.
 - Keep the marketplace workflow focused on approval, polling, freshness,
   lineage, budgets, and reporting while the server owns protocol validation and
   evidence semantics.

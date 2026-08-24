@@ -1,6 +1,6 @@
 # Coverage MCP contract pointer
 
-Status: the schema-9 seven-tool contract is implemented in the canonical
+Status: the schema-10 eight-tool contract is implemented in the canonical
 server. The canonical server's [README and repository](https://github.com/appunni-m/coverage-mcp)
 are the stable public entry point.
 
@@ -19,8 +19,9 @@ The active MCP inventory contains exactly:
 - `cancel_run`
 - `coverage_import`
 - `coverage_review`
+- `find_duplicate_coverage_tests`
 
-The contract is schema revision 9. The exact tool-array digest is pinned in
+The contract is schema revision 10. The exact tool-array digest is pinned in
 `plugins/testing/compatibility.json` and checked against the live server by
 the existing `pnpm check:coverage-mcp` command.
 
@@ -37,6 +38,12 @@ Use `coverage_import` only for an external or historical repository-relative
 report. Use `coverage_review` for bounded change, history, insight, source,
 audit, or combined analysis.
 
+Use `find_duplicate_coverage_tests` for large named-test inventories. It
+groups tests only when their complete normalized covered line, branch, and
+function observation sets are equal, ignores hit counts, and returns bounded
+pages. This is a coverage-equivalence candidate signal, not logic equivalence
+or permission to delete a test.
+
 ## Verification
 
 ```sh
@@ -44,4 +51,4 @@ pnpm check
 pnpm check:coverage-mcp
 ```
 
-Plugin files and runtime configuration contain only the schema-9 contract.
+Plugin files and runtime configuration contain only the schema-10 contract.

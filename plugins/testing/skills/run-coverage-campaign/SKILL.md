@@ -88,6 +88,9 @@ managed-evidence workflow.
    regression value. Do not claim per-case attribution from a batch-level
    snapshot. If attribution cannot be measured safely, retain the cases and
    report the uncertainty instead of guessing.
+7. For large named-test inventories, use `find_duplicate_coverage_tests` to
+   produce bounded exact-coverage candidate groups. It does not compare logic
+   or prove interchangeability; review each candidate before pruning.
 
 ## Escalate stalled work to Sol
 

@@ -1,6 +1,6 @@
 {
   "name": "testing",
-  "version": "0.5.3+codex.20260822162441",
+  "version": "0.5.4+codex.20260824060349",
   "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
   "author": {
     "name": "Appunni M",

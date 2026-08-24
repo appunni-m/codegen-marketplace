@@ -8,8 +8,8 @@ async function read(pathname) {
 
 test('release metadata uses stable versions and the pinned Coverage MCP bootstrap', async () => {
   const expectedVersions = new Map([
-    ['plugins/testing/.claude-plugin/plugin.json', '0.5.3'],
-    ['plugins/testing/.codex-plugin/plugin.json', '0.5.3'],
+    ['plugins/testing/.claude-plugin/plugin.json', '0.5.4'],
+    ['plugins/testing/.codex-plugin/plugin.json', '0.5.4'],
     ['plugins/rust-development/gemini-extension.json', '0.3.2'],
   ]);
 
@@ -44,7 +44,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.deepEqual(connector.args.slice(0, 2), ['-eu', '-c']);
   assert.equal(connector.args.length, 3);
   assert.equal(connector.cwd, undefined);
-  assert.deepEqual(connector.env, { COVERAGE_MCP_VERSION: '0.10.0' });
+  assert.deepEqual(connector.env, { COVERAGE_MCP_VERSION: '0.11.0' });
   assert.equal(connector.startup_timeout_sec, 900);
   assert.equal(connector.required, true);
   assert.match(connector.args[2], /releases\/download\/v\$\{version\}/);
@@ -53,8 +53,8 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.match(connector.args[2], /exec \"\$\{runtime_binary\}\" connect$/);
   assert.doesNotMatch(connector.args[2], /daemon\.lock|serve|\/mcp\//);
   const compatibility = JSON.parse(await read('plugins/testing/compatibility.json'));
-  assert.equal(compatibility.coverageMcp.schemaRevision, 9);
-  assert.equal(compatibility.coverageMcp.toolCount, 7);
+  assert.equal(compatibility.coverageMcp.schemaRevision, 10);
+  assert.equal(compatibility.coverageMcp.toolCount, 8);
   assert.equal(compatibility.coverageMcp.sharedDaemon.defaultPort, 59471);
   assert.equal(compatibility.coverageMcp.sharedDaemon.connectionLock, false);
   assert.equal(
@@ -74,7 +74,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.equal(compatibility.coverageMcp.sharedDaemon.orchestrator, 'coverage-mcp connect');
   assert.equal(compatibility.coverageMcp.connector.workingDirectory, 'inherit-client-project');
   assert.equal(compatibility.coverageMcp.connector.required, true);
-  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.10.0');
+  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.11.0');
   assert.equal(compatibility.coverageMcp.bootstrap.scope, 'exact-binary-acquisition-only');
   assert.equal(compatibility.coverageMcp.bootstrap.customLock, false);
   assert.equal(compatibility.coverageMcp.bootstrap.checksumAsset, 'SHA256SUMS');
@@ -82,7 +82,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.deepEqual(compatibility.coverageMcp.bootstrap.fallback, {
     manager: 'cargo',
     package: 'coverage-mcp',
-    version: '=0.10.0',
+    version: '=0.11.0',
     locked: true,
   });
   assert.deepEqual(compatibility.coverageMcp.bootstrap.platforms, [

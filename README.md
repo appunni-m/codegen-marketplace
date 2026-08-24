@@ -102,9 +102,9 @@ Restart Pi after installing the adapter.
 
 ## Coverage MCP
 
-The schema-9 contract is summarized in the
+The schema-10 contract is summarized in the
 [Coverage MCP contract pointer](docs/coverage-mcp-contract.md). The canonical
-server exposes seven task-oriented public tools and enforces the same typed
+server exposes eight task-oriented public tools and enforces the same typed
 contract across HTTP and stdio.
 
 The `testing` plugin launches a native stdio connector for
@@ -115,8 +115,8 @@ a Python package and does not invoke it through `uvx`, `pip`, Node, or `npx`.
 ### Automatic Codex bootstrap
 
 Codex loads a required stdio declaration from the testing plugin's `.mcp.json`.
-The configuration checks `PATH` for exact `coverage-mcp 0.10.0`, then the
-versioned cache at `~/.coverage-mcp/runtime/0.10.0`. On a cache miss it maps the
+The configuration checks `PATH` for exact `coverage-mcp 0.11.0`, then the
+versioned cache at `~/.coverage-mcp/runtime/0.11.0`. On a cache miss it maps the
 host to one of four native GitHub Release archives:
 
 | Host | Release target |
@@ -127,7 +127,7 @@ host to one of four native GitHub Release archives:
 | x86-64 Linux/WSL | `x86_64-unknown-linux-gnu` |
 
 The POSIX bootstrap downloads the exact archive and `SHA256SUMS`, fails closed
-on an integrity mismatch, verifies the extracted binary reports 0.10.0, and
+on an integrity mismatch, verifies the extracted binary reports 0.11.0, and
 atomically fills the cache. Supported targets therefore need no Rust toolchain
 and do not compile DuckDB. If the host is unsupported or GitHub is unavailable,
 an existing Cargo toolchain provides a slower exact-version fallback.
@@ -209,7 +209,7 @@ For a non-Codex host, or to prewarm the binary before the first Codex task,
 install the published version explicitly:
 
 ```bash
-cargo install coverage-mcp --version '=0.10.0' --locked
+cargo install coverage-mcp --version '=0.11.0' --locked
 coverage-mcp --version
 ```
 
@@ -242,16 +242,23 @@ command above require a checkout path. Gemini, Claude, and Pi retain their
 documented native command and therefore need `coverage-mcp` on `PATH` or an
 explicit Cargo/absolute-path registration.
 At this marketplace revision, the synchronized Coverage MCP contract is schema
-revision 9 with seven public tools. The server's `tools/list.contract.tools_sha256`
+revision 10 with eight public tools. The server's `tools/list.contract.tools_sha256`
 must equal
-`28fb24dbcc43910e3592d8e4f4c35057acb97e731ceb8a274a2dc96e0b016b16`;
+`cd8d7d3de9b199476f1b681114a664fbdefc326d14a76f8343c466a77774ab05`;
 `GET /health` and `tools/list` remain the runtime authorities.
+
+The read-only `find_duplicate_coverage_tests` tool is intended for large named
+test inventories. It returns bounded groups whose complete normalized covered
+line, branch, and function observation sets are exactly equal, ignoring hit
+counts. The result is a coverage-equivalence candidate signal, not logic
+equivalence or permission to delete a test; use `page.next_cursor` for more
+groups.
 
 Run a PATH installation manually, or invoke the Codex-managed cache directly:
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.10.0/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.11.0/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -343,7 +350,7 @@ pinned version changes. To update a manually installed server after a
 published Coverage MCP release:
 
 ```bash
-cargo install coverage-mcp --version '=0.10.0' --locked --force
+cargo install coverage-mcp --version '=0.11.0' --locked --force
 ```
 
 Start a new Codex task after updating the plugin so Codex launches the refreshed

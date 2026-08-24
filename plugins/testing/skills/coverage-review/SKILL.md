@@ -91,6 +91,8 @@ Use the consolidated `coverage_review` tool:
   coverage evidence;
 - `task="audit"` or `representation="audit"` only for exact records;
 - `task="all"` for a bounded combination of change, history, and insight.
+- `find_duplicate_coverage_tests` for bounded groups of named tests with equal
+  normalized line, branch, and function observation sets.
 
 Carry exact `measurement.snapshot_id` or `measurement.run_id`, baseline
 selectors, file paths, and source ranges from one response into the next.
@@ -108,6 +110,11 @@ measured, `!` regressed, `-` removed, and `~` changed coverage. Use
 `representation="audit"` only when exact records are explicitly needed.
 Compact file metrics use one `file_legend` plus `p`, `l`, `b`, `f`, and `r`
 arrays rather than repeating metric keys for every file.
+
+For duplicate candidates, pass the matching `snapshot_id` or `suite`, keep the
+default small limits, and follow `page.next_cursor`. The result compares
+coverage observations only; inspect test logic, inputs, assertions, side
+effects, and dependencies before retaining or removing any candidate.
 
 ## Report the result
 

@@ -1,7 +1,7 @@
 # Coverage MCP efficiency evidence
 
 This document records a bounded, deterministic measurement of the current
-schema-9 Coverage MCP projections. It is representative evidence from the
+schema-10 Coverage MCP projections. It is representative evidence from the
 temporary fixture used by `mcp-evals`, not a performance promise for every
 repository, report format, database size, or host.
 
@@ -32,6 +32,7 @@ properties:
 | Exact audit words | `771` |
 | Grouped region words | `120` |
 | Exact line-audit words | `663` |
+| Exact duplicate-candidate words | `39` |
 | Detailed history points | `2` |
 | Bounded insight latency, p50/p95 | `5 / 6 ms` across 8 samples |
 
@@ -39,13 +40,15 @@ The compact representation is smaller because it emits each file path and
 metric legend once, then uses grouped ranges and short status symbols. The
 audit representation remains available when exact records are required. The
 history projection keeps two detailed points and summarizes the remaining
-window instead of returning every line record.
+window instead of returning every line record. Duplicate-candidate output is
+bounded separately and returns only names, counts, and pagination metadata;
+the fixture measured it at 39 words.
 
 ## Correctness and scope
 
-The same run passed all 230 evaluator checks: usability 171, outcomes 14,
-efficiency 16, protocol 9, safety 12, and reliability 8. Those checks cover
-the public seven-tool inventory, response budgets, compact projections,
+The same run passed all 250 evaluator checks: usability 187, outcomes 15,
+efficiency 19, protocol 9, safety 12, and reliability 8. Those checks cover
+the public eight-tool inventory, response budgets, compact projections,
 history shaping, source batching, managed-run polling, validation errors, and
 shared transport behavior in the fixture.
 

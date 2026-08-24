@@ -5,8 +5,8 @@ Testing workflows backed by the local
 
 Coverage MCP is a native Rust executable. Codex declares it as a required
 stdio server in the bundled `.mcp.json`. The configuration checks `PATH` for
-exact `coverage-mcp 0.10.0`, otherwise checks
-`~/.coverage-mcp/runtime/0.10.0`. On a cache miss it downloads the matching
+exact `coverage-mcp 0.11.0`, otherwise checks
+`~/.coverage-mcp/runtime/0.11.0`. On a cache miss it downloads the matching
 checksummed GitHub Release archive for macOS or Linux on ARM64 or x86-64,
 verifies the extracted version, atomically fills the cache, and immediately
 executes `coverage-mcp connect`. There is no plugin-owned launcher file, custom
@@ -64,7 +64,7 @@ For another host, or to prewarm Codex, install the published native binary.
 This plugin does not invoke Coverage MCP through `uvx`, `pip`, Node, or `npx`:
 
 ```bash
-cargo install coverage-mcp --version '=0.10.0' --locked
+cargo install coverage-mcp --version '=0.11.0' --locked
 coverage-mcp --version
 ```
 
@@ -78,8 +78,14 @@ available after an individual connector exits. Use an explicit
 `--repo` for native host configurations that do not provide a repository
 working directory. The bundled connector is in `.mcp.json`, and the
 machine-readable bootstrap/runtime contract is in `compatibility.json`. The
-server must report schema revision 9, seven public tools, and
-`tools/list.contract.tools_sha256=28fb24dbcc43910e3592d8e4f4c35057acb97e731ceb8a274a2dc96e0b016b16`.
+server must report schema revision 10, eight public tools, and
+`tools/list.contract.tools_sha256=cd8d7d3de9b199476f1b681114a664fbdefc326d14a76f8343c466a77774ab05`.
+The eighth tool, `find_duplicate_coverage_tests`, returns bounded groups of
+named tests with exactly equal normalized line, branch, and function
+observation sets. It is a coverage-equivalence candidate signal only: it does
+not compare test logic and never authorizes deletion. Its defaults are the
+latest snapshot, ten groups, and ten test names per group; continue with the
+opaque `page.next_cursor` when more groups are needed.
 
 The stdio process can outlive a daemon crash. If the next connection is
 refused, that same bridge uses the released OS lease and its leftover metadata
@@ -106,15 +112,15 @@ The published Codex manifest keeps the runtime version pinned because an
 installed plugin cannot safely infer a user's Coverage MCP checkout or track a
 moving Git branch. Use the explicit Cargo manifest option for local
 development; it never falls back to a guessed path. Do not publish this plugin
-version until Coverage MCP 0.10.0 exists on crates.io and all four claimed
+version until Coverage MCP 0.11.0 exists on crates.io and all four claimed
 native archives, `SHA256SUMS`, and provenance are published.
-This plugin revision is synchronized with Coverage MCP schema revision 9 and
-its seven-tool public inventory; verify those values through `GET /health` and
+This plugin revision is synchronized with Coverage MCP schema revision 10 and
+its eight-tool public inventory; verify those values through `GET /health` and
 `tools/list` after upgrading.
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.10.0/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.11.0/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -166,7 +172,7 @@ before reconnecting. Update a manually installed native binary separately
 after a published release:
 
 ```bash
-cargo install coverage-mcp --version '=0.10.0' --locked --force
+cargo install coverage-mcp --version '=0.11.0' --locked --force
 ```
 
 Start a new Codex task after reinstalling the plugin. Its connector resolves the

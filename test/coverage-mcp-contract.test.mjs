@@ -11,12 +11,13 @@ test('Coverage MCP contract pointer lists the current public contract', async ()
     '`run_review`',
     '`cancel_run`',
     '`coverage_review`',
+    '`find_duplicate_coverage_tests`',
     '`coverage_import`',
   ]) {
     assert.match(plan, new RegExp(requiredTool.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   for (const requiredInvariant of [
-    'schema revision 9',
+    'schema revision 10',
     'approval',
     'polling',
     'freshness',

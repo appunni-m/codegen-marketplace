@@ -87,9 +87,9 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   const compatibility = await json(path.join(pluginRoot, 'compatibility.json'));
   assert.deepEqual(compatibility.coverageMcp, {
     healthUrl: 'http://127.0.0.1:59471/health',
-    schemaRevision: 9,
-    toolCount: 7,
-    toolsSha256: '28fb24dbcc43910e3592d8e4f4c35057acb97e731ceb8a274a2dc96e0b016b16',
+    schemaRevision: 10,
+    toolCount: 8,
+    toolsSha256: 'cd8d7d3de9b199476f1b681114a664fbdefc326d14a76f8343c466a77774ab05',
     sharedDaemon: {
       orchestrator: 'coverage-mcp connect',
       autoStart: true,
@@ -128,7 +128,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     bootstrap: {
       manager: 'github-release',
       repository: 'appunni-m/coverage-mcp',
-      version: '=0.10.0',
+      version: '=0.11.0',
       scope: 'exact-binary-acquisition-only',
       customLock: false,
       platforms: ['macos', 'linux', 'wsl'],
@@ -143,14 +143,14 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
       checksumAsset: 'SHA256SUMS',
       provenance: 'github-sigstore',
       runtimeDirectoryOverride: 'COVERAGE_MCP_RUNTIME_DIR',
-      defaultInstallRoot: '~/.coverage-mcp/runtime/0.10.0',
+      defaultInstallRoot: '~/.coverage-mcp/runtime/0.11.0',
       fallback: {
         manager: 'cargo',
         package: 'coverage-mcp',
-        version: '=0.10.0',
+        version: '=0.11.0',
         locked: true,
       },
-      releasePrerequisite: 'coverage-mcp 0.10.0 and all claimed native archives published',
+      releasePrerequisite: 'coverage-mcp 0.11.0 and all claimed native archives published',
     },
     localDevelopment: {
       command: 'cargo',
@@ -231,6 +231,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     'poll_after_ms',
     'run_review',
     'coverage_review',
+    'find_duplicate_coverage_tests',
     'coverage_import',
     'BLOCKED_MCP_CONTEXT',
     'latest run',
