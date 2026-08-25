@@ -74,15 +74,28 @@ managed-evidence workflow.
    one bounded fix pass, retain the revealing input as a regression case, and
    rerun every affected family before measuring coverage.
 4. Run the approved coverage command through Coverage MCP with
-   `reuse_if_unchanged=true` and one stable `idempotency_key`. If the server
-   returns `submission_reused=true`, use that terminal run instead of launching
+   `reuse_if_unchanged=true`, one stable `idempotency_key`, and the approved
+   family arguments. Reuse the single registered command; do not register a
+   command per family. Composite commands additionally register one required
+   inventory and one descriptor per declared component/package variant; full
+   and incremental runs reuse that same registration. For a fixed-base family
+   measurement, pass `execution.mode="incremental"` and
+   `baseline.kind="explicit"` with the recorded ordinary or composite baseline
+   ID. The terminal run automatically returns `incremental_review`; inspect it
+   instead of launching a second comparison run. If the server returns
+   `submission_reused=true`, use that terminal run instead of launching
    duplicate work. Require a terminal run, successful artifact ingestion, and
-   an explicit current snapshot ID. A green test without a valid snapshot is
-   not coverage evidence.
-5. Compare the current snapshot with the recorded baseline. Report line,
-   branch, function, and region deltas only when supplied by the artifacts.
-   First measure the full batch; use approved family slices only when needed
-   to attribute unique gain.
+   an explicit current snapshot ID, or `composite_snapshot_id` for a composite
+   run. A green test without valid ordinary or composite evidence is not
+   coverage evidence.
+5. Use standalone `coverage_review(task="incremental")` only when comparing two
+   matching ordinary or composite snapshots that already exist outside the run
+   that produced them. Report line, branch, function, and region deltas only
+   when supplied by the artifacts. For composite evidence, report canonical
+   regions, component summaries, inventory completeness, and remediation
+   reasons. First measure the full batch; use approved family slices only when
+   their explicit arguments and baseline make unique gain attribution
+   meaningful.
 6. Remove a family only after evidence shows that it contributes no unique
    covered line, branch, function, or region and has no separately documented
    regression value. Do not claim per-case attribution from a batch-level

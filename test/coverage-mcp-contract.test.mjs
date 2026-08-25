@@ -17,7 +17,8 @@ test('Coverage MCP contract pointer lists the current public contract', async ()
     assert.match(plan, new RegExp(requiredTool.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   for (const requiredInvariant of [
-    'schema revision 10',
+    'schema revision 14',
+    'composite',
     'approval',
     'polling',
     'freshness',

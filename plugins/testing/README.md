@@ -5,8 +5,8 @@ Testing workflows backed by the local
 
 Coverage MCP is a native Rust executable. Codex declares it as a required
 stdio server in the bundled `.mcp.json`. The configuration checks `PATH` for
-exact `coverage-mcp 0.11.0`, otherwise checks
-`~/.coverage-mcp/runtime/0.11.0`. On a cache miss it downloads the matching
+exact `coverage-mcp 0.13.0`, otherwise checks
+`~/.coverage-mcp/runtime/0.13.0`. On a cache miss it downloads the matching
 checksummed GitHub Release archive for macOS or Linux on ARM64 or x86-64,
 verifies the extracted version, atomically fills the cache, and immediately
 executes `coverage-mcp connect`. There is no plugin-owned launcher file, custom
@@ -64,7 +64,7 @@ For another host, or to prewarm Codex, install the published native binary.
 This plugin does not invoke Coverage MCP through `uvx`, `pip`, Node, or `npx`:
 
 ```bash
-cargo install coverage-mcp --version '=0.11.0' --locked
+cargo install coverage-mcp --version '=0.13.0' --locked
 coverage-mcp --version
 ```
 
@@ -78,8 +78,8 @@ available after an individual connector exits. Use an explicit
 `--repo` for native host configurations that do not provide a repository
 working directory. The bundled connector is in `.mcp.json`, and the
 machine-readable bootstrap/runtime contract is in `compatibility.json`. The
-server must report schema revision 10, eight public tools, and
-`tools/list.contract.tools_sha256=cd8d7d3de9b199476f1b681114a664fbdefc326d14a76f8343c466a77774ab05`.
+server must report schema revision 14, eight public tools, and
+`tools/list.contract.tools_sha256=3dd1da08e6bf7053e8e64cf310dc9c328488413754a42fe3060ef3afef09f892`.
 The eighth tool, `find_duplicate_coverage_tests`, returns bounded groups of
 named tests with exactly equal normalized line, branch, and function
 observation sets. It is a coverage-equivalence candidate signal only: it does
@@ -112,17 +112,120 @@ The published Codex manifest keeps the runtime version pinned because an
 installed plugin cannot safely infer a user's Coverage MCP checkout or track a
 moving Git branch. Use the explicit Cargo manifest option for local
 development; it never falls back to a guessed path. Do not publish this plugin
-version until Coverage MCP 0.11.0 exists on crates.io and all four claimed
+version until Coverage MCP 0.13.0 exists on crates.io and all four claimed
 native archives, `SHA256SUMS`, and provenance are published.
-This plugin revision is synchronized with Coverage MCP schema revision 10 and
+This plugin revision is synchronized with Coverage MCP schema revision 14 and
 its eight-tool public inventory; verify those values through `GET /health` and
 `tools/list` after upgrading.
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.11.0/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.13.0/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
+
+## Incremental runs without re-registering commands
+
+Register one human-approved command that safely accepts the intended runtime
+arguments, for example `cargo test -- {{args}}` when that exact command and
+filter boundary have been approved. Reuse the returned command ID or name for
+every case; do not register a new command for each test filter.
+
+Pass the case-specific arguments and an explicit fixed-base snapshot to
+`run_test`:
+
+```json
+{
+  "command_ref": "coverage-tests",
+  "arguments": ["--filter", "parser::handles_empty_input"],
+  "execution": {"mode": "incremental", "label": "parser empty input"},
+  "baseline": {"kind": "explicit", "snapshot_id": "<base_snapshot_id>"},
+  "reuse_if_unchanged": true,
+  "idempotency_key": "parser-empty-input-v1"
+}
+```
+
+The server shell-quotes each argument and replaces the command's single
+`{{args}}` placeholder, or appends the quoted arguments when no placeholder is
+present. `execution.identity` is optional: the server persists a fingerprint
+of mode, arguments, and baseline, so different cases cannot accidentally reuse
+one another. Use a different idempotency key for each materially different
+case.
+
+Obtain `base_snapshot_id` from a completed full run's
+`data.coverage_ingest.snapshot_ids[0]` or a compatible `coverage_import`
+result. The server never guesses the latest or previous snapshot. After the
+incremental run reaches terminal state and ingests exactly one current report,
+the run response and `run_review(view="status")` contain
+`incremental_review` automatically. A pending or not-measured status is not a
+coverage claim; report its server-provided reason.
+
+Use `coverage_review(task="incremental")` only to compare two snapshots that
+already exist independently of a run. It reads stored detail, never reruns
+tests or reparses the baseline, and requires
+`measurement.snapshot_id` (or an unambiguous run) plus
+`baseline.kind="explicit"` and `baseline.snapshot_id`.
+
+Compaction does not change snapshot IDs and incremental comparison can read
+compacted detail; inspect `incremental.detail_source` to see whether each side
+came from relational rows or a compacted payload. Mark a long-lived fixed base
+artifact `detail_retention=incremental_base` when it must be excluded from
+ordinary compaction. Reports without named test observations expose an
+explicit unavailable attribution status rather than invented test identities.
+
+## Composite production coverage
+
+Coverage MCP schema 14 lets one managed run produce a single authoritative
+production-coverage view across Rust/WGSL, Python, and JavaScript. Register the
+command once with one required inventory artifact and one required descriptor
+for every component/package variant. Full and incremental runs use that same
+registration; pass only the approved case-specific `arguments`, execution
+metadata, and explicit baseline for the case.
+
+Each coverage descriptor declares its mapping rather than relying on filenames:
+
+```json
+{
+  "path": "target/python.json",
+  "required": true,
+  "coverage_format": "coveragepy",
+  "composite": {
+    "component_id": "python",
+    "package_variant": "cpython",
+    "language": "python",
+    "format": "coveragepy",
+    "inventory_artifact": "target/inventory.json",
+    "role": "coverage",
+    "logical_source_aliases": [
+      {"path": "pkg/runtime.py", "logical_source_id": "python:pkg/runtime.py"}
+    ],
+    "toolchain_versions": {"coverage.py": "7.x"}
+  }
+}
+```
+
+The inventory is authoritative for the canonical-region denominator. Logical
+source aliases are the only deduplication mechanism; matching paths, packages,
+bytes, or filenames never merge regions. Every declared variant must be
+present, fresh, well-formed, and source-compatible. Missing, stale, malformed,
+or source-mismatched evidence leaves the composite `incomplete` and never
+reduces its denominator.
+
+Save `data.composite_snapshot_id` from every completed composite run. For a
+smaller composite case, use the same incremental `run_test` shape but provide
+`baseline.kind="explicit"` and `baseline.composite_snapshot_id`. The terminal
+run automatically exposes its bounded `incremental_review`; standalone
+`coverage_review(task="incremental")` is only for comparing two already stored
+composite snapshots. Composite incremental review reads stored canonical-region
+rows and child named-test observations, never reruns the fixed base, and
+requires matching repository, mapping version, and inventory hash.
+
+Compaction does not rewrite composite rows. If ordinary child snapshots were
+compacted, the server restores their detail from the zstd payload for comparison
+and reports the detail source. Keep a long-lived base's artifacts at
+`detail_retention="incremental_base"` when avoiding restoration work matters;
+named-test attribution remains explicitly `unavailable` for formats without
+named observations.
 
 ## Installation Boundary
 
@@ -172,7 +275,7 @@ before reconnecting. Update a manually installed native binary separately
 after a published release:
 
 ```bash
-cargo install coverage-mcp --version '=0.11.0' --locked --force
+cargo install coverage-mcp --version '=0.13.0' --locked --force
 ```
 
 Start a new Codex task after reinstalling the plugin. Its connector resolves the

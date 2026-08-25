@@ -1,7 +1,7 @@
 # Coverage MCP efficiency evidence
 
 This document records a bounded, deterministic measurement of the current
-schema-10 Coverage MCP projections. It is representative evidence from the
+schema-14 Coverage MCP projections. It is representative evidence from the
 temporary fixture used by `mcp-evals`, not a performance promise for every
 repository, report format, database size, or host.
 
