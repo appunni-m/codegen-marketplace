@@ -15,8 +15,7 @@ the server owns schema, validation, freshness, lineage, and projections.
   directly.
 - If MCP is unavailable or points at another repository, stop with
   `BLOCKED_MCP_CONTEXT`; do not substitute a raw coverage command.
-- Keep test failure, artifact/parser failure, coverage regression, missing or
-  stale evidence, missing baseline, and unmeasured coverage distinct.
+- Keep test failure, artifact/parser failure, coverage regression, missing or stale evidence, missing baseline, and unmeasured coverage distinct.
 
 ## Discover approval and the command
 
@@ -72,24 +71,25 @@ cwd, or case label.
   `poll_after_ms`; do not infer progress from elapsed time.
 - Use `cancel_run` only when the user no longer wants the run. On failure, use
   `run_review(view="logs", run_id=..., query=...)` with bounded literal matches.
-- On terminal state, inspect `coverage_ingest.status`, artifact outcomes, and
-  snapshot IDs. An incremental run with one current snapshot automatically
-  includes `incremental_review`; `run_review(view="status")` exposes it again.
-  `pending` means not finished; `not_measured` plus `reasons` means no diff
-  claim is available. Do not launch another review runner call.
+- On terminal state, inspect `coverage_ingest.status`, artifact outcomes, and snapshot IDs. An incremental run automatically includes `incremental_review` after ingestion; when multiple ordinary artifacts are declared, its primary aggregate is the deduplicated baseline-union of all selected snapshots.
+  `run_review(view="status")` exposes it again. `pending` means not finished; `not_measured` plus `reasons` means no coverage claim is available. Do not launch another review runner call.
 
 ## Incremental versus standalone comparison
 
 An incremental run is execution plus review: the selected subset runs through
-the existing approved command, its report is ingested, and the server compares
-the current snapshot with the explicit base. This is the normal fewer-test-case
-workflow.
+the existing approved command, one or more reports are ingested, and the server
+forms the deduplicated union of the selected snapshots with the explicit base.
+`incremental.aggregate` and `metric_deltas` are the primary coverage result;
+the nested `incremental.diff` is a scope-aware replacement diagnostic. For a
+selected subset, baseline identities absent from that subset are `not_observed`,
+not regressions; only `complete_snapshot` supports a real regression claim.
 
-Use `coverage_review(task="incremental")` only when both snapshots already
-exist and an independent stored comparison is needed. It requires
-`measurement.snapshot_id` or a run resolving to exactly one ingested snapshot,
-plus `baseline.kind="explicit"` and `baseline.snapshot_id`. It never selects a
-previous snapshot, invokes a runner, reparses a report, or reruns tests.
+Use `coverage_review(task="incremental")` only when stored measurements already
+exist and an independent comparison is needed. It requires
+`measurement.snapshot_id` or a `measurement.run_id` resolving to ordinary
+artifact snapshots, plus `baseline.kind="explicit"` and the matching
+`baseline.snapshot_id`. It never selects a previous snapshot, invokes a runner,
+reparses a report, or reruns tests.
 
 Keep the base immutable and record its ID. Use artifact
 `detail_retention="incremental_base"` for a long-lived high-detail base.

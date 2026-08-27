@@ -185,7 +185,7 @@ descriptions, server instructions, connector guidance, or the agent workflow,
 update the marketplace in the same change window so installed agents do not
 learn stale behavior.
 
-The schema-14 eight-tool surface is tracked in
+The schema-15 eight-tool surface is tracked in
 `docs/coverage-mcp-contract.md`; the canonical server owns the
 contract and unsupported names return ordinary unknown-tool errors.
 

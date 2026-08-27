@@ -3,6 +3,26 @@
 Current marketplace changes are recorded here. Detailed behavior and
 compatibility claims live in the authored plugin documentation and manifests.
 
+## 0.7.1 - 2026-08-27
+
+### Fixed
+
+- Pin the testing plugin to released Coverage MCP `0.15.1`, including its
+  refreshed tools-list digest and exact native bootstrap metadata for the
+  incremental-union fix.
+
+## 0.7.0 - 2026-08-26
+
+### Changed
+
+- Upgrade the testing plugin to Coverage MCP `0.15.0`, schema revision 15, and
+  the live eight-tool contract.
+- Document additive incremental coverage as the deduplicated union of the fixed
+  baseline and all selected ordinary artifacts, with a separate diagnostic diff
+  that labels selected-subset absence `not_observed` instead of regression.
+- Keep composite coverage, exact binary bootstrap, and shared-daemon handoff
+  guidance synchronized with the published release.
+
 ## 0.6.0 - 2026-08-25
 
 ### Changed

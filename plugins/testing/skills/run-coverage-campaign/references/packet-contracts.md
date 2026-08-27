@@ -112,7 +112,7 @@ Send only bounded failure evidence:
   "cycle": 1,
   "strategy_family_ids": ["family-01"],
   "baseline_snapshot_id": "uuid",
-  "current_snapshot_id": "uuid-or-null",
+  "current_snapshot_ids": ["uuid"],
   "runs": [
     {
       "run_id": "uuid",

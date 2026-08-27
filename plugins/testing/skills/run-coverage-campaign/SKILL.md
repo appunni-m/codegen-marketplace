@@ -82,12 +82,15 @@ managed-evidence workflow.
    measurement, pass `execution.mode="incremental"` and
    `baseline.kind="explicit"` with the recorded ordinary or composite baseline
    ID. The terminal run automatically returns `incremental_review`; inspect it
-   instead of launching a second comparison run. If the server returns
+   instead of launching a second comparison run. Its primary ordinary result is
+   the deduplicated baseline-union of all selected artifact snapshots; use the
+   nested diff only for scope-aware diagnostics, where selected-subset absence
+   is `not_observed`, not regression. If the server returns
    `submission_reused=true`, use that terminal run instead of launching
    duplicate work. Require a terminal run, successful artifact ingestion, and
-   an explicit current snapshot ID, or `composite_snapshot_id` for a composite
-   run. A green test without valid ordinary or composite evidence is not
-   coverage evidence.
+   explicit current snapshot ID(s), a run resolving to ordinary artifacts, or
+   `composite_snapshot_id` for a composite run. A green test without valid
+   ordinary or composite evidence is not coverage evidence.
 5. Use standalone `coverage_review(task="incremental")` only when comparing two
    matching ordinary or composite snapshots that already exist outside the run
    that produced them. Report line, branch, function, and region deltas only
@@ -126,7 +129,7 @@ or the same failure survives a bounded fix.
 Run the repository's proportionate final gates and return:
 
 - exact repository, checkout, branch, revision, suite, and command names
-- baseline and final snapshot IDs plus supplied metric deltas
+- baseline and final snapshot ID(s) plus supplied metric deltas
 - proposed, generated, retained, removed, and failing case counts by family
 - product bugs found and the bounded fixes or classifications
 - Sol escalation count and decisions

@@ -1,6 +1,6 @@
 # Coverage MCP contract
 
-Status: schema revision 14, eight public tools, and the exact tools-list digest
+Status: schema revision 15, eight public tools, and the exact tools-list digest
 are implemented by the canonical Rust server and pinned in
 `plugins/testing/compatibility.json`. The canonical server's
 [README and source](https://github.com/appunni-m/coverage-mcp) are the source
@@ -52,9 +52,17 @@ An incremental run supplies:
 `execution.identity` is optional. The server fingerprints mode, arguments,
 and the explicit baseline, so idempotency and unchanged-run reuse cannot cross
 case boundaries. An incremental `run_test` automatically attaches a bounded
-`incremental_review` after exactly one current snapshot is ingested; pending
-and not-measured states carry their reasons. `run_review(view=status)` exposes
-the same durable result.
+`incremental_review` after terminal ingestion. If a run declares multiple
+ordinary coverage artifacts, their `snapshot_ids` form one selected measurement
+set. The primary `incremental.aggregate` and `metric_deltas` are the
+deduplicated union of the fixed baseline and every selected snapshot;
+`run_review(view=status)` exposes the same durable result.
+
+Incremental review keeps two blocks: the additive union is the coverage result,
+while `incremental.diff` is a replacement-style diagnostic. For a selected
+subset, baseline identities absent from that subset are `not_observed`, not
+regressions; only a `complete_snapshot` measurement supports a real regression
+claim.
 
 `coverage_review(task="incremental")` is the standalone comparison path for
 two already stored snapshots. It requires an explicit current measurement and
@@ -65,7 +73,7 @@ source in the response.
 
 ## Composite coverage boundary
 
-Schema 14 also supports composite production coverage in managed runs. Register
+Schema 15 also supports composite production coverage in managed runs. Register
 one command with one required inventory artifact and one coverage descriptor for
 each declared component/package variant. Every full and incremental `run_test`
 uses that same registration; only the approved optional `arguments`, execution
@@ -111,5 +119,5 @@ pnpm check:coverage-mcp
 ```
 
 The production binary release pinned by the testing plugin is Coverage MCP
-`0.13.0`. Publish or enable that pin only after the matching crates.io/GitHub
+`0.15.1`. Publish or enable that pin only after the matching crates.io/GitHub
 release assets, checksums, and live HTTP/stdio contract checks exist.
