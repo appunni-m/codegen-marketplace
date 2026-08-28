@@ -3,6 +3,16 @@
 Current marketplace changes are recorded here. Detailed behavior and
 compatibility claims live in the authored plugin documentation and manifests.
 
+## 0.7.3 - 2026-08-28
+
+### Fixed
+
+- Pin the testing plugin to Coverage MCP `0.15.3`, whose dashboard automatic
+  incremental union base skips subset runs and selects the nearest compatible
+  full or legacy snapshot.
+- Keep the plugin's full-shaped incremental measurement guidance and
+  run-specific increment/decrement data synchronized with the release.
+
 ## 0.7.2 - 2026-08-28
 
 ### Fixed

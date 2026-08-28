@@ -9,7 +9,7 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 const configPath = new URL('../plugins/testing/.mcp.json', import.meta.url);
-const version = '0.15.2';
+const version = '0.15.3';
 
 async function bootstrapScript() {
   const config = JSON.parse(await fs.readFile(configPath, 'utf8'));

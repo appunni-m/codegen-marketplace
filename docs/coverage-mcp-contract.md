@@ -123,5 +123,5 @@ pnpm check:coverage-mcp
 ```
 
 The production binary release pinned by the testing plugin is Coverage MCP
-`0.15.2`. Publish or enable that pin only after the matching crates.io/GitHub
+`0.15.3`. Publish or enable that pin only after the matching crates.io/GitHub
 release assets, checksums, and live HTTP/stdio contract checks exist.

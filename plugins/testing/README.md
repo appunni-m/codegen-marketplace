@@ -5,8 +5,8 @@ Testing workflows backed by the local
 
 Coverage MCP is a native Rust executable. Codex declares it as a required
 stdio server in the bundled `.mcp.json`. The configuration checks `PATH` for
-exact `coverage-mcp 0.15.2`, otherwise checks
-`~/.coverage-mcp/runtime/0.15.2`. On a cache miss it downloads the matching
+exact `coverage-mcp 0.15.3`, otherwise checks
+`~/.coverage-mcp/runtime/0.15.3`. On a cache miss it downloads the matching
 checksummed GitHub Release archive for macOS or Linux on ARM64 or x86-64,
 verifies the extracted version, atomically fills the cache, and immediately
 executes `coverage-mcp connect`. There is no plugin-owned launcher file, custom
@@ -64,7 +64,7 @@ For another host, or to prewarm Codex, install the published native binary.
 This plugin does not invoke Coverage MCP through `uvx`, `pip`, Node, or `npx`:
 
 ```bash
-cargo install coverage-mcp --version '=0.15.2' --locked
+cargo install coverage-mcp --version '=0.15.3' --locked
 coverage-mcp --version
 ```
 
@@ -112,7 +112,7 @@ The published Codex manifest keeps the runtime version pinned because an
 installed plugin cannot safely infer a user's Coverage MCP checkout or track a
 moving Git branch. Use the explicit Cargo manifest option for local
 development; it never falls back to a guessed path. Do not publish this plugin
-version until Coverage MCP 0.15.2 exists on crates.io and all four claimed
+version until Coverage MCP 0.15.3 exists on crates.io and all four claimed
 native archives, `SHA256SUMS`, and provenance are published.
 This plugin revision is synchronized with Coverage MCP schema revision 16 and
 its eight-tool public inventory; verify those values through `GET /health` and
@@ -120,7 +120,7 @@ its eight-tool public inventory; verify those values through `GET /health` and
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.15.2/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.15.3/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -171,6 +171,12 @@ and rates; do not calculate an x/y rate from the selected run. For a selected
 subset, baseline identities absent from the selected run are `not_observed`,
 not regressions; only a `complete_snapshot` measurement supports a real
 regression claim.
+
+The embedded dashboard has a separate automatic-base convenience: when no
+ordinary baseline is selected, it uses the nearest earlier compatible full or
+legacy snapshot and skips incremental subset snapshots. Its headline and
+incremental panel use the server-provided base ∪ selected-run union; the raw
+incremental run and its gain/decrement data remain supplemental.
 
 Use `coverage_review(task="incremental")` only to compare stored measurements
 that already exist independently of a run. It reads stored detail, never reruns
@@ -287,7 +293,7 @@ before reconnecting. Update a manually installed native binary separately
 after a published release:
 
 ```bash
-cargo install coverage-mcp --version '=0.15.2' --locked --force
+cargo install coverage-mcp --version '=0.15.3' --locked --force
 ```
 
 Start a new Codex task after reinstalling the plugin. Its connector resolves the

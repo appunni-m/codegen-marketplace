@@ -115,8 +115,8 @@ a Python package and does not invoke it through `uvx`, `pip`, Node, or `npx`.
 ### Automatic Codex bootstrap
 
 Codex loads a required stdio declaration from the testing plugin's `.mcp.json`.
-The configuration checks `PATH` for exact `coverage-mcp 0.15.2`, then the
-versioned cache at `~/.coverage-mcp/runtime/0.15.2`. On a cache miss it maps the
+The configuration checks `PATH` for exact `coverage-mcp 0.15.3`, then the
+versioned cache at `~/.coverage-mcp/runtime/0.15.3`. On a cache miss it maps the
 host to one of four native GitHub Release archives:
 
 | Host | Release target |
@@ -127,7 +127,7 @@ host to one of four native GitHub Release archives:
 | x86-64 Linux/WSL | `x86_64-unknown-linux-gnu` |
 
 The POSIX bootstrap downloads the exact archive and `SHA256SUMS`, fails closed
-on an integrity mismatch, verifies the extracted binary reports 0.15.2, and
+on an integrity mismatch, verifies the extracted binary reports 0.15.3, and
 atomically fills the cache. Supported targets therefore need no Rust toolchain
 and do not compile DuckDB. If the host is unsupported or GitHub is unavailable,
 an existing Cargo toolchain provides a slower exact-version fallback.
@@ -209,7 +209,7 @@ For a non-Codex host, or to prewarm the binary before the first Codex task,
 install the published version explicitly:
 
 ```bash
-cargo install coverage-mcp --version '=0.15.2' --locked
+cargo install coverage-mcp --version '=0.15.3' --locked
 coverage-mcp --version
 ```
 
@@ -273,7 +273,7 @@ Run a PATH installation manually, or invoke the Codex-managed cache directly:
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.15.2/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.15.3/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -365,7 +365,7 @@ pinned version changes. To update a manually installed server after a
 published Coverage MCP release:
 
 ```bash
-cargo install coverage-mcp --version '=0.15.2' --locked --force
+cargo install coverage-mcp --version '=0.15.3' --locked --force
 ```
 
 Start a new Codex task after updating the plugin so Codex launches the refreshed
