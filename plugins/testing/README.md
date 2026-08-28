@@ -5,8 +5,8 @@ Testing workflows backed by the local
 
 Coverage MCP is a native Rust executable. Codex declares it as a required
 stdio server in the bundled `.mcp.json`. The configuration checks `PATH` for
-exact `coverage-mcp 0.15.1`, otherwise checks
-`~/.coverage-mcp/runtime/0.15.1`. On a cache miss it downloads the matching
+exact `coverage-mcp 0.15.2`, otherwise checks
+`~/.coverage-mcp/runtime/0.15.2`. On a cache miss it downloads the matching
 checksummed GitHub Release archive for macOS or Linux on ARM64 or x86-64,
 verifies the extracted version, atomically fills the cache, and immediately
 executes `coverage-mcp connect`. There is no plugin-owned launcher file, custom
@@ -64,7 +64,7 @@ For another host, or to prewarm Codex, install the published native binary.
 This plugin does not invoke Coverage MCP through `uvx`, `pip`, Node, or `npx`:
 
 ```bash
-cargo install coverage-mcp --version '=0.15.1' --locked
+cargo install coverage-mcp --version '=0.15.2' --locked
 coverage-mcp --version
 ```
 
@@ -78,8 +78,8 @@ available after an individual connector exits. Use an explicit
 `--repo` for native host configurations that do not provide a repository
 working directory. The bundled connector is in `.mcp.json`, and the
 machine-readable bootstrap/runtime contract is in `compatibility.json`. The
-server must report schema revision 15, eight public tools, and
-`tools/list.contract.tools_sha256=6a0488850f9cda4b42f3ea678022c3ae40157da7d8c95b5aa926ebdde6026cb6`.
+server must report schema revision 16, eight public tools, and
+`tools/list.contract.tools_sha256=d1abfcbc612c4ce09e8ffbfe30849726cc1195f8bee0ff40c33c402ec9d5befa`.
 The eighth tool, `find_duplicate_coverage_tests`, returns bounded groups of
 named tests with exactly equal normalized line, branch, and function
 observation sets. It is a coverage-equivalence candidate signal only: it does
@@ -112,15 +112,15 @@ The published Codex manifest keeps the runtime version pinned because an
 installed plugin cannot safely infer a user's Coverage MCP checkout or track a
 moving Git branch. Use the explicit Cargo manifest option for local
 development; it never falls back to a guessed path. Do not publish this plugin
-version until Coverage MCP 0.15.1 exists on crates.io and all four claimed
+version until Coverage MCP 0.15.2 exists on crates.io and all four claimed
 native archives, `SHA256SUMS`, and provenance are published.
-This plugin revision is synchronized with Coverage MCP schema revision 15 and
+This plugin revision is synchronized with Coverage MCP schema revision 16 and
 its eight-tool public inventory; verify those values through `GET /health` and
 `tools/list` after upgrading.
 
 ```bash
 coverage-mcp connect --repo /absolute/path/to/repository
-~/.coverage-mcp/runtime/0.15.1/bin/coverage-mcp connect \
+~/.coverage-mcp/runtime/0.15.2/bin/coverage-mcp connect \
   --repo /absolute/path/to/repository
 ```
 
@@ -158,16 +158,19 @@ result. The server never guesses the latest or previous snapshot. After the
 incremental run reaches terminal state, its `incremental_review` is automatic;
 `run_review(view="status")` exposes it again. When the run emits several
 ordinary coverage artifacts, all `data.coverage_ingest.snapshot_ids` are one
-selected measurement set and the primary aggregate is the deduplicated union
-of the fixed base with that set. A pending or not-measured status is not a
+selected measurement set and the standard `measurement` is the deduplicated
+union of the fixed base with that set. Run-specific increment/decrement data
+lives under `incremental`; a pending or not-measured status is not a
 coverage claim; report its server-provided reason.
 
-Incremental review has two blocks: `incremental.aggregate` and
-`metric_deltas` are the final base-union-selected coverage, while
-`incremental.diff` is a replacement-style diagnostic. For a selected subset,
-baseline identities absent from the selected run are `not_observed`, not
-regressions; only a `complete_snapshot` measurement supports a real regression
-claim.
+Incremental review keeps the full-shaped top-level `measurement` and
+`baseline` fields used by full mode. `incremental.run` preserves the selected
+run artifact, while `incremental.metric_deltas`, `coverage_gain`, `merge`, and
+`incremental.diff` carry incremental evidence. Use server-provided union counts
+and rates; do not calculate an x/y rate from the selected run. For a selected
+subset, baseline identities absent from the selected run are `not_observed`,
+not regressions; only a `complete_snapshot` measurement supports a real
+regression claim.
 
 Use `coverage_review(task="incremental")` only to compare stored measurements
 that already exist independently of a run. It reads stored detail, never reruns
@@ -184,7 +187,7 @@ explicit unavailable attribution status rather than invented test identities.
 
 ## Composite production coverage
 
-Coverage MCP schema 15 lets one managed run produce a single authoritative
+Coverage MCP schema 16 lets one managed run produce a single authoritative
 production-coverage view across Rust/WGSL, Python, and JavaScript. Register the
 command once with one required inventory artifact and one required descriptor
 for every component/package variant. Full and incremental runs use that same
@@ -284,7 +287,7 @@ before reconnecting. Update a manually installed native binary separately
 after a published release:
 
 ```bash
-cargo install coverage-mcp --version '=0.15.1' --locked --force
+cargo install coverage-mcp --version '=0.15.2' --locked --force
 ```
 
 Start a new Codex task after reinstalling the plugin. Its connector resolves the

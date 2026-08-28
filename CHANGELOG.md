@@ -3,6 +3,15 @@
 Current marketplace changes are recorded here. Detailed behavior and
 compatibility claims live in the authored plugin documentation and manifests.
 
+## 0.7.2 - 2026-08-28
+
+### Fixed
+
+- Pin the testing plugin to Coverage MCP `0.15.2`, schema revision 16, and the
+  refreshed eight-tool contract.
+- Document the ordinary incremental union as the full-shaped `measurement`,
+  with run-specific increment/decrement data under `incremental`.
+
 ## 0.7.1 - 2026-08-27
 
 ### Fixed

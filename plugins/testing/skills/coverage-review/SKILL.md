@@ -71,18 +71,20 @@ cwd, or case label.
   `poll_after_ms`; do not infer progress from elapsed time.
 - Use `cancel_run` only when the user no longer wants the run. On failure, use
   `run_review(view="logs", run_id=..., query=...)` with bounded literal matches.
-- On terminal state, inspect `coverage_ingest.status`, artifact outcomes, and snapshot IDs. An incremental run automatically includes `incremental_review` after ingestion; when multiple ordinary artifacts are declared, its primary aggregate is the deduplicated baseline-union of all selected snapshots.
-  `run_review(view="status")` exposes it again. `pending` means not finished; `not_measured` plus `reasons` means no coverage claim is available. Do not launch another review runner call.
+- On terminal state, inspect `coverage_ingest.status`, artifact outcomes, and snapshot IDs. An incremental run automatically includes `incremental_review` after ingestion; when multiple ordinary artifacts are declared, its standard `measurement` is the deduplicated baseline-union of all selected snapshots, with run-specific data under `incremental`. `run_review(view="status")` exposes it again. `pending` means not finished; `not_measured` plus `reasons` means no coverage claim is available. Do not launch another review runner call.
 
 ## Incremental versus standalone comparison
 
 An incremental run is execution plus review: the selected subset runs through
 the existing approved command, one or more reports are ingested, and the server
 forms the deduplicated union of the selected snapshots with the explicit base.
-`incremental.aggregate` and `metric_deltas` are the primary coverage result;
-the nested `incremental.diff` is a scope-aware replacement diagnostic. For a
-selected subset, baseline identities absent from that subset are `not_observed`,
-not regressions; only `complete_snapshot` supports a real regression claim.
+The standard top-level `measurement` and `baseline` have the same shape as a full review. `incremental.run` preserves selected-run provenance, while
+`incremental.metric_deltas`, `coverage_gain`, `merge`, and the nested `diff`
+carry run-specific increment/decrement data and replacement diagnostics. Use
+the server-provided union counts and rates; never reconstruct an x/y rate from
+the selected run. For a selected subset, baseline identities absent from that
+subset are `not_observed`, not regressions; only `complete_snapshot` supports a
+real regression claim.
 
 Use `coverage_review(task="incremental")` only when stored measurements already
 exist and an independent comparison is needed. It requires
@@ -173,7 +175,4 @@ status, parser warnings, artifact state, `claim_status`, server `reasons`, and
 one bounded next action. For composite results, include the canonical-region
 denominator, three component summaries, completeness/remediation reasons, and
 attribution status. Label raw LLVM/LCOV inspection separately; it cannot
-replace managed lineage or the bounded `coverage_review` envelope.
-
-The dashboard is available at <http://localhost:59471/> after a terminal run.
-Do not open the browser automatically.
+replace managed lineage or the bounded `coverage_review` envelope. The dashboard is available at <http://localhost:59471/> after a terminal run; Do not open the browser automatically.

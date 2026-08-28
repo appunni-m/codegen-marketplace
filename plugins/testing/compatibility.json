@@ -1,9 +1,9 @@
 {
   "coverageMcp": {
     "healthUrl": "http://127.0.0.1:59471/health",
-    "schemaRevision": 15,
+    "schemaRevision": 16,
     "toolCount": 8,
-    "toolsSha256": "6a0488850f9cda4b42f3ea678022c3ae40157da7d8c95b5aa926ebdde6026cb6",
+    "toolsSha256": "d1abfcbc612c4ce09e8ffbfe30849726cc1195f8bee0ff40c33c402ec9d5befa",
     "sharedDaemon": {
       "orchestrator": "coverage-mcp connect",
       "autoStart": true,
@@ -42,7 +42,7 @@
     "bootstrap": {
       "manager": "github-release",
       "repository": "appunni-m/coverage-mcp",
-      "version": "=0.15.1",
+      "version": "=0.15.2",
       "scope": "exact-binary-acquisition-only",
       "customLock": false,
       "platforms": ["macos", "linux", "wsl"],
@@ -57,14 +57,14 @@
       "checksumAsset": "SHA256SUMS",
       "provenance": "github-sigstore",
       "runtimeDirectoryOverride": "COVERAGE_MCP_RUNTIME_DIR",
-      "defaultInstallRoot": "~/.coverage-mcp/runtime/0.15.1",
+      "defaultInstallRoot": "~/.coverage-mcp/runtime/0.15.2",
       "fallback": {
         "manager": "cargo",
         "package": "coverage-mcp",
-        "version": "=0.15.1",
+        "version": "=0.15.2",
         "locked": true
       },
-      "releasePrerequisite": "coverage-mcp 0.15.1 and all claimed native archives published"
+      "releasePrerequisite": "coverage-mcp 0.15.2 and all claimed native archives published"
     },
     "localDevelopment": {
       "command": "cargo",
