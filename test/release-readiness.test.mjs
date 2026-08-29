@@ -8,8 +8,8 @@ async function read(pathname) {
 
 test('release metadata uses stable versions and the pinned Coverage MCP bootstrap', async () => {
   const expectedVersions = new Map([
-    ['plugins/testing/.claude-plugin/plugin.json', '0.7.3'],
-    ['plugins/testing/.codex-plugin/plugin.json', '0.7.3'],
+    ['plugins/testing/.claude-plugin/plugin.json', '0.7.4'],
+    ['plugins/testing/.codex-plugin/plugin.json', '0.7.4'],
     ['plugins/rust-development/gemini-extension.json', '0.3.2'],
   ]);
 
@@ -44,7 +44,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.deepEqual(connector.args.slice(0, 2), ['-eu', '-c']);
   assert.equal(connector.args.length, 3);
   assert.equal(connector.cwd, undefined);
-  assert.deepEqual(connector.env, { COVERAGE_MCP_VERSION: '0.15.3' });
+  assert.deepEqual(connector.env, { COVERAGE_MCP_VERSION: '0.15.4' });
   assert.equal(connector.startup_timeout_sec, 900);
   assert.equal(connector.required, true);
   assert.match(connector.args[2], /releases\/download\/v\$\{version\}/);
@@ -74,7 +74,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.equal(compatibility.coverageMcp.sharedDaemon.orchestrator, 'coverage-mcp connect');
   assert.equal(compatibility.coverageMcp.connector.workingDirectory, 'inherit-client-project');
   assert.equal(compatibility.coverageMcp.connector.required, true);
-  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.15.3');
+  assert.equal(compatibility.coverageMcp.bootstrap.version, '=0.15.4');
   assert.equal(compatibility.coverageMcp.bootstrap.scope, 'exact-binary-acquisition-only');
   assert.equal(compatibility.coverageMcp.bootstrap.customLock, false);
   assert.equal(compatibility.coverageMcp.bootstrap.checksumAsset, 'SHA256SUMS');
@@ -82,7 +82,7 @@ test('release metadata uses stable versions and the pinned Coverage MCP bootstra
   assert.deepEqual(compatibility.coverageMcp.bootstrap.fallback, {
     manager: 'cargo',
     package: 'coverage-mcp',
-    version: '=0.15.3',
+    version: '=0.15.4',
     locked: true,
   });
   assert.deepEqual(compatibility.coverageMcp.bootstrap.platforms, [

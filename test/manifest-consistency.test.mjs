@@ -128,7 +128,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     bootstrap: {
       manager: 'github-release',
       repository: 'appunni-m/coverage-mcp',
-      version: '=0.15.3',
+      version: '=0.15.4',
       scope: 'exact-binary-acquisition-only',
       customLock: false,
       platforms: ['macos', 'linux', 'wsl'],
@@ -143,14 +143,14 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
       checksumAsset: 'SHA256SUMS',
       provenance: 'github-sigstore',
       runtimeDirectoryOverride: 'COVERAGE_MCP_RUNTIME_DIR',
-      defaultInstallRoot: '~/.coverage-mcp/runtime/0.15.3',
+      defaultInstallRoot: '~/.coverage-mcp/runtime/0.15.4',
       fallback: {
         manager: 'cargo',
         package: 'coverage-mcp',
-        version: '=0.15.3',
+        version: '=0.15.4',
         locked: true,
       },
-      releasePrerequisite: 'coverage-mcp 0.15.3 and all claimed native archives published',
+      releasePrerequisite: 'coverage-mcp 0.15.4 and all claimed native archives published',
     },
     localDevelopment: {
       command: 'cargo',

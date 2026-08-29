@@ -3,6 +3,14 @@
 Current marketplace changes are recorded here. Detailed behavior and
 compatibility claims live in the authored plugin documentation and manifests.
 
+## 0.7.4 - 2026-08-29
+
+### Fixed
+
+- Pin the testing plugin to Coverage MCP `0.15.4`, whose live dashboard
+  automatic current-artifact selection follows the newest snapshot unless the
+  user explicitly pins a selection.
+
 ## 0.7.3 - 2026-08-28
 
 ### Fixed
