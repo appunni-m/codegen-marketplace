@@ -178,43 +178,21 @@ export default defineConfig({
 The scaffold output is authoritative — `aipm scaffold` emits the full set of
 targets the toolkit supports. Trust it over this table if they disagree.
 
-### Coverage MCP sync
+### Coverage MCP connector
 
-When Coverage MCP changes MCP tool behavior, input/output schema, tool
-descriptions, server instructions, connector guidance, or the agent workflow,
-update the marketplace in the same change window so installed agents do not
-learn stale behavior.
+The `testing` plugin exposes the schema-18 `coverage_gaps` and
+`coverage_compare` tools. It contains no coverage skills or campaign agents.
+Use normal source search and repository test commands.
 
-The schema-16 eight-tool surface is tracked in
-`docs/coverage-mcp-contract.md`; the canonical server owns the
-contract and unsupported names return ordinary unknown-tool errors.
+Keep `docs/coverage-mcp-contract.md`, `plugins/testing/README.md`, connector
+manifests, and `plugins/testing/compatibility.json` synchronized with the server.
+Run `pnpm check:coverage-mcp` to verify the live tool contract. The native
+`coverage-mcp connect` command owns daemon startup and recovery; keep the
+bootstrap limited to obtaining the pinned binary. Publish a runtime pin only
+after that version and its claimed archives exist.
 
-Authoritative source files for the `testing` plugin are:
-
-- `plugins/testing/README.md` for marketplace/user-facing connector guidance.
-- `plugins/testing/skills/coverage-review/SKILL.md` for the shared test and
-  coverage-review workflow, and
-  `plugins/testing/skills/run-coverage-campaign/SKILL.md` for input-driven
-  campaign workflow.
-- `plugins/testing/.codex-plugin/plugin.json` and `plugins/testing/.mcp.json`
-  for the required Codex connector and exact-binary bootstrap. The bootstrap
-  may download a verified release archive or fall back to the pinned crate,
-  but all daemon orchestration belongs to `coverage-mcp connect`; do not add a
-  standalone launcher or lifecycle lock.
-- `plugins/testing/compatibility.json` and
-  `plugins/testing/scripts/install-pi-mcp.mjs` when connector invocation or
-  runtime compatibility changes.
-- `scripts/verify-coverage-mcp-contract.mjs` for the live `tools/list` digest
-  check run by `pnpm check`.
-- Root `README.md` when examples or installation guidance change.
-
-Do not edit generated root artifacts to patch Coverage MCP guidance. Edit the
-plugin source files above, then run the required marketplace build/check
-workflow if generated outputs are affected. After publishing or pushing, refresh
-the local Codex install with `codex plugin add testing@codegen-marketplace` and
-verify the cached plugin under `~/.codex/plugins/cache/codegen-marketplace/testing/`.
-Never publish a testing-plugin runtime pin before that exact Coverage MCP crate
-version is available from crates.io.
+Edit plugin sources, then run `pnpm build` and `pnpm check`. Refresh the local
+Codex installation after connector changes and verify the installed cache.
 
 ### Constraints
 

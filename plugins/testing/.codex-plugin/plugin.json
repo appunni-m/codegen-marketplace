@@ -1,7 +1,7 @@
 {
   "name": "testing",
-  "version": "0.7.4+codex.20260829044918",
-  "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
+  "version": "0.8.0",
+  "description": "Find coverage gaps and compare existing coverage reports.",
   "author": {
     "name": "Appunni M",
     "url": "https://github.com/appunni-m"
@@ -13,15 +13,14 @@
     "testing",
     "coverage",
     "mcp",
-    "worktrees",
+    "reports",
     "quality"
   ],
-  "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Testing",
-    "shortDescription": "Run tests and track coverage without flooding context.",
-    "longDescription": "Bootstraps a verified native Coverage MCP release, runs human-approved tests, records bounded evidence, and compares worktrees with frozen baselines.",
+    "shortDescription": "Find useful gaps and compare coverage reports.",
+    "longDescription": "Query exact uncovered source locations and compare coverage report artifacts.",
     "developerName": "Appunni M",
     "category": "Developer Tools",
     "capabilities": [
@@ -31,9 +30,8 @@
     ],
     "websiteURL": "https://github.com/appunni-m/coverage-mcp",
     "defaultPrompt": [
-      "Run the approved test suite and summarize the result.",
-      "Did this worktree improve coverage?",
-      "Show the files and lines that need coverage."
+      "Find coverage gaps in this report.",
+      "Measure coverage added by these new tests against the baseline."
     ],
     "brandColor": "#0F766E"
   }

@@ -1,8 +1,8 @@
 import { defineConfig } from '@ai-plugin-marketplace/core';
 
 export default defineConfig({
-  version: '0.7.4',
+  version: '0.8.0',
   targets: ['claude', 'codex'],
-  description: 'Testing workflows with approved commands, bounded run summaries, and coverage lineage.',
-  keywords: ['testing', 'coverage', 'mcp', 'worktrees', 'quality'],
+  description: 'Find coverage gaps and compare existing coverage reports.',
+  keywords: ['testing', 'coverage', 'mcp', 'reports', 'quality'],
 });

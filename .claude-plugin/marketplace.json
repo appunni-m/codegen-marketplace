@@ -36,12 +36,12 @@
     {
       "name": "testing",
       "source": "./plugins/testing",
-      "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
+      "description": "Find coverage gaps and compare existing coverage reports.",
       "tags": [
         "testing",
         "coverage",
         "mcp",
-        "worktrees",
+        "reports",
         "quality"
       ]
     }

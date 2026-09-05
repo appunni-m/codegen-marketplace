@@ -1,7 +1,7 @@
 {
   "name": "testing",
-  "version": "0.7.4",
-  "description": "Testing workflows with approved commands, bounded run summaries, and coverage lineage.",
+  "version": "0.8.0",
+  "description": "Find coverage gaps and compare existing coverage reports.",
   "author": {
     "name": "Appunni M",
     "url": "https://github.com/appunni-m"
@@ -13,14 +13,15 @@
     "testing",
     "coverage",
     "mcp",
-    "worktrees",
+    "reports",
     "quality"
   ],
-  "skills": "./skills/",
   "mcpServers": {
     "coverage-mcp": {
       "command": "coverage-mcp",
-      "args": ["connect"]
+      "args": [
+        "connect"
+      ]
     }
   }
 }

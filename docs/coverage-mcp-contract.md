@@ -1,127 +1,48 @@
 # Coverage MCP contract
 
-Status: schema revision 16, eight public tools, and the exact tools-list digest
-are implemented by the canonical Rust server and pinned in
-`plugins/testing/compatibility.json`. The canonical server's
-[README and source](https://github.com/appunni-m/coverage-mcp) are the source
-of truth for wire semantics, validation, storage, freshness, provenance, and
-response budgets.
+The native Rust server owns the full protocol and storage contract. This
+marketplace owns connector configuration and pins compatibility in
+[`plugins/testing/compatibility.json`](../plugins/testing/compatibility.json).
 
-The marketplace owns workflow guidance in the
-[`coverage-review` skill](../plugins/testing/skills/coverage-review/SKILL.md).
-The server owns the MCP schema and implementation. Keep this document limited
-to the integration boundary; do not copy the server's complete schema here.
+Coverage MCP 0.16.0 uses schema revision 18 and two read-only tools:
 
-## Public inventory
+| Tool | Purpose | Inputs |
+| --- | --- | --- |
+| `coverage_gaps` | Find a few missing function/region locations | Report or snapshot, literal query, optional line/metric, limit/offset |
+| `coverage_compare` | Explain measured changes and remaining gaps | Explicit current/baseline, query/metric, scope, previous batches, limit |
 
-The active inventory contains exactly:
+Report-file queries do not import data. Saved ordinary and composite snapshots
+remain readable, including compacted detail and missing-component states.
+There are no public execution, command-registration, polling, source-reading,
+worktree, duplicate-test, or topology endpoints. Resources are empty.
 
-- `project_context`
-- `register_test_command`
-- `run_test`
-- `run_review`
-- `cancel_run`
-- `coverage_import`
-- `coverage_review`
-- `find_duplicate_coverage_tests`
+The normal workflow is report → gaps → `rg` and bounded local source reads →
+existing test command → explicit comparison. Five groups with at most three
+locations each are returned by default. The 12 KiB envelope cap bounds output,
+not evidence used for comparison. Narrow the query before paging. Evidence
+appears once in `structuredContent`; there is no duplicate JSON text block.
 
-Both HTTP and native stdio use the same JSON-RPC dispatcher. The expected
-schema revision, tool count, and `tools/list` SHA-256 digest are pinned in the
-compatibility record and verified against a live server by
-`pnpm check:coverage-mcp`.
+Source/build receipts bind report bytes to measured inputs. Without receipts,
+coordinate changes are limited evidence. A current-source mismatch requires
+matching source or remeasurement. Selected-test absences are not regressions;
+full regression claims require matching full-scope receipts. Failed tests,
+unavailable metric detail, and missing artifacts remain explicit. Coverage gain
+alone cannot prove test uniqueness or redundancy.
 
-## Run and incremental-review boundary
+With `scope: "incremental"`, compare only the new tests' report against the saved
+baseline. Optional `previous` includes up to 16 earlier batches. Results show
+marginal gain, overlap, fixed-denominator combined coverage, and remaining gaps.
+Repeated locations count once. Filters affect displayed locations only. Failed
+or incompatible reports have no combined total; missing identity is labeled an
+unverified estimate. The dashboard uses these same fields and can retain a
+verified batch in its earlier-batch selector. Full-suite regression remains
+unchecked. See the [server incremental guide](https://github.com/appunni-m/coverage-mcp/blob/main/docs/user-guide.md#run-only-the-new-tests).
 
-Register one exact human-approved command, then reuse it with optional
-case-specific `run_test.arguments`. The arguments are persisted with the run,
-shell-quoted, and either replace one approved `{{args}}` placeholder or append
-to the approved command. A new test filter does not require registering a new
-command.
+HTTP and stdio share one dispatcher. The dashboard uses the same query results
+without automatic polling. Optional REST archival administration remains in the
+[server HTTP reference](https://github.com/appunni-m/coverage-mcp/blob/main/docs/http-api.md).
 
-An incremental run supplies:
-
-```json
-{
-  "command_ref": "coverage-tests",
-  "arguments": ["--filter", "parser::handles_empty_input"],
-  "execution": {"mode": "incremental", "label": "parser empty input"},
-  "baseline": {"kind": "explicit", "snapshot_id": "<snapshot-id>"}
-}
-```
-
-`execution.identity` is optional. The server fingerprints mode, arguments,
-and the explicit baseline, so idempotency and unchanged-run reuse cannot cross
-case boundaries. An incremental `run_test` automatically attaches a bounded
-`incremental_review` after terminal ingestion. If a run declares multiple
-ordinary coverage artifacts, their `snapshot_ids` form one selected measurement
-set. The standard `data.measurement` and `data.baseline` use the same shape as
-full mode. `data.measurement` is the deduplicated union of the fixed baseline
-and every selected snapshot; `data.incremental.run` preserves selected-run
-provenance, while `metric_deltas`, `coverage_gain`, `merge`, and `diff` carry
-increment/decrement evidence. `run_review(view=status)` exposes the same
-durable result. Consumers use the server-provided counts and rates rather than
-reconstructing an x/y rate from the selected run.
-
-Incremental review keeps two blocks: the additive union is the coverage result,
-while `incremental.diff` is a replacement-style diagnostic. For a selected
-subset, baseline identities absent from that subset are `not_observed`, not
-regressions; only a `complete_snapshot` measurement supports a real regression
-claim.
-
-`coverage_review(task="incremental")` is the standalone comparison path for
-two already stored snapshots. It requires an explicit current measurement and
-an explicit baseline, never selects the previous snapshot, and never invokes a
-runner or reparses either report. Both sides must have compatible repositories
-and normalized formats. Compacted detail remains usable and identifies its
-source in the response.
-
-## Composite coverage boundary
-
-Schema 16 also supports composite production coverage in managed runs. Register
-one command with one required inventory artifact and one coverage descriptor for
-each declared component/package variant. Every full and incremental `run_test`
-uses that same registration; only the approved optional `arguments`, execution
-mode, and explicit baseline vary by case. A composite run returns its ordinary
-child snapshot IDs plus `data.composite_snapshot_id`.
-
-Composite descriptors must declare `component_id`, `package_variant`,
-`language`, `format`, `inventory_artifact`, `role`, and explicit
-`logical_source_aliases`. The inventory is the authoritative canonical-region
-denominator; matching paths or filenames never deduplicate evidence, and every
-declared variant must be present, fresh, well-formed, and source-compatible.
-Missing or incompatible evidence leaves the composite incomplete and does not
-shrink its denominator.
-
-Use `baseline.composite_snapshot_id` for an incremental composite run and keep
-the fixed composite ID immutable. Standalone `coverage_review(task="incremental")`
-accepts matching composite measurement and baseline selectors, compares stored
-canonical-region rows and child observations without rerunning tests, and
-requires the same repository, mapping version, and inventory hash. Compaction
-preserves composite rows and restores ordinary child detail from its compacted
-payload when attribution is needed; named-test attribution is explicitly
-unavailable when the producer did not emit named observations.
-
-## Workflow ownership
-
-The marketplace skill owns approval, polling, freshness, lineage, response
-budget, and reporting policy. The server still advertises a self-describing
-workflow through `initialize` instructions and `tools/list` descriptions, and
-enforces identical behavior over HTTP and stdio, including `source_resolution`
-and `max_bytes` validation.
-
-Use `coverage_import` only for an external or historical repository-relative
-report. Use `coverage_review` for bounded change, incremental, history,
-insight, source, audit, or combined analysis. Use
-`find_duplicate_coverage_tests` for bounded coverage-equivalence candidates;
-it does not compare test logic or authorize deletion.
-
-## Verification
-
-```sh
-pnpm check
-pnpm check:coverage-mcp
-```
-
-The production binary release pinned by the testing plugin is Coverage MCP
-`0.15.4`. Publish or enable that pin only after the matching crates.io/GitHub
-release assets, checksums, and live HTTP/stdio contract checks exist.
+Validate the local contract with `pnpm check:coverage-mcp` after installing the
+matching binary. Run `pnpm check` for marketplace checks. For future updates,
+publish the pinned runtime and native archives before distributing the plugin;
+these checks do not publish releases.

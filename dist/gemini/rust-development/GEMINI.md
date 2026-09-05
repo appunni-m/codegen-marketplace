@@ -27,20 +27,6 @@ narrower match.
 
 ## Coverage MCP
 
-This Gemini extension also exposes Coverage MCP for approved test execution,
-coverage history, exact missing lines, and worktree baseline comparisons.
-
-- Gemini invokes `coverage-mcp connect` directly; the Codex-only Cargo
-  bootstrap does not apply. Keep the matching native binary on `PATH` or
-  configure an explicit checkout-local Cargo launcher.
-- Require human approval of the exact command, working directory, and artifact
-  paths before registering or running a test command.
-- Start with `project_context(detailed=false)` before rerunning an approved
-  suite.
-- The stdio connector starts or reuses the daemon on `127.0.0.1:59471`. Only
-  the daemon process holds its ownership lease; stdio bridges and direct HTTP
-  clients do not lock one another. Do not start a daemon per project.
-- Use one stable `idempotency_key` for retries of the same intended run.
-- Treat a missing worktree snapshot as not measured, not unchanged.
-- Open <http://localhost:59471/> only after a test or coverage task completes;
-  do not open the browser automatically.
+The connector exposes `coverage_gaps` and `coverage_compare` for existing reports.
+Gemini invokes `coverage-mcp connect`; keep the matching native binary on PATH.
+Use ordinary source search and repository test commands.

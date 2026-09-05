@@ -87,9 +87,9 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
   const compatibility = await json(path.join(pluginRoot, 'compatibility.json'));
   assert.deepEqual(compatibility.coverageMcp, {
     healthUrl: 'http://127.0.0.1:59471/health',
-    schemaRevision: 16,
-    toolCount: 8,
-    toolsSha256: 'd1abfcbc612c4ce09e8ffbfe30849726cc1195f8bee0ff40c33c402ec9d5befa',
+    schemaRevision: 18,
+    toolCount: 2,
+    toolsSha256: '52c6a7584f015fee480c51f8a49a7e9d6fce2f3bff1a4ccdbfd3f408ef5a6cf0',
     sharedDaemon: {
       orchestrator: 'coverage-mcp connect',
       autoStart: true,
@@ -128,7 +128,7 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     bootstrap: {
       manager: 'github-release',
       repository: 'appunni-m/coverage-mcp',
-      version: '=0.15.4',
+      version: '=0.16.0',
       scope: 'exact-binary-acquisition-only',
       customLock: false,
       platforms: ['macos', 'linux', 'wsl'],
@@ -143,14 +143,14 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
       checksumAsset: 'SHA256SUMS',
       provenance: 'github-sigstore',
       runtimeDirectoryOverride: 'COVERAGE_MCP_RUNTIME_DIR',
-      defaultInstallRoot: '~/.coverage-mcp/runtime/0.15.4',
+      defaultInstallRoot: '~/.coverage-mcp/runtime/0.16.0',
       fallback: {
         manager: 'cargo',
         package: 'coverage-mcp',
-        version: '=0.15.4',
+        version: '=0.16.0',
         locked: true,
       },
-      releasePrerequisite: 'coverage-mcp 0.15.4 and all claimed native archives published',
+      releasePrerequisite: 'coverage-mcp 0.16.0 and all claimed native archives published',
     },
     localDevelopment: {
       command: 'cargo',
@@ -214,30 +214,9 @@ test('testing plugin declares and documents its Coverage MCP contract', async ()
     'utf8',
   );
   assert.match(geminiContext, /Coverage MCP/);
-  assert.match(geminiContext, /human approval/);
-  assert.match(geminiContext, /project_context\(detailed=false\)/);
-
-  const skill = await fs.readFile(
-    path.join(pluginRoot, 'skills', 'coverage-review', 'SKILL.md'),
-    'utf8',
-  );
-  assert.ok(skill.split('\n').length <= 180, 'Coverage review skill exceeds its context budget');
-  assert.ok(skill.trim().split(/\s+/).length <= 1400, 'Coverage review skill is too verbose');
-  const normalizedSkill = skill.replace(/\s+/g, ' ');
-  for (const requiredGuidance of [
-    'human_approved=true',
-    'idempotency_key',
-    'coverage_ingest',
-    'poll_after_ms',
-    'run_review',
-    'coverage_review',
-    'find_duplicate_coverage_tests',
-    'coverage_import',
-    'BLOCKED_MCP_CONTEXT',
-    'latest run',
-    'unmeasured',
-    'unmeasured coverage',
-  ]) {
-    assert.ok(normalizedSkill.includes(requiredGuidance), `skill is missing: ${requiredGuidance}`);
+  for (const host of ['.codex-plugin', '.claude-plugin']) {
+    const manifest = await json(path.join(pluginRoot, host, 'plugin.json'));
+    assert.equal(manifest.skills, undefined, `${host} must expose only the connector`);
   }
+  await assert.rejects(fs.access(path.join(pluginRoot, 'skills')), { code: 'ENOENT' });
 });

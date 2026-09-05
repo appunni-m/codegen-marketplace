@@ -3,6 +3,19 @@
 Current marketplace changes are recorded here. Detailed behavior and
 compatibility claims live in the authored plugin documentation and manifests.
 
+## 0.8.0 - 2026-09-05
+
+### Changed
+
+- Pin the testing plugin to Coverage MCP `0.16.0`, schema revision 18, with two
+  read-only tools for coverage gaps and report comparisons.
+- Add incremental comparison guidance for measuring new test batches against a
+  fixed baseline, including marginal gain, overlap, and combined coverage.
+- Remove coverage campaign skills and mandatory workflow guidance. Use normal
+  source search and the repository's existing test commands.
+- Synchronize connector metadata, bootstrap checks, and documentation with the
+  released runtime.
+
 ## 0.7.4 - 2026-08-29
 
 ### Fixed
