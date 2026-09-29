@@ -1,0 +1,89 @@
+{
+  "skill_name": "performance-parity-optimization",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "The scalar implementation already takes 0.4 ms and perf shows the caller spends 8 ms converting input and 4 ms allocating its result. Rewrite the scalar loop with AVX-512 intrinsics for a 10x win. What evidence and first change should guide this work?",
+      "expected_output": "Does not begin with intrinsics or promise 10x. Includes conversion and allocation in the target boundary, profiles the real operation, estimates whole-operation headroom, and targets measured representation/allocation cost first while preserving the contract.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Our scalar loop is 15% slower than our AVX2 version in one microbenchmark. The release compiler may already vectorize it. Recommend the next check before accepting hand-written SIMD.",
+      "expected_output": "Inspects release-build machine code and vectorization diagnostics, lane/shuffle/tail/spill work, and the full public-operation cost. Repeats comparable measurements and retains the explicit SIMD path only if the gain exceeds noise on representative workloads with a safe fallback.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "A GPU image operation reports `backend=gpu` in the request log, but a callback-enabled path may execute item-by-item on the CPU. The optimized benchmark is faster than baseline. Decide whether this proves a GPU win and specify the missing evidence.",
+      "expected_output": "Says the label and timing do not prove GPU execution. Traces normalization and dispatch for the public call, builds a callback-free bulk workload when that is the desired executor, obtains per-case dispatch/completion receipts with fallback counts, and times the same end-to-end boundary.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "A kernel timer shows 0.08 ms on GPU versus 0.7 ms on CPU. The user operation still takes 1.4 ms because it uploads an input, allocates buffers, synchronizes, reads back the output, and materializes a host object. What is the next optimization decision?",
+      "expected_output": "Separates host preparation, allocation, upload, queue, kernel, wait/map, readback, and output materialization. Compares complete operation latency with CPU/SIMD, keeps data resident or changes transfer/layout only when consumers and result contract permit it, and stops arithmetic tuning while transport/completion is the floor.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "A tightly packed 3-byte-per-pixel input is uploaded as 32-bit words. Review the extraction approach `offset=3*i; word=offset/4; shift=(offset%4)*8`, including the final pixels in a non-multiple-of-four byte buffer.",
+      "expected_output": "Uses checked pixel/byte lengths and little-endian assumptions; extracts across the next word only when `shift > 8`, masks to three bytes, reads only valid/padded tail storage, and adds short-width and final-word parity cases. For compact output, avoids overlapping word writes by assigning each aligned output word one writer.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "An RGBA buffer and a CMYK buffer both use four bytes per pixel. A shader infers active channels from stride and accidentally treats the fourth CMYK byte as alpha. How should the fast path be repaired and tested?",
+      "expected_output": "Tracks logical format and concrete storage separately, uses explicit mode/layout dispatch rather than stride or numeric-mode inference, preserves each byte's semantic role, and tests fill/source/raw output for every mode sharing the physical carrier with a safe fallback.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "A brightness loop computes `limit - scale(x, limit)` in floating point, then clamps and truncates to a byte. A proposed unsigned integer formula removes the clamp and is mathematically equivalent over real numbers. Is that sufficient to merge it?",
+      "expected_output": "Requires matching the reference's types, rounding, truncation, saturation, overflow and evaluation order. Exhausts the finite byte/parameter domain when practical, encodes that proof in a regression test, validates public outputs and tails, and keeps a fallback outside the proved predicate.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "A resize with unchanged dimensions selects the same source sample at every output coordinate, but `resize()` clones the full source before that fact is checked. Propose a safe fast path.",
+      "expected_output": "Checks exact identity geometry and validates parameters before materializing/allocating the intermediate, then uses the public copy/no-op semantics while preserving metadata, aliasing, mutation/copy-on-write behavior and errors. Tests identity plus near-identity cases and measures required output materialization.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "A fused color conversion is 2x faster but produces a different bilevel result on a few pixels near threshold. The reference uses several quantized stages and optional error diffusion. Can the fusion ship with a small parity tolerance?",
+      "expected_output": "Does not loosen a discrete output contract to admit the speedup. Preserves every intermediate rounding/clamp/threshold and separates stateful error diffusion unless dependencies/traversal are preserved; uses threshold-adjacent exact public parity before timing.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "A fixed worker pool benchmark uses 16 closed-loop clients. After a change, requests are slower but the client issues fewer requests; the dashboard reports similar requests per second. Design an evaluation that can establish sustainable throughput and latency.",
+      "expected_output": "Chooses an open offered-arrival workload for the fixed-rate question, verifies generator capacity, raises load/concurrency gradually, records completions, p50/p95/p99, queue/backlog, failures/retries and peak memory at the same operating point, and also checks single-operation latency. Distinguishes a representative closed-loop test from fixed offered load.",
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "A query change cuts a cached read benchmark in half, but the service also has skewed tenants, retries, transactions, and a high write rate. What must be measured before claiming the service improved?",
+      "expected_output": "Checks real plans and row counts across skewed parameters; measures read/write and transaction cost, queue/lock/network/serialization/downstream/retry time, invalidation/backpressure and tail latency under representative concurrency; evaluates completed requests and resource limits at the same load.",
+      "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "Row-parallelization helped a large image resize. A pointwise mask kernel performs one SIMD operation per 16 bytes and has many short rows. Can the same area threshold be reused?",
+      "expected_output": "No. Benchmarks the serial/parallel crossover for this kernel and row shape, includes scheduling/chunking, false sharing, memory bandwidth and concurrency, and uses a serial route below the measured crossover.",
+      "files": []
+    },
+    {
+      "id": 13,
+      "prompt": "A new kernel is 25% faster, but uses twice the scratch memory and raises p99 latency under concurrent requests. The task asked for lower median single-request latency, with a stated peak-memory cap and p99 limit. Should the change be accepted?",
+      "expected_output": "Checks all stated acceptance bounds, reports single-request and concurrent results separately, and rejects or narrows the route if peak memory or p99 breaches its limit even when one median improves.",
+      "files": []
+    },
+    {
+      "id": 14,
+      "prompt": "I need to add three independent additions to an integer array. This is not reported as slow, and no performance goal or behavior change is requested. Should a performance campaign be started?",
+      "expected_output": "Does not turn a routine implementation request into a profiling campaign. Implements or explains the straightforward behavior at the requested scope; asks for performance work only if a measured target or bottleneck is supplied.",
+      "files": []
+    }
+  ]
+}

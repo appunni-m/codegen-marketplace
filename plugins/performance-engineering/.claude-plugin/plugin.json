@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "0.1.0",
+  "name": "performance-engineering",
+  "version": "0.1.0",
+  "description": "Evidence-driven performance optimization for CPU, SIMD, parallel, GPU, database, and service workloads.",
+  "author": { "name": "Appunni M", "url": "https://github.com/appunni-m" },
+  "homepage": "https://github.com/appunni-m/codegen-marketplace",
+  "repository": "https://github.com/appunni-m/codegen-marketplace",
+  "license": "MIT",
+  "keywords": ["performance", "profiling", "benchmarking", "simd", "gpu", "throughput"],
+  "skills": "./skills/"
+}

@@ -17,6 +17,18 @@
       "category": "Productivity"
     },
     {
+      "name": "performance-engineering",
+      "source": {
+        "source": "local",
+        "path": "./plugins/performance-engineering"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
       "name": "rust-development",
       "source": {
         "source": "local",

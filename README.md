@@ -13,6 +13,7 @@ toolkit from the
 | Plugin | Purpose | Targets |
 | --- | --- | --- |
 | `rust-development` | Rust implementation, debugging, documentation, crate research and releases, coding standards, and unsafe review | Claude Code, Codex, Cursor, Gemini CLI, Kiro, Vercel Skills CLI, Pi |
+| `performance-engineering` | Evidence-driven CPU, SIMD, parallel, GPU, database, and service performance optimization | Claude Code, Codex, Cursor, Vercel Skills CLI, Pi |
 | `testing` | Coverage gap queries and report comparisons | Claude Code, Codex, Gemini CLI (combined extension), Pi |
 | `opensource` | Evidence-first README, source API, contributor, security, release, and packaged-documentation guidance | Claude Code, Codex, Cursor, Vercel Skills CLI, Pi |
 
@@ -25,6 +26,7 @@ Install only the plugins needed for a given agent.
 ```bash
 codex plugin marketplace add appunni-m/codegen-marketplace
 codex plugin add rust-development@codegen-marketplace
+codex plugin add performance-engineering@codegen-marketplace
 codex plugin add testing@codegen-marketplace
 codex plugin add opensource@codegen-marketplace
 ```
@@ -36,6 +38,7 @@ Start a new Codex task after installation.
 ```bash
 claude plugin marketplace add appunni-m/codegen-marketplace
 claude plugin install rust-development@codegen-marketplace
+claude plugin install performance-engineering@codegen-marketplace
 claude plugin install testing@codegen-marketplace
 claude plugin install opensource@codegen-marketplace
 ```
@@ -50,7 +53,8 @@ Import the marketplace repository in **Settings > Plugins**:
 https://github.com/appunni-m/codegen-marketplace
 ```
 
-The Cursor target currently contains `rust-development` and `opensource`.
+The Cursor target currently contains `rust-development`, `performance-engineering`,
+and `opensource`.
 
 ### Gemini CLI
 
@@ -86,6 +90,7 @@ Pi installs local plugin directories. Clone the marketplace once:
 ```bash
 git clone https://github.com/appunni-m/codegen-marketplace.git
 pi install ./codegen-marketplace/plugins/rust-development
+pi install ./codegen-marketplace/plugins/performance-engineering
 pi install ./codegen-marketplace/plugins/testing
 pi install ./codegen-marketplace/plugins/opensource
 ```
@@ -171,6 +176,12 @@ them directly.
 ├── aipm.workspace.ts
 ├── plugins/
 │   ├── rust-development/
+│   │   ├── aipm.config.ts
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── .codex-plugin/plugin.json
+│   │   ├── .cursor-plugin/plugin.json
+│   │   └── skills/
+│   ├── performance-engineering/
 │   │   ├── aipm.config.ts
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── .codex-plugin/plugin.json

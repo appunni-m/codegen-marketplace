@@ -4,7 +4,7 @@
     "name": "Appunni M"
   },
   "metadata": {
-    "description": "Curated plugins for Rust development, open-source documentation, test execution, and coverage analysis"
+    "description": "Curated plugins for Rust development, performance optimization, open-source documentation, test execution, and coverage analysis"
   },
   "plugins": [
     {
@@ -17,6 +17,19 @@
         "migration",
         "testing",
         "open-source"
+      ]
+    },
+    {
+      "name": "performance-engineering",
+      "source": "./plugins/performance-engineering",
+      "description": "Evidence-driven performance optimization for CPU, SIMD, parallel, GPU, database, and service workloads.",
+      "tags": [
+        "performance",
+        "profiling",
+        "benchmarking",
+        "simd",
+        "gpu",
+        "throughput"
       ]
     },
     {
