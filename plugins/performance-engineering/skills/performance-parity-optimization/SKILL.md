@@ -1,8 +1,8 @@
 ---
 name: performance-parity-optimization
-description: This skill should be used when the user asks to "profile and optimize a slow operation", "improve CPU, SIMD, GPU, or accelerator performance", "increase throughput without changing behavior", or "verify an end-to-end performance claim".
+description: This skill should be used when the user asks to profile or optimize an operation, reduce Python/Rust (PyO3) boundary copies, improve CPU/SIMD/GPU performance, increase throughput without behavior changes, or verify an end-to-end speedup claim.
 metadata:
-  short-description: Optimize measured workloads while preserving behavior
+  short-description: Optimize measured CPU, GPU, and FFI bottlenecks
 ---
 
 # Performance and parity optimization
@@ -91,6 +91,36 @@ For vector loops, threading, and packed tails, read [CPU, SIMD, and parallel
 patterns](references/cpu-simd-and-parallel.md). For device execution and data
 transport, read [GPU and accelerator patterns](references/gpu-and-accelerators.md).
 For database or service paths, read [service and query patterns](references/services-and-databases.md).
+
+## Avoid Python/Rust boundary copies (PyO3)
+
+For each hot payload, map the Python and Rust types, direction, mutability,
+owner, lifetime, and allocations across the bridge. Check the exact PyO3 version
+and feature set: extraction and construction APIs can have different copy
+behavior.
+
+When Rust only reads or sends immutable Python `bytes`, PyO3's `bytes` feature
+can extract them as `bytes::Bytes` while retaining the backing allocation. For
+example, `value.extract::<Bytes>()?` can pass the shared payload through Rust
+channels to an async transport without first copying it into a `Vec`. Keep the
+`Bytes` owner alive through the last consumer; converting to `Vec<u8>` copies,
+while cloning a `Bytes` handle only adds a reference. Sharing avoids a payload
+copy, not extraction, scheduling, or reference-counting overhead.
+
+Mutable `bytearray` and writable buffers need a snapshot unless mutation is
+prevented or ownership is transferred exclusively. Do not alias mutable
+Python storage across Rust workers just to remove that safety copy. In the
+reverse direction, `PyBytes::new(py, rust_slice)` copies. If the consumer
+requires Python `bytes`—as ASGI request messages do—retain native Rust storage
+through queues and streaming, remove intermediate copies, then make the one
+required Python object at the boundary. Avoid unsafe pointer-based `bytes`
+construction without a complete lifetime and deallocation proof.
+
+Preserve chunking and backpressure instead of materializing whole bodies.
+Bound queued bytes as well as message count when chunk sizes vary. Instrument
+crossing calls, copied bytes, Python scheduling, and queue-full wait time; run
+small call-heavy and large streaming cases at the complete request/response
+boundary.
 
 ## Preserve the observable contract
 
